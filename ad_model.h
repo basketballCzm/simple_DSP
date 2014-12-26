@@ -8,7 +8,7 @@ struct GeoInfo
 struct AdInfo
 {
     int ad_owner;
-    char ad_url[2048];
+    char ad_content[2048];
     int ad_type;
     GeoInfo ad_point;
     int ad_radius;
@@ -33,7 +33,9 @@ struct MallGeoInfo
 
 struct AdData
 {
+    int mall_id;
+    char mall_name [100];
     int size;
-    int number;
+    unsigned int number;
     AdInfo ad_list[1];
 };

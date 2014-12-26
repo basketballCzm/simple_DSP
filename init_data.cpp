@@ -26,7 +26,7 @@ int init_ad_data()
     ssize_t read_size = read(fd,(void *)&ad_data_head,sizeof(AdData));
     if(read_size<sizeof(AdData))
     {
-        syslog(LOG_ERR, "invalid ad_data_file:%s ,read size (%d) < sizeof(AdData) " ,AD_DATA_FILE,read_size);
+        syslog(LOG_ERR, "invalid ad_data_file:%s ,read size (%d) < sizeof(AdData)(%d) " ,AD_DATA_FILE,read_size, sizeof(AdData));
         return -1;
     }
 

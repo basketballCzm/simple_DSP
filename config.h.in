@@ -1,5 +1,8 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Define to 1 if you have the <fcgi_config.h> header file. */
+#undef HAVE_FCGI_CONFIG_H
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
@@ -27,6 +30,9 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
+/* Define to 1 if you have the <uriparser/Uri.h> header file. */
+#undef HAVE_URIPARSER_URI_H
+
 /* Name of package */
 #undef PACKAGE
 
@@ -50,5 +56,3 @@
 
 /* Version number of package */
 #undef VERSION
-
-#define AD_DATA_FILE "/var/www/data/advertisement.data"

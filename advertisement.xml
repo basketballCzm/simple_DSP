@@ -1,0 +1,59 @@
+<root>
+    <!--initial advertisement data-->
+    <section callback='save_message_file'>
+        <mall_id type='int'>19022421</mall_id>
+        <mall_name type='string' length='100'>dayangbaihuo</mall_name>
+        <body callback='fill_message_length'>
+            <multi counter='int'>
+                <ad_info>
+                    <ad_owner type='int'>10001</ad_owner>
+                    <ad_content type='string' length='2048'>123adf1234za25gsgsdg1</ad_content>
+                    <ad_type type='int'>1</ad_type>
+                    <geo_info>
+                        <longitude type='int'>1232</longitude>
+                        <latitude type='int'>1235</latitude>
+                    </geo_info>
+                    <ad_radius type='int'>12</ad_radius>
+                    <shoplist>
+                        <shop type='int'>1231</shop>
+                        <shop type='int'>1232</shop>
+                        <shop type='int'>1233</shop>
+                        <shop type='int'>1234</shop>
+                        <shop type='int'>1235</shop>
+                        <shop type='int'>1236</shop>
+                        <shop type='int'>1237</shop>
+                        <shop type='int'>1238</shop>
+                        <shop type='int'>1239</shop>
+                        <shop type='int'>1240</shop>
+                    </shoplist>
+                    <web_position type='int'>201245</web_position>
+                    <price type='int'>1245</price>
+                </ad_info>
+                <ad_info>
+                    <ad_owner type='int'>10002</ad_owner>
+                    <ad_content type='string' length='2048'>12312awdfasffaasdfasd</ad_content>
+                    <ad_type type='int'>1</ad_type>
+                    <geo_info>
+                        <longitude type='int'>1232</longitude>
+                        <latitude type='int'>1235</latitude>
+                    </geo_info>
+                    <ad_radius type='int'>12</ad_radius>
+                    <shoplist>
+                        <shop type='int'>1231</shop>
+                        <shop type='int'>1232</shop>
+                        <shop type='int'>1233</shop>
+                        <shop type='int'>1234</shop>
+                        <shop type='int'>1235</shop>
+                        <shop type='int'>1236</shop>
+                        <shop type='int'>1237</shop>
+                        <shop type='int'>1238</shop>
+                        <shop type='int'>1239</shop>
+                        <shop type='int'>1240</shop>
+                    </shoplist>
+                    <web_position type='int'>201245</web_position>
+                    <price type='int'>1245</price>
+                </ad_info>
+            </multi>
+        </body>
+    </section>
+</root>
