@@ -94,7 +94,7 @@ int main()
             syslog(LOG_INFO, "adstat value=%d",p_para->value);
             FCGX_FPrintF(request.out, "<br />key : %s ,value : %s",p_para->key,p_para->value);
 			if (strcmp(p_para->key,"adid")==0)
-				 FCGX_FPrintF(request.out,"叔叔婶婶客户");
+				 FCGX_FPrintF(request.out,"咔咔咔上课上课上课");
 
         }
 
