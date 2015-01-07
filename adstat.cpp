@@ -93,7 +93,7 @@ int main()
             syslog(LOG_INFO, "adstat key=%d",strlen(p_para->key));
             syslog(LOG_INFO, "adstat value=%d",p_para->value);
             FCGX_FPrintF(request.out, "<br />key : %s ,value : %s",p_para->key,p_para->value);
-			if (strcmp(p_para->key,"adid"))
+			if (strcmp(p_para->key,"adid")==0)
 				 FCGX_FPrintF(request.out," Â Â…Ù…ÙøÕªß");
 
         }
