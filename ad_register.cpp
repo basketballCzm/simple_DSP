@@ -53,7 +53,27 @@ static void penv(const char * const * envp)
 
 int main()
 {
-    openlog("adstat", LOG_PID|LOG_CONS, LOG_LOCAL0 );
+	
+	
+	struct AD_info
+	{
+		int ADD;
+		char jump_url[1024];
+		int counter=0;
+	};      //结构体
+	struct AD_info ad1[1000];
+	for(int i=0;i<12;i++)
+	{
+		if (ad1[i].ADD==0)
+		   ｛
+			strcpy(ad1[i].jump_url,"上上下下左右左右BABA"）;
+			FCGX_FPrintF(request.out, ad1[i].jump_url );
+			｝
+		counter++;
+	}
+	
+	
+	openlog("adstat", LOG_PID|LOG_CONS, LOG_LOCAL0 );
 
     FCGX_Init();
     FCGX_Request request;
@@ -83,6 +103,7 @@ int main()
         FCGX_FPrintF(request.out, "<br /> Request number = [%d]", ++g_p_ad_data->number );
         FCGX_FPrintF(request.out, "<br /> Process ID: %d ", getpid() );
         FCGX_FPrintF(request.out, "<br /> Request String: %s ", request_string);
+		
 
 
         syslog(LOG_INFO, "adstat print parameters");
