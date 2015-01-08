@@ -62,7 +62,7 @@ int main()
 		int counter=0;
 	};      //½á¹¹Ìå
 	struct AD_info ad1[1000];
-	for(int i=0;i<12;i++)
+	/*for(int i=0;i<12;i++)
 	{
 		if (ad1[i].ADD==0)
 		{
@@ -70,7 +70,7 @@ int main()
 			FCGX_FPrintF(request.out, ad1[i].jump_url );
 		}
 		counter++;
-	}
+	}*/
 	
 	
 	openlog("adstat", LOG_PID|LOG_CONS, LOG_LOCAL0 );
