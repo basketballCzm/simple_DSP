@@ -65,10 +65,10 @@ int main()
 	for(int i=0;i<12;i++)
 	{
 		if (ad1[i].ADD==0)
-		   ｛
+		{
 			strcpy(ad1[i].jump_url,"上上下下左右左右BABA"）;
 			FCGX_FPrintF(request.out, ad1[i].jump_url );
-			｝
+		}
 		counter++;
 	}
 	
