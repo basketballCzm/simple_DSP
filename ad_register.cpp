@@ -55,22 +55,7 @@ int main()
 {
 	
 	
-	struct AD_info
-	{
-		int ADD;
-		char jump_url[1024];
-		int ctr=0;
-	};      //结构体
-	struct AD_info ad1[1000];
-	/*for(int i=0;i<12;i++)
-	{
-		if (ad1[i].ADD==0)
-		{
-			strcpy(ad1[i].jump_url,"上上下下左右左右BABA"）;
-			FCGX_FPrintF(request.out, ad1[i].jump_url );
-		}
-		counter++;
-	}*/
+	
 	
 	
 	openlog("adstat", LOG_PID|LOG_CONS, LOG_LOCAL0 );
