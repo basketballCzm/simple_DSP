@@ -14,7 +14,10 @@ struct AdInfo
     int ad_radius;
     int shoplist[10];
     int web_position;
-    float price;
+    float show_price;
+    float click_price;
+    int show_counter;
+    int click_counter;
 };
 
 struct ShopInfo
