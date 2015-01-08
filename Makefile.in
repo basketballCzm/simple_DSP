@@ -32,7 +32,8 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-bin_PROGRAMS = adstat$(EXEEXT) ad_register$(EXEEXT)
+bin_PROGRAMS = adstat$(EXEEXT) ad_register$(EXEEXT) \
+	ad_request$(EXEEXT)
 subdir = .
 DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
@@ -52,6 +53,9 @@ PROGRAMS = $(bin_PROGRAMS)
 am_ad_register_OBJECTS = ad_register.$(OBJEXT) init_data.$(OBJEXT)
 ad_register_OBJECTS = $(am_ad_register_OBJECTS)
 ad_register_DEPENDENCIES =
+am_ad_request_OBJECTS = ad_request.$(OBJEXT) init_data.$(OBJEXT)
+ad_request_OBJECTS = $(am_ad_request_OBJECTS)
+ad_request_DEPENDENCIES =
 am_adstat_OBJECTS = adstat.$(OBJEXT) init_data.$(OBJEXT)
 adstat_OBJECTS = $(am_adstat_OBJECTS)
 adstat_DEPENDENCIES =
@@ -64,8 +68,10 @@ CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
-SOURCES = $(ad_register_SOURCES) $(adstat_SOURCES)
-DIST_SOURCES = $(ad_register_SOURCES) $(adstat_SOURCES)
+SOURCES = $(ad_register_SOURCES) $(ad_request_SOURCES) \
+	$(adstat_SOURCES)
+DIST_SOURCES = $(ad_register_SOURCES) $(ad_request_SOURCES) \
+	$(adstat_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -169,10 +175,12 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
-adstat_SOURCES = adstat.cpp init_data.cpp
+adstat_SOURCES = adstat.cpp init_data.cpp 
 adstat_LDADD = -lfcgi -luriparser
 ad_register_SOURCES = ad_register.cpp init_data.cpp
 ad_register_LDADD = -lfcgi -luriparser
+ad_request_SOURCES = ad_request.cpp init_data.cpp
+ad_request_LDADD = -lfcgi -luriparser
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -269,6 +277,9 @@ clean-binPROGRAMS:
 ad_register$(EXEEXT): $(ad_register_OBJECTS) $(ad_register_DEPENDENCIES) 
 	@rm -f ad_register$(EXEEXT)
 	$(CXXLINK) $(ad_register_OBJECTS) $(ad_register_LDADD) $(LIBS)
+ad_request$(EXEEXT): $(ad_request_OBJECTS) $(ad_request_DEPENDENCIES) 
+	@rm -f ad_request$(EXEEXT)
+	$(CXXLINK) $(ad_request_OBJECTS) $(ad_request_LDADD) $(LIBS)
 adstat$(EXEEXT): $(adstat_OBJECTS) $(adstat_DEPENDENCIES) 
 	@rm -f adstat$(EXEEXT)
 	$(CXXLINK) $(adstat_OBJECTS) $(adstat_LDADD) $(LIBS)
@@ -280,6 +291,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ad_register.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ad_request.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/adstat.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/init_data.Po@am__quote@
 
