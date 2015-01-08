@@ -59,7 +59,7 @@ int main()
 	{
 		int ADD;
 		char jump_url[1024];
-		int counter=0;
+		int ctr=0;
 	};      //½á¹¹Ìå
 	struct AD_info ad1[1000];
 	/*for(int i=0;i<12;i++)
