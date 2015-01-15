@@ -3,11 +3,14 @@
     <section callback='save_message_file'>
         <mall_id type='int'>19022421</mall_id>
         <mall_name type='string' length='100'>dayangbaihuo</mall_name>
-        <body callback='fill_message_length'>
+        <size type='int'>-1</size>
+        <body >
             <multi counter='int'>
                 <ad_info>
+                    <ad_id type='int'>50001</ad_id>
                     <ad_owner type='int'>10001</ad_owner>
                     <ad_content type='string' length='2048'>123adf1234za25gsgsdg1</ad_content>
+                    <jump_url type='string' length='2048'>http://www.baidu.com</jump_url>
                     <ad_type type='int'>1</ad_type>
                     <geo_info>
                         <longitude type='int'>1232</longitude>
@@ -27,11 +30,17 @@
                         <shop type='int'>1240</shop>
                     </shoplist>
                     <web_position type='int'>201245</web_position>
-                    <price type='int'>1245</price>
+                    <show_price type='int'>1</show_price>
+                    <click_price type='int'>1245</click_price>
+                    <show_counter type='int'>1245</show_counter>
+                    <click_counter type='int'>12</click_counter>
+                    <valid type='int'>0</valid>
                 </ad_info>
                 <ad_info>
+                    <ad_id type='int'>50001</ad_id>
                     <ad_owner type='int'>10002</ad_owner>
                     <ad_content type='string' length='2048'>12312awdfasffaasdfasd</ad_content>
+                    <jump_url type='string' length='2048'>http://www.baidu.com</jump_url>
                     <ad_type type='int'>1</ad_type>
                     <geo_info>
                         <longitude type='int'>1232</longitude>
@@ -51,8 +60,12 @@
                         <shop type='int'>1240</shop>
                     </shoplist>
                     <web_position type='int'>201245</web_position>
-                    <price type='int'>1245</price>
-                </ad_info>
+                    <show_price type='int'>1</show_price>
+                    <click_price type='int'>1245</click_price>
+                    <show_counter type='int'>1245</show_counter>
+                    <click_counter type='int'>12</click_counter>
+                    <valid type='int'>1</valid>
+                 </ad_info>
             </multi>
         </body>
     </section>

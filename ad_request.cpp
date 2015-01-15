@@ -84,7 +84,6 @@ int main()
         FCGX_FPrintF(request.out, "<br /> Process ID: %d ", getpid() );
         FCGX_FPrintF(request.out, "<br /> Request String: %s ", request_string);
 
-
         syslog(LOG_INFO, "adstat print parameters");
 
         for(UriQueryListA *p_para=queryList ;p_para!=NULL;p_para=p_para->next)

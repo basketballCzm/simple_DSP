@@ -11,7 +11,8 @@ AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_PREFIX_DEFAULT([/usr/local/nginx/simple_DSP_cgi])
 # Checks for programs.
-AC_PROG_CXX
+AC_PROG_CXX([clang++ g++])
+AC_PROG_CC([clang gcc])
 
 # Checks for libraries.
 

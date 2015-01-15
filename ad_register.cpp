@@ -1,4 +1,6 @@
 #include <iostream>
+#include <sstream>
+#include <string>
 #include <fcgi_stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -7,6 +9,7 @@
 
 #include <sys/mman.h>
 #include <fcntl.h>
+#include <cstdlib>
 
 #include "init_data.h"
 #include "ad_model.h"
@@ -51,6 +54,66 @@ static void penv(const char * const * envp)
 
 }
 
+int add_ad(UriQueryListA * queryList)
+{
+    syslog(LOG_INFO, "ad stat enter add_ad" );
+    int index = atomic_fetch_add_explicit(& g_p_ad_data->number,1, std::memory_order_seq_cst) ;
+    syslog(LOG_INFO, "ad stat add_ad index = %d",index );
+    if(index >= g_p_ad_data->size)
+    {
+        syslog(LOG_ERR, "adstat can't add new ad ,out of max size : %d",g_p_ad_data->size );
+        return -1;
+    }
+    AdInfo & newAd= g_p_ad_data->ad_list[index] ;
+    newAd.ad_id=index;
+    int i_ad_type;
+
+    syslog(LOG_INFO, "adstat print parameters, NULL =%d",NULL);
+    for(UriQueryListA *p_para=queryList ;p_para!=NULL ;p_para=p_para->next)
+    {
+        syslog(LOG_INFO, "adstat p_para=%d",p_para);
+        syslog(LOG_INFO, "adstat key=%s",p_para->key);
+        syslog(LOG_INFO, "adstat value=%s",p_para->value);
+        if (strcmp(p_para->key,"ad_id")==0)
+            stringstream( p_para->value )>> newAd.ad_id ;
+        else if (strcmp(p_para->key,"ad_owner")==0)
+            stringstream( p_para->value )>> newAd.ad_owner ;
+        else if (strcmp(p_para->key,"jump_url")==0)
+            strncpy (newAd.jump_url, p_para->value, sizeof(newAd.jump_url));
+        else if (strcmp(p_para->key,"ad_content")==0)
+            strncpy (newAd.ad_content, p_para->value, sizeof(newAd.jump_url));
+        else if (strcmp(p_para->key,"ad_type")==0)
+        {    
+            stringstream( p_para->value )>> i_ad_type ;
+            newAd.ad_type = AdType(i_ad_type);
+        }
+        else if (strcmp(p_para->key,"ad_point_x")==0)
+            stringstream( p_para->value )>> newAd.ad_point.longitude ;
+        else if (strcmp(p_para->key,"ad_point_y")==0)
+            stringstream( p_para->value )>> newAd.ad_point.latitude;
+    }
+    return 0;
+}
+
+int print_ad_list(FCGX_Stream* out)
+{
+    syslog(LOG_INFO,"enter print_ad_list");
+    FCGX_FPrintF(out,"<br /> ad list length : %d", int(g_p_ad_data->number));
+    syslog(LOG_INFO, "<br /> ad list length : %d", int(g_p_ad_data->number));
+    for(int i=0;i<g_p_ad_data->number; ++i)
+    {
+        syslog(LOG_INFO, "print ad list [%d]", i);
+        FCGX_FPrintF(out,"<br /> ad_id : %d", g_p_ad_data->ad_list[i].ad_id);
+        FCGX_FPrintF(out,"<br /> ad_content : %s", g_p_ad_data->ad_list[i].ad_content);
+        FCGX_FPrintF(out,"<br /> jump_url: %s", g_p_ad_data->ad_list[i].jump_url);
+        FCGX_FPrintF(out,"<br /> show_price: %f", g_p_ad_data->ad_list[i].show_price);
+        FCGX_FPrintF(out,"<br /> click_price: %f", g_p_ad_data->ad_list[i].click_price);
+        FCGX_FPrintF(out,"<br /> jump_url: %s", g_p_ad_data->ad_list[i].jump_url);
+        FCGX_FPrintF(out,"<br /> valid: %d", g_p_ad_data->ad_list[i].valid);
+    }
+    return 0;
+}
+
 int main()
 {
     openlog("adstat", LOG_PID|LOG_CONS, LOG_LOCAL0 );
@@ -60,6 +123,7 @@ int main()
     FCGX_InitRequest(&request, 0, 0);
 
     init_data();
+    syslog(LOG_INFO, "adstat parser query string");
 
     UriParserStateA state;
 
@@ -80,29 +144,18 @@ int main()
 
         FCGX_FPrintF(request.out, "Content-type:text/html\r\n\r\n" );
         FCGX_FPrintF(request.out, "<p> Hello FastCGI !  </ p>" );
-        FCGX_FPrintF(request.out, "<br /> Request number = [%d]", ++g_p_ad_data->number );
+        FCGX_FPrintF(request.out, "<br /> sizeof(number) = [%d]", sizeof(g_p_ad_data->number ));
         FCGX_FPrintF(request.out, "<br /> Process ID: %d ", getpid() );
         FCGX_FPrintF(request.out, "<br /> Request String: %s ", request_string);
 
-
-        syslog(LOG_INFO, "adstat print parameters");
-
-        for(UriQueryListA *p_para=queryList ;p_para!=NULL;p_para=p_para->next)
-        {
-            syslog(LOG_INFO, "adstat p_para=%d",p_para);
-            syslog(LOG_INFO, "adstat key=%d",strlen(p_para->key));
-            syslog(LOG_INFO, "adstat value=%d",p_para->value);
-            FCGX_FPrintF(request.out, "<br />key : %s ,value : %s",p_para->key,p_para->value);
-			if (strcmp(p_para->key,"adid")==0)
-				 FCGX_FPrintF(request.out,"ßÇßÇßÇÉÏ¿ÎÉÏ¿ÎÉÏ¿Î");
-
-        }
-
-
+        add_ad(queryList);
+        
+        print_ad_list(request.out);
+        
         uriFreeQueryListA(queryList);
 
         syslog(LOG_INFO, "adstat load success ..."); 
-    }   
+    } 
 
 
     return 0;
