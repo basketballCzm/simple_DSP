@@ -116,7 +116,12 @@ int print_ad_list(FCGX_Stream* out)
 
 int main()
 {
-    openlog("adstat", LOG_PID|LOG_CONS, LOG_LOCAL0 );
+	
+	
+	
+	
+	
+	openlog("adstat", LOG_PID|LOG_CONS, LOG_LOCAL0 );
 
     FCGX_Init();
     FCGX_Request request;
@@ -147,6 +152,7 @@ int main()
         FCGX_FPrintF(request.out, "<br /> sizeof(number) = [%d]", sizeof(g_p_ad_data->number ));
         FCGX_FPrintF(request.out, "<br /> Process ID: %d ", getpid() );
         FCGX_FPrintF(request.out, "<br /> Request String: %s ", request_string);
+		
 
         add_ad(queryList);
         
