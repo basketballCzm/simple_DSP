@@ -65,11 +65,9 @@ T *init_shared_data(const char * filename)
         g_data = (T *) mmap( NULL,buffer_size ,PROT_READ|PROT_WRITE,MAP_SHARED,fd,0 ); 
     }
 
-    T *p_head=&data_head;
-    new (p_head) char[10];
-    //atomic_init (&g_data->number,*( (int *)&data_head.number));
-    void *p_number = (void *)&data_head.number;
-    new (p_number) std::atomic<int>;
+    atomic_init (&g_data->number,*( (int *)&data_head.number));
+    //void *p_number = (void *)&data_head.number;
+    //new (p_number) std::atomic<int>;
     close(fd);
     return g_data;
 }

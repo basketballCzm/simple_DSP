@@ -21,7 +21,7 @@ using namespace std;
 
 AdData* g_p_ad_data=NULL;
 
-int parseQueryString(char *request_string ,UriParserStateA &state, UriQueryListA * &  queryList)
+int parseQueryString(const char *request_string ,UriParserStateA &state, UriQueryListA * &  queryList)
 {
     UriUriA uri; 
     state.uri = &uri;
@@ -74,14 +74,12 @@ int add_ad(UriQueryListA * queryList)
         syslog(LOG_INFO, "adstat p_para=%d",p_para);
         syslog(LOG_INFO, "adstat key=%s",p_para->key);
         syslog(LOG_INFO, "adstat value=%s",p_para->value);
-        if (strcmp(p_para->key,"ad_id")==0)
-            stringstream( p_para->value )>> newAd.ad_id ;
-        else if (strcmp(p_para->key,"ad_owner")==0)
+        if (strcmp(p_para->key,"ad_owner")==0)
             stringstream( p_para->value )>> newAd.ad_owner ;
         else if (strcmp(p_para->key,"jump_url")==0)
             strncpy (newAd.jump_url, p_para->value, sizeof(newAd.jump_url));
         else if (strcmp(p_para->key,"ad_content")==0)
-            strncpy (newAd.ad_content, p_para->value, sizeof(newAd.jump_url));
+            strncpy (newAd.ad_content, p_para->value, sizeof(newAd.ad_content));
         else if (strcmp(p_para->key,"ad_type")==0)
         {    
             stringstream( p_para->value )>> i_ad_type ;
@@ -92,6 +90,11 @@ int add_ad(UriQueryListA * queryList)
         else if (strcmp(p_para->key,"ad_point_y")==0)
             stringstream( p_para->value )>> newAd.ad_point.latitude;
     }
+    
+    atomic_init (&newAd.show_counter,0);
+    atomic_init (&newAd.click_counter,0);
+    newAd.valid=1;
+
     return 0;
 }
 
@@ -110,17 +113,13 @@ int print_ad_list(FCGX_Stream* out)
         FCGX_FPrintF(out,"<br /> click_price: %f", g_p_ad_data->ad_list[i].click_price);
         FCGX_FPrintF(out,"<br /> jump_url: %s", g_p_ad_data->ad_list[i].jump_url);
         FCGX_FPrintF(out,"<br /> valid: %d", g_p_ad_data->ad_list[i].valid);
+        FCGX_FPrintF(out,"<br /> -----------------------------------------------");
     }
     return 0;
 }
 
 int main()
 {
-	
-	
-	
-	
-	
 	openlog("adstat", LOG_PID|LOG_CONS, LOG_LOCAL0 );
 
     FCGX_Init();
@@ -135,8 +134,21 @@ int main()
 
     while(FCGX_Accept_r(&request) >= 0)
     {
-        //penv(request.envp);
-        char * request_string = FCGX_GetParam("REQUEST_URI", request.envp);
+        penv(request.envp);
+        char * method = FCGX_GetParam("REQUEST_METHOD", request.envp);
+        const char * request_string=NULL;
+        string request_body;
+        if(strncmp(method,"POST",4)==0)
+        {
+            //request_body = FCGX_GetParam("REQUEST_BODY", request.envp) ;
+            //syslog(LOG_INFO, "adstat request_string = %s",request_body.c_str());
+            request_body = string("a?")+string(FCGX_GetParam("REQUEST_BODY", request.envp) );
+            syslog(LOG_INFO, "adstat request_string = %s",request_body.c_str());
+            request_string = request_body.c_str();
+            syslog(LOG_INFO, "adstat request_string = %s",request_string);
+        }
+        else
+            request_string = FCGX_GetParam("REQUEST_URI", request.envp);
         UriQueryListA * queryList=NULL;
         syslog(LOG_INFO, "adstat call parseQueryString");
         int itemCount = parseQueryString(request_string ,state ,  queryList);
