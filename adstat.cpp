@@ -13,6 +13,7 @@
 #include <fcgi_config.h>
 #include <fcgiapp.h>
 #include <uriparser/Uri.h>
+#include "config.h"
 
 using namespace std;
 
@@ -59,7 +60,7 @@ int main()
     FCGX_Request request;
     FCGX_InitRequest(&request, 0, 0);
 
-    init_data();
+    g_p_ad_data = init_shared_data<AdData,AdInfo>(AD_DATA_FILE);
 
     UriParserStateA state;
 

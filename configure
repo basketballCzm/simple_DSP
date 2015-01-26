@@ -1839,6 +1839,16 @@ ac_config_headers="$ac_config_headers config.h"
 
 
 
+cat >>confdefs.h <<\_ACEOF
+#define AD_DATA_FILE "/var/www/data/advertisement.data"
+_ACEOF
+
+
+cat >>confdefs.h <<\_ACEOF
+#define USER_MAP_FILE "/var/www/data/user_map.data"
+_ACEOF
+
+
 am__api_version='1.11'
 
 ac_aux_dir=
@@ -4716,6 +4726,10 @@ as_val=`eval 'as_val=${'$as_ac_Header'}
 #define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
 _ACEOF
 
+else
+  { { $as_echo "$as_me:$LINENO: error: Unable to find fcgi, please install fcgi" >&5
+$as_echo "$as_me: error: Unable to find fcgi, please install fcgi" >&2;}
+   { (exit 1); exit 1; }; }
 fi
 
 done
@@ -4870,7 +4884,6 @@ _ACEOF
 fi
 
 done
-
 
 # Checks for typedefs, structures, and compiler characteristics.
 

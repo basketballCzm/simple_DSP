@@ -16,6 +16,7 @@
 #include <fcgi_config.h>
 #include <fcgiapp.h>
 #include <uriparser/Uri.h>
+#include "config.h"
 
 using namespace std;
 
@@ -85,6 +86,10 @@ int add_ad(UriQueryListA * queryList)
             stringstream( p_para->value )>> i_ad_type ;
             newAd.ad_type = AdType(i_ad_type);
         }
+        else if (strcmp(p_para->key,"show_price")==0)
+            stringstream( p_para->value )>> newAd.show_price;
+        else if (strcmp(p_para->key,"click_price")==0)
+            stringstream( p_para->value )>> newAd.click_price ;
         else if (strcmp(p_para->key,"ad_point_x")==0)
             stringstream( p_para->value )>> newAd.ad_point.longitude ;
         else if (strcmp(p_para->key,"ad_point_y")==0)
@@ -111,7 +116,6 @@ int print_ad_list(FCGX_Stream* out)
         FCGX_FPrintF(out,"<br /> jump_url: %s", g_p_ad_data->ad_list[i].jump_url);
         FCGX_FPrintF(out,"<br /> show_price: %f", g_p_ad_data->ad_list[i].show_price);
         FCGX_FPrintF(out,"<br /> click_price: %f", g_p_ad_data->ad_list[i].click_price);
-        FCGX_FPrintF(out,"<br /> jump_url: %s", g_p_ad_data->ad_list[i].jump_url);
         FCGX_FPrintF(out,"<br /> valid: %d", g_p_ad_data->ad_list[i].valid);
         FCGX_FPrintF(out,"<br /> -----------------------------------------------");
     }
@@ -126,7 +130,7 @@ int main()
     FCGX_Request request;
     FCGX_InitRequest(&request, 0, 0);
 
-    init_data();
+    g_p_ad_data = init_shared_data<AdData,AdInfo>(AD_DATA_FILE);
     syslog(LOG_INFO, "adstat parser query string");
 
     UriParserStateA state;

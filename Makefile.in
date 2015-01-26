@@ -50,13 +50,13 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_ad_register_OBJECTS = ad_register.$(OBJEXT) init_data.$(OBJEXT)
+am_ad_register_OBJECTS = ad_register.$(OBJEXT)
 ad_register_OBJECTS = $(am_ad_register_OBJECTS)
 ad_register_DEPENDENCIES =
-am_ad_request_OBJECTS = ad_request.$(OBJEXT) init_data.$(OBJEXT)
+am_ad_request_OBJECTS = ad_request.$(OBJEXT)
 ad_request_OBJECTS = $(am_ad_request_OBJECTS)
 ad_request_DEPENDENCIES =
-am_adstat_OBJECTS = adstat.$(OBJEXT) init_data.$(OBJEXT)
+am_adstat_OBJECTS = adstat.$(OBJEXT)
 adstat_OBJECTS = $(am_adstat_OBJECTS)
 adstat_DEPENDENCIES =
 DEFAULT_INCLUDES = -I.@am__isrc@
@@ -176,11 +176,11 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 AM_CPPFLAGS = -std=c++11 -stdlib=libc++ -Weverything -Wno-c++98-compat -I/data/caster_zeng/package/libcxx/build/include/c++/v1
-adstat_SOURCES = adstat.cpp init_data.cpp 
+adstat_SOURCES = adstat.cpp 
 adstat_LDADD = -lfcgi -luriparser -lc++
-ad_register_SOURCES = ad_register.cpp init_data.cpp
+ad_register_SOURCES = ad_register.cpp 
 ad_register_LDADD = -lfcgi -luriparser -lc++ 
-ad_request_SOURCES = ad_request.cpp init_data.cpp
+ad_request_SOURCES = ad_request.cpp 
 ad_request_LDADD = -lfcgi -luriparser -lc++
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -294,7 +294,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ad_register.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ad_request.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/adstat.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/init_data.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
