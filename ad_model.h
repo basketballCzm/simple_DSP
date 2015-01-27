@@ -40,9 +40,10 @@ struct ShopInfo
     char shop_name[100];
     char shop_address[100];
     GeoInfo shop_sharp[10];
+    int level;
 };
 
-struct MallGeoInfo
+struct ShopData
 {
     int shop_number;
     ShopInfo shop_list[1];    
@@ -56,4 +57,17 @@ struct AdData
     std::atomic<int> number;
     AdInfo ad_list[1];
 };
+
+struct UserPostion
+{
+    GeoInfo positon;
+    int level;  //mall level
+};
+
+struct UserPositionMap
+{
+    std::atomic<int> number;
+    UserPostion position_list[1];
+};
+
 #endif

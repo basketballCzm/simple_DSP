@@ -472,7 +472,9 @@ if __name__=="__main__":
         print "auto test"
         for message_list in message_buffer:
             save_message_file(message_list)
-    else: 
+    else:
+        if len(sys.argv) >= 3:
+            filename = sys.argv[2]
         parse_xml(sys.argv[1])
 
     time.sleep(0.1)
