@@ -2,10 +2,20 @@
 #define __AD_MODEL_H_2015_1_15__
 #include <atomic>
 
-struct GeoInfo
+union GeoInfo
 {
-    float longitude; //x-axis
-    float latitude;  //y-axis
+    struct 
+    {
+        float longitude; //x-axis
+        float latitude;  //y-axis
+        int level;  //mall level
+    };
+    struct 
+    {
+        float x; //x-axis
+        float y;  //y-axis
+        int z;  //mall level
+    };
 };
 
 enum AdType
@@ -27,7 +37,7 @@ struct AdInfo
     float ad_radius=0;
     int shoplist[10];
     int web_position=-1;
-    float show_price = 0.001;
+    float show_price = 0.001f;
     float click_price = 1;
     std::atomic<int> show_counter{0};
     std::atomic<int> click_counter{0};
@@ -58,16 +68,18 @@ struct AdData
     AdInfo ad_list[1];
 };
 
-struct UserPostion
+struct UserPosition
 {
-    GeoInfo positon;
-    int level;  //mall level
+    int user_id;
+    GeoInfo position;
+    int valid;
 };
 
 struct UserPositionMap
 {
+    int size;
     std::atomic<int> number;
-    UserPostion position_list[1];
+    UserPosition list[1];
 };
 
 #endif

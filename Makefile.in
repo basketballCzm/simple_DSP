@@ -33,7 +33,7 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 bin_PROGRAMS = adstat$(EXEEXT) ad_register$(EXEEXT) \
-	ad_request$(EXEEXT)
+	ad_request$(EXEEXT) user_op$(EXEEXT)
 subdir = .
 DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
@@ -59,6 +59,9 @@ ad_request_DEPENDENCIES =
 am_adstat_OBJECTS = adstat.$(OBJEXT)
 adstat_OBJECTS = $(am_adstat_OBJECTS)
 adstat_DEPENDENCIES =
+am_user_op_OBJECTS = user_op.$(OBJEXT) user_map.$(OBJEXT)
+user_op_OBJECTS = $(am_user_op_OBJECTS)
+user_op_DEPENDENCIES =
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -69,9 +72,9 @@ CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
 SOURCES = $(ad_register_SOURCES) $(ad_request_SOURCES) \
-	$(adstat_SOURCES)
+	$(adstat_SOURCES) $(user_op_SOURCES)
 DIST_SOURCES = $(ad_register_SOURCES) $(ad_request_SOURCES) \
-	$(adstat_SOURCES)
+	$(adstat_SOURCES) $(user_op_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -175,13 +178,17 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
-AM_CPPFLAGS = -std=c++11 -stdlib=libc++ -Weverything -Wno-c++98-compat -I/data/caster_zeng/package/libcxx/build/include/c++/v1
+AM_CPPFLAGS = -std=c++11 -stdlib=libc++ -Weverything -Wno-c++98-compat \
+	-I/data/caster_zeng/package/libcxx/build/include/c++/v1
+
 adstat_SOURCES = adstat.cpp 
-adstat_LDADD = -lfcgi -luriparser -lc++
+adstat_LDADD = -lfcgi -luriparser -lc++ 
 ad_register_SOURCES = ad_register.cpp 
 ad_register_LDADD = -lfcgi -luriparser -lc++ 
 ad_request_SOURCES = ad_request.cpp 
 ad_request_LDADD = -lfcgi -luriparser -lc++
+user_op_SOURCES = user_op.cpp  user_map.cpp
+user_op_LDADD = -lfcgi -luriparser -lc++ -ljsoncpp
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -284,6 +291,9 @@ ad_request$(EXEEXT): $(ad_request_OBJECTS) $(ad_request_DEPENDENCIES)
 adstat$(EXEEXT): $(adstat_OBJECTS) $(adstat_DEPENDENCIES) 
 	@rm -f adstat$(EXEEXT)
 	$(CXXLINK) $(adstat_OBJECTS) $(adstat_LDADD) $(LIBS)
+user_op$(EXEEXT): $(user_op_OBJECTS) $(user_op_DEPENDENCIES) 
+	@rm -f user_op$(EXEEXT)
+	$(CXXLINK) $(user_op_OBJECTS) $(user_op_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -294,6 +304,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ad_register.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ad_request.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/adstat.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/user_map.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/user_op.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

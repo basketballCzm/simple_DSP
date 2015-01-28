@@ -1,0 +1,16 @@
+<root>
+    <!--initial user map data-->
+    <section callback='save_message_file'>
+        <size type='int'>0</size>
+        <body >
+            <multi counter='int'>
+				<UserPosition>
+					<UserId type='int'>1000001</UserId>
+					<longitude type='int'>0</longitude>
+					<latitude type='int'>0</latitude>
+					<level type='int'>1</level>
+				</UserPosition>
+            </multi>
+        </body>
+    </section>
+</root>

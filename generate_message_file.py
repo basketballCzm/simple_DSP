@@ -474,7 +474,8 @@ if __name__=="__main__":
             save_message_file(message_list)
     else:
         if len(sys.argv) >= 3:
-            filename = sys.argv[2]
+            file_name = sys.argv[2]
+            print "save file name :",file_name
         parse_xml(sys.argv[1])
 
     time.sleep(0.1)

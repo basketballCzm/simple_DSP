@@ -21,7 +21,7 @@ AC_PROG_CC([clang gcc])
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h])
 AC_CHECK_HEADERS([fcgi_config.h],[],[AC_MSG_ERROR([Unable to find fcgi, please install fcgi])])
-AC_CHECK_HEADERS([uriparser/Uri.h])
+AC_CHECK_HEADERS([uriparser/Uri.h],[],[AC_MSG_ERROR([Unable to find uriparser, please install uriparser])])
 # Checks for typedefs, structures, and compiler characteristics.
 
 # Checks for library functions.
