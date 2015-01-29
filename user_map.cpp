@@ -1,5 +1,6 @@
 #include "user_map.h"
 #include "init_data.h"
+#include <syslog.h>
 
 static UserPositionMap *g_p_user_map = NULL;
 
@@ -83,3 +84,25 @@ int user_update(int user_id, float x, float y, int z)
     return -1;
 }
 
+void user_list_all(Json::Value & user_list)
+{
+    if(g_p_user_map==NULL)
+        user_map_init();
+
+    int j=0;    
+    syslog(LOG_INFO, "enter user_list_all()" );
+    syslog(LOG_INFO, "enter user_list_all() number=%d", int(g_p_user_map->number));
+    for(int i=0;i < g_p_user_map->number; ++i)
+    {
+        if(g_p_user_map->list[i].valid==1)
+        {
+            Json::Value user;
+            user["id"]=g_p_user_map->list[i].user_id;
+            user["x"]=g_p_user_map->list[i].position.x;
+            user["y"]=g_p_user_map->list[i].position.y;
+            user["z"]=g_p_user_map->list[i].position.z;
+            user_list[std::to_string(j)]=user;
+            ++j;
+        }
+    }
+}

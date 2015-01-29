@@ -141,6 +141,10 @@ void user_op(UriQueryListA * queryList, Json::Value & ret)
             ret["z"]=pos.position.level;
         }
     }
+    else if(strcmp("list_all",action.c_str())==0)
+    {
+        user_list_all(ret);
+    }
     else
     {
         ret["result"]="none";
