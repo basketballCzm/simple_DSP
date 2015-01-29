@@ -34,6 +34,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 bin_PROGRAMS = adstat$(EXEEXT) ad_register$(EXEEXT) \
 	ad_request$(EXEEXT) user_op$(EXEEXT)
+noinst_PROGRAMS = robot_commander$(EXEEXT)
 subdir = .
 DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
@@ -49,7 +50,7 @@ CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
-PROGRAMS = $(bin_PROGRAMS)
+PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am_ad_register_OBJECTS = ad_register.$(OBJEXT)
 ad_register_OBJECTS = $(am_ad_register_OBJECTS)
 ad_register_DEPENDENCIES =
@@ -59,6 +60,9 @@ ad_request_DEPENDENCIES =
 am_adstat_OBJECTS = adstat.$(OBJEXT)
 adstat_OBJECTS = $(am_adstat_OBJECTS)
 adstat_DEPENDENCIES =
+am_robot_commander_OBJECTS = robot_commander.$(OBJEXT)
+robot_commander_OBJECTS = $(am_robot_commander_OBJECTS)
+robot_commander_DEPENDENCIES =
 am_user_op_OBJECTS = user_op.$(OBJEXT) user_map.$(OBJEXT)
 user_op_OBJECTS = $(am_user_op_OBJECTS)
 user_op_DEPENDENCIES =
@@ -72,9 +76,11 @@ CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
 SOURCES = $(ad_register_SOURCES) $(ad_request_SOURCES) \
-	$(adstat_SOURCES) $(user_op_SOURCES)
+	$(adstat_SOURCES) $(robot_commander_SOURCES) \
+	$(user_op_SOURCES)
 DIST_SOURCES = $(ad_register_SOURCES) $(ad_request_SOURCES) \
-	$(adstat_SOURCES) $(user_op_SOURCES)
+	$(adstat_SOURCES) $(robot_commander_SOURCES) \
+	$(user_op_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -189,6 +195,8 @@ ad_request_SOURCES = ad_request.cpp
 ad_request_LDADD = -lfcgi -luriparser -lc++
 user_op_SOURCES = user_op.cpp  user_map.cpp
 user_op_LDADD = -lfcgi -luriparser -lc++ -ljsoncpp
+robot_commander_SOURCES = robot_commander.cpp
+robot_commander_LDADD = -lc++
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -282,6 +290,9 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+
+clean-noinstPROGRAMS:
+	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
 ad_register$(EXEEXT): $(ad_register_OBJECTS) $(ad_register_DEPENDENCIES) 
 	@rm -f ad_register$(EXEEXT)
 	$(CXXLINK) $(ad_register_OBJECTS) $(ad_register_LDADD) $(LIBS)
@@ -291,6 +302,9 @@ ad_request$(EXEEXT): $(ad_request_OBJECTS) $(ad_request_DEPENDENCIES)
 adstat$(EXEEXT): $(adstat_OBJECTS) $(adstat_DEPENDENCIES) 
 	@rm -f adstat$(EXEEXT)
 	$(CXXLINK) $(adstat_OBJECTS) $(adstat_LDADD) $(LIBS)
+robot_commander$(EXEEXT): $(robot_commander_OBJECTS) $(robot_commander_DEPENDENCIES) 
+	@rm -f robot_commander$(EXEEXT)
+	$(CXXLINK) $(robot_commander_OBJECTS) $(robot_commander_LDADD) $(LIBS)
 user_op$(EXEEXT): $(user_op_OBJECTS) $(user_op_DEPENDENCIES) 
 	@rm -f user_op$(EXEEXT)
 	$(CXXLINK) $(user_op_OBJECTS) $(user_op_LDADD) $(LIBS)
@@ -304,6 +318,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ad_register.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ad_request.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/adstat.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/robot_commander.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/user_map.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/user_op.Po@am__quote@
 
@@ -554,7 +569,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic clean-noinstPROGRAMS \
+	mostlyclean-am
 
 distclean: distclean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
@@ -627,20 +643,20 @@ uninstall-am: uninstall-binPROGRAMS
 .MAKE: all install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am am--refresh check check-am clean \
-	clean-binPROGRAMS clean-generic ctags dist dist-all dist-bzip2 \
-	dist-gzip dist-lzma dist-shar dist-tarZ dist-xz dist-zip \
-	distcheck distclean distclean-compile distclean-generic \
-	distclean-hdr distclean-tags distcleancheck distdir \
-	distuninstallcheck dvi dvi-am html html-am info info-am \
-	install install-am install-binPROGRAMS install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
-	uninstall-am uninstall-binPROGRAMS
+	clean-binPROGRAMS clean-generic clean-noinstPROGRAMS ctags \
+	dist dist-all dist-bzip2 dist-gzip dist-lzma dist-shar \
+	dist-tarZ dist-xz dist-zip distcheck distclean \
+	distclean-compile distclean-generic distclean-hdr \
+	distclean-tags distcleancheck distdir distuninstallcheck dvi \
+	dvi-am html html-am info info-am install install-am \
+	install-binPROGRAMS install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic pdf pdf-am ps ps-am \
+	tags uninstall uninstall-am uninstall-binPROGRAMS
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

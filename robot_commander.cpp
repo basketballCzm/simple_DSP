@@ -13,6 +13,7 @@
 #include <cstdlib>
 #include <unistd.h>
 #include <fstream>
+#include <sstream>
 using namespace std;
 //#define MALLPOINT 10
 #define ROBOT_SUM 50 //顾客数
@@ -114,8 +115,10 @@ int main(void)
         //		Sleep(3000);
         for(i=0;i<ROBOT_SUM;i++){
             pt[i].Brownian();
-            cout<<"顾客"<<i<<":  "<<"("<<pt[i].x<<"\t"<<","<<pt[i].y<<"\t"<<","<<pt[i].z<<")"<<"\t"<<endl;
-            system("node");
+            ostringstream cmd_line;
+            cmd_line<<"node module/robot/robot.js user_add --user "<<i<<" --x "<< pt[i].x<<" --y "<<pt[i].y<<" --z "<<pt[i].z;
+            cout<<cmd_line.str()<<"\n";
+            system(cmd_line.str().c_str());
         }
         sleep(3);
     }

@@ -15,3 +15,8 @@ ad_request_LDADD=-lfcgi -luriparser -lc++
 
 user_op_SOURCES=user_op.cpp  user_map.cpp
 user_op_LDADD=-lfcgi -luriparser -lc++ -ljsoncpp
+
+noinst_PROGRAMS=robot_commander
+
+robot_commander_SOURCES=robot_commander.cpp
+robot_commander_LDADD=-lc++
