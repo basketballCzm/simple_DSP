@@ -55,12 +55,12 @@ struct MallPoint{
 };
 
 //顾客位置
-struct PeoplePoint{
+class PeoplePoint{
     public:
         float x;
         float y;
         int z;
-        int user_id;
+        int id;
 
         //顾客初始位置
         void init_random_point(){
@@ -68,6 +68,8 @@ struct PeoplePoint{
             x=(float)rand()/RAND_MAX*1000;
             y=(float)rand()/RAND_MAX*1000;
             z=rand()%3+1;
+            id=user_counter;
+            ++ user_counter;
             //	cout<<"("<<x<<","<<y<<","<<z<<")"<<"  RAND_MAX = "<<RAND_MAX<<endl;
         }
 
@@ -89,29 +91,21 @@ struct PeoplePoint{
             //pnpoly();
             //	cout<<"顾客"<<j<<":"<<x<<","<<y<<endl;
         }
-
+        static int user_counter;
 
 };
 
+int PeoplePoint::user_counter=100001;
 
 int main(void)
 {
     int i;
     PeoplePoint pt[ROBOT_SUM];
-    MallPoint mp;
-    mp.init_point();
-
-    //商场坐标，主要用于调试
-    int j=0;
-    while(j<3){
-        cout<<mp.x[j]<<","<<mp.y[j]<<","<<mp.z[j]<<endl;
-        j++;
-    }
 
     srand(time(0));
     for(i=0;i<ROBOT_SUM;i++){
         pt[i].init_random_point();
-        cout<<"顾客"<<i<<":  "<<"("<<pt[i].x<<","<<pt[i].y<<","<<pt[i].z<<")"<<endl;
+        cout<<"顾客"<<pt[i].id<<":  "<<"("<<pt[i].x<<","<<pt[i].y<<","<<pt[i].z<<")"<<endl;
         //			pt[i].Brownian();
     }
 
@@ -121,10 +115,9 @@ int main(void)
         for(i=0;i<ROBOT_SUM;i++){
             pt[i].Brownian();
             cout<<"顾客"<<i<<":  "<<"("<<pt[i].x<<"\t"<<","<<pt[i].y<<"\t"<<","<<pt[i].z<<")"<<"\t"<<endl;
-            //			system("cls");
+            system("node");
         }
         sleep(3);
-        system("cls");
     }
 
 
