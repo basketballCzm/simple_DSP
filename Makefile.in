@@ -60,7 +60,8 @@ ad_request_DEPENDENCIES =
 am_adstat_OBJECTS = adstat.$(OBJEXT)
 adstat_OBJECTS = $(am_adstat_OBJECTS)
 adstat_DEPENDENCIES =
-am_robot_commander_OBJECTS = robot_commander.$(OBJEXT)
+am_robot_commander_OBJECTS = robot_commander.$(OBJEXT) \
+	user_map.$(OBJEXT)
 robot_commander_OBJECTS = $(am_robot_commander_OBJECTS)
 robot_commander_DEPENDENCIES =
 am_user_op_OBJECTS = user_op.$(OBJEXT) user_map.$(OBJEXT)
@@ -192,11 +193,11 @@ adstat_LDADD = -lfcgi -luriparser -lc++
 ad_register_SOURCES = ad_register.cpp 
 ad_register_LDADD = -lfcgi -luriparser -lc++ 
 ad_request_SOURCES = ad_request.cpp 
-ad_request_LDADD = -lfcgi -luriparser -lc++
+ad_request_LDADD = -lfcgi -luriparser -lc++ -ljsoncpp
 user_op_SOURCES = user_op.cpp  user_map.cpp
 user_op_LDADD = -lfcgi -luriparser -lc++ -ljsoncpp
-robot_commander_SOURCES = robot_commander.cpp
-robot_commander_LDADD = -lc++
+robot_commander_SOURCES = robot_commander.cpp user_map.cpp
+robot_commander_LDADD = -lc++ -ljsoncpp
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 

@@ -11,12 +11,12 @@ ad_register_SOURCES=ad_register.cpp
 ad_register_LDADD=-lfcgi -luriparser -lc++ 
 
 ad_request_SOURCES=ad_request.cpp 
-ad_request_LDADD=-lfcgi -luriparser -lc++
+ad_request_LDADD=-lfcgi -luriparser -lc++ -ljsoncpp
 
 user_op_SOURCES=user_op.cpp  user_map.cpp
 user_op_LDADD=-lfcgi -luriparser -lc++ -ljsoncpp
 
 noinst_PROGRAMS=robot_commander
 
-robot_commander_SOURCES=robot_commander.cpp
-robot_commander_LDADD=-lc++
+robot_commander_SOURCES=robot_commander.cpp user_map.cpp
+robot_commander_LDADD=-lc++ -ljsoncpp

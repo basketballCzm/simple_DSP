@@ -9,6 +9,7 @@
 					<longitude type='int'>0</longitude>
 					<latitude type='int'>0</latitude>
 					<level type='int'>1</level>
+					<valid type='int'>1</valid>
 				</UserPosition>
             </multi>
         </body>

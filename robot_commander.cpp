@@ -14,13 +14,17 @@
 #include <unistd.h>
 #include <fstream>
 #include <sstream>
+#include <math.h>
+#include "user_map.h" 
+
 using namespace std;
 //#define MALLPOINT 10
-#define ROBOT_SUM 50 //顾客数
+#define ROBOT_SUM 500 //顾客数
 #define NUM2 100//商场坐标数
-#define START -5
-#define END 5
-
+#define START -2.0f
+#define END 2.0f
+#define STEP 5.0f
+#define TARGET_RANGE 5.0f
 
 //商场坐标
 struct MallPoint{
@@ -62,16 +66,29 @@ class PeoplePoint{
         float y;
         int z;
         int id;
+        float x_delta;
+        float y_delta;
+        float target_x;
+        float target_y;
 
         //顾客初始位置
         void init_random_point(){
             //srand(time(0));
             x=(float)rand()/RAND_MAX*1000;
-            y=(float)rand()/RAND_MAX*1000;
-            z=rand()%3+1;
+            y=(float)rand()/RAND_MAX*625;
+            target_x=(float)rand()/RAND_MAX*1000;
+            target_y=(float)rand()/RAND_MAX*625;
+            z=rand()%7+1;
             id=user_counter;
             ++ user_counter;
-            //	cout<<"("<<x<<","<<y<<","<<z<<")"<<"  RAND_MAX = "<<RAND_MAX<<endl;
+            
+            set_target(); 
+        }
+
+        void set_target()
+        {
+            target_x=(float)rand()/RAND_MAX*1000;
+            target_y=(float)rand()/RAND_MAX*625;
         }
 
         //判断是否在商场内，还未实现
@@ -87,11 +104,58 @@ class PeoplePoint{
 
         //顾客随机走动
         void Brownian(){
-            this->x=x+(END-START)*rand()/RAND_MAX+START;
-            this->y=y+(END-START)*rand()/RAND_MAX+START;
+            float delta = (END-START)*(float)rand()/RAND_MAX+START;
+            x_delta = delta;
+            delta = (END-START)*(float)rand()/RAND_MAX+START;
+            y_delta = delta;
+            this->x=x+x_delta;
+            this->y=y+y_delta;
+            cout<<"x_delta="<<x_delta<<",y_delta="<<y_delta<<"\n";
             //pnpoly();
             //	cout<<"顾客"<<j<<":"<<x<<","<<y<<endl;
         }
+
+        void wander()
+        {
+            float distance=fabsf(target_x-x)+fabsf(target_y-y);
+            if(distance<TARGET_RANGE)
+            {
+                set_target();    
+            }
+            float x_offset=target_x-x;
+            float y_offset=target_y-y;
+            float length=fabsf(x_offset)+fabsf(y_offset);
+            x_delta=x_offset/length*STEP;
+            y_delta=y_offset/length*STEP;
+            
+            //add some noise
+            float x_noise= (END-START)*(float)rand()/RAND_MAX+START;
+            this->x=x+x_delta+x_noise;
+            float y_noise = (END-START)*(float)rand()/RAND_MAX+START;
+            this->y=y+y_delta+y_noise;
+            if(id==PeoplePoint::user_counter-1)
+            {
+                cout<<"wander() user_id="<<id<<" x="<<x<<" y="<<y
+                    <<" x_delta="<<x_delta<<" y_delta="<<y_delta<<" x_noise="<<x_noise
+                    <<" y_noise="<<y_noise<<" target_x="<<target_x<<" target_y="<<target_y<<"\n";
+            }
+
+        }
+
+        void update_location_via_web()
+        {
+            ostringstream cmd_line;
+            cmd_line<<"node module/robot/robot.js user_add --user "<<id<<" --x "<< x<<" --y "<<y<<" --z "<<z;
+            cout<<cmd_line.str()<<"\n";
+            system(cmd_line.str().c_str());
+        }
+
+        void update_location_via_memory()
+        {
+           //cout<<"update_location_via_memory() id="<<id<<" x="<<x<<" y="<<y<<" z="<<z<<"\n";
+           user_add(id,x,y,z); 
+        }
+
         static int user_counter;
 
 };
@@ -114,11 +178,9 @@ int main(void)
     while(1){
         //		Sleep(3000);
         for(i=0;i<ROBOT_SUM;i++){
-            pt[i].Brownian();
-            ostringstream cmd_line;
-            cmd_line<<"node module/robot/robot.js user_add --user "<<i<<" --x "<< pt[i].x<<" --y "<<pt[i].y<<" --z "<<pt[i].z;
-            cout<<cmd_line.str()<<"\n";
-            system(cmd_line.str().c_str());
+            //pt[i].Brownian();
+            pt[i].wander();
+            pt[i].update_location_via_memory();
         }
         sleep(3);
     }
@@ -126,4 +188,3 @@ int main(void)
 
     return 0;
 }
-

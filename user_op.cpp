@@ -67,9 +67,6 @@ void user_op(UriQueryListA * queryList, Json::Value & ret)
 
     for(UriQueryListA *p_para=queryList ;p_para!=NULL;p_para=p_para->next)
     {
-        syslog(LOG_INFO, "adstat p_para=%d",p_para);
-        syslog(LOG_INFO, "adstat key=%d",strlen(p_para->key));
-        syslog(LOG_INFO, "adstat value=%d",p_para->value);
         if (strcmp(p_para->key,"action")==0)
             action = p_para->value;
         else if (strcmp(p_para->key,"x")==0||strcmp(p_para->key,"longitude")==0)

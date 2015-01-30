@@ -44,9 +44,13 @@ int user_query(UserPosition& pos)
 
 int user_add(int user_id, float x, float y, int z)
 {
+    if(g_p_user_map==NULL)
+        user_map_init();
+    syslog(LOG_INFO, "adstat user_add number : %d, user_id : %d",int(g_p_user_map->number) ,user_id);
     if(user_update(user_id,x,y,z) == -1)
         //update fail ,need add a new user
     {
+        syslog(LOG_INFO, "adstat user_add add new user ");
         int index = atomic_fetch_add_explicit(& g_p_user_map->number,1, std::memory_order_seq_cst) ; 
         if(index >= g_p_user_map->size)
         {
@@ -63,6 +67,7 @@ int user_add(int user_id, float x, float y, int z)
             return 1;
         }
     }
+    return 2;
 }
 
 int user_update(int user_id, float x, float y, int z)
@@ -74,6 +79,7 @@ int user_update(int user_id, float x, float y, int z)
     {
         if(g_p_user_map->list[i].user_id == user_id )
         {
+            syslog(LOG_INFO, "adstat user_update found user %d",user_id);
             g_p_user_map->list[i].position.x=x;
             g_p_user_map->list[i].position.y=y;
             g_p_user_map->list[i].position.z=z;

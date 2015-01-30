@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <fcgi_stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -14,6 +15,9 @@
 #include <fcgiapp.h>
 #include <uriparser/Uri.h>
 #include "config.h"
+
+#include "user_map.h"
+
 
 using namespace std;
 
@@ -52,6 +56,27 @@ static void penv(const char * const * envp)
 
 }
 
+static void bidding(UriQueryListA * queryList,Json::Value & ret)
+{
+    int user_id=INT_MIN;
+    int ad_space=INT_MIN;//TODO now ,only have one ad space.
+    for(UriQueryListA *p_para=queryList ;p_para!=NULL;p_para=p_para->next)
+    {
+        if (strcmp(p_para->key,"user_id")==0)
+        {
+            stringstream( p_para->value )>> user_id;
+        }
+        else if (strcmp(p_para->key,"space")==0)
+        {
+            stringstream( p_para->value )>> ad_space;
+        }
+    }
+
+    UserPosition pos;
+
+}
+
+
 int main()
 {
     openlog("adstat", LOG_PID|LOG_CONS, LOG_LOCAL0 );
@@ -60,10 +85,9 @@ int main()
     FCGX_Request request;
     FCGX_InitRequest(&request, 0, 0);
 
-
     g_p_ad_data = init_shared_data<AdData,AdInfo>(AD_DATA_FILE);
     UriParserStateA state;
-
+    Json::StyledWriter writer;
 
     while(FCGX_Accept_r(&request) >= 0)
     {
@@ -80,24 +104,12 @@ int main()
         }
 
         FCGX_FPrintF(request.out, "Content-type:text/html\r\n\r\n" );
-        FCGX_FPrintF(request.out, "<p> Hello FastCGI !  </ p>" );
-        FCGX_FPrintF(request.out, "<br /> Request number = [%d]", ++g_p_ad_data->number );
-        FCGX_FPrintF(request.out, "<br /> Process ID: %d ", getpid() );
-        FCGX_FPrintF(request.out, "<br /> Request String: %s ", request_string);
 
-        syslog(LOG_INFO, "adstat print parameters");
-
-        for(UriQueryListA *p_para=queryList ;p_para!=NULL;p_para=p_para->next)
-        {
-            syslog(LOG_INFO, "adstat p_para=%d",p_para);
-            syslog(LOG_INFO, "adstat key=%d",strlen(p_para->key));
-            syslog(LOG_INFO, "adstat value=%d",p_para->value);
-            FCGX_FPrintF(request.out, "<br />key : %s ,value : %s",p_para->key,p_para->value);
-			if (strcmp(p_para->key,"adid")==0)
-				 FCGX_FPrintF(request.out,"ßÇßÇßÇÉÏ¿ÎÉÏ¿ÎÉÏ¿Î");
-
-        }
-
+        Json::Value ret;
+        bidding(queryList,ret);
+        const string output = writer.write(ret);
+        syslog(LOG_INFO, "[output : %s\n  ]", output.c_str()); 
+        FCGX_FPrintF(request.out, output.c_str() );
 
         uriFreeQueryListA(queryList);
 
