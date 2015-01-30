@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Demo</title>
+		<script src="heatmap.min.js"></script>
+		<script src="../jquery-1.11.2.min.js"></script>
+  </head>
+  
+  <body>
+    <div class="heatmap">
+    	<img src="map.jpg" width="1000" height="625" />
+    </div>
+    
+    <script>
+         
+    	var heatmapInstance = h337.create({
+			  container: document.querySelector('.heatmap')
+			});
+			
+        var max = 0;
+        var width = 1000;
+        var height = 625;
+        
+       
+			
+        function update_map()
+        {
+            console.log("enter update_map()")
+            $.getJSON("../user_op.cgi",{action:"list_all"},function(resp)
+                {
+                    var user_list=[]
+                    $.each( resp, function( key, value ) {
+                        var user={}
+                        user.x=resp[key].x
+                        user.y=resp[key].y
+                        user.z=resp[key].z
+                        user.value=100
+                        user.radius=10
+                        user_list.push(user)
+                    })
+                    console.log("user_list="+user_list)
+                    var data ={
+                        max:max,
+                        data:user_list
+                    }
+                    heatmapInstance.setData(data);
+                    setTimeout(update_map,3000)    
+                }
+            ).error=function()
+            {
+                setTimeout(update_map,3000)    
+            }
+        }
+
+        update_map()
+    </script>
+  </body>
+</html>

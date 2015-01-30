@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Demo</title>
+		<script src="heatmap.min.js"></script>
+		<script src="../jquery-1.11.2.min.js"></script>
+  </head>
+  
+  <body>
+    <div class="heatmap">
+    	<img src="map.jpg" width="1000" height="625" />
+    </div>
+    
+    <script>
+         
+    	var heatmapInstance = h337.create({
+			  container: document.querySelector('.heatmap')
+			});
+			
+        var max = 0;
+        var width = 1000;
+        var height = 625;
+        
+       
+        var user_list_history=[]			
+        function update_map()
+        {
+            console.log("enter update_map()")
+            $.getJSON("../user_op.cgi",{action:"list_all"},function(resp)
+                {
+                    var user_list=[]
+                    $.each( resp, function( key, value ) {
+                        var user={}
+                        user.x=resp[key].x
+                        user.y=resp[key].y
+                        user.z=resp[key].z
+                        user.id=resp[key].id
+                        user.value=200
+                        user.radius=5
+                        user_list.push(user)
+                    })
+                    user_list_history.push(user_list)
+
+                    if(user_list_history.length>=2)
+                    {
+                        var p=user_list_history[user_list_history.length-2]    
+                        var c=user_list_history[user_list_history.length-1]    
+                        c.forEach(function(e1,i1,list1){
+                                p.forEach(function(e2,i2,list2){
+                                        if (e1.id==e2.id && e1.x==e2.x && e1.y==e2.y
+                                            && e1.z == e2.z)
+                                        {
+                                            //point doesn't move ,remove the record from the previous user_list
+                                            console.log("user_id="+e1.id+";i1="+i1+"i2="+i2)
+                                            list2.splice(i2,1) 
+                                        }
+                                    })
+                            })
+                    }
+
+                    while(user_list_history.length>40)
+                    {
+                         user_list_history.shift()   
+                    }
+                    user_list_history.forEach(function(e,i,list) {
+                            list[i].forEach(function(e,j,user_list){
+                                    user_list[j].value=e.value-5
+                                })
+                        })
+                    
+                    route_data=user_list_history.reduce(function(p,c,i,a){
+                            return p.concat(c)
+                        })
+                    console.log("route_data.length="+route_data.length)
+
+                    var data ={
+                        max:max,
+                        data:route_data
+                    }
+                    heatmapInstance.setData(data);
+                    setTimeout(update_map,3000)    
+                }
+            ).error=function()
+            {
+                setTimeout(update_map,3000)    
+            }
+        }
+
+        update_map()
+    </script>
+  </body>
+</html>
