@@ -10,7 +10,7 @@ adstat_LDADD=-lfcgi -luriparser -lc++
 ad_register_SOURCES=ad_register.cpp 
 ad_register_LDADD=-lfcgi -luriparser -lc++ 
 
-ad_request_SOURCES=ad_request.cpp 
+ad_request_SOURCES=ad_request.cpp user_map.cpp 
 ad_request_LDADD=-lfcgi -luriparser -lc++ -ljsoncpp
 
 user_op_SOURCES=user_op.cpp  user_map.cpp
