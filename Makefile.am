@@ -16,7 +16,13 @@ ad_request_LDADD=-lfcgi -luriparser -lc++ -ljsoncpp
 user_op_SOURCES=user_op.cpp  user_map.cpp
 user_op_LDADD=-lfcgi -luriparser -lc++ -ljsoncpp
 
-noinst_PROGRAMS=robot_commander
+noinst_PROGRAMS=robot_commander ap_signal_dock ap_signal_sender 
 
 robot_commander_SOURCES=robot_commander.cpp user_map.cpp
 robot_commander_LDADD=-lc++ -ljsoncpp
+
+ap_signal_dock_SOURCES=ap_signal_dock.cpp 
+ap_signal_dock_LDADD=-lc++ -lzmq
+
+ap_signal_sender_SOURCES=ap_signal_sender.cpp 
+ap_signal_sender_LDADD=-lc++ -lzmq

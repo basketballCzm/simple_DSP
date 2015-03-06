@@ -34,7 +34,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 bin_PROGRAMS = adstat$(EXEEXT) ad_register$(EXEEXT) \
 	ad_request$(EXEEXT) user_op$(EXEEXT)
-noinst_PROGRAMS = robot_commander$(EXEEXT)
+noinst_PROGRAMS = robot_commander$(EXEEXT) ap_signal_dock$(EXEEXT) \
+	ap_signal_sender$(EXEEXT)
 subdir = .
 DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
@@ -60,6 +61,12 @@ ad_request_DEPENDENCIES =
 am_adstat_OBJECTS = adstat.$(OBJEXT)
 adstat_OBJECTS = $(am_adstat_OBJECTS)
 adstat_DEPENDENCIES =
+am_ap_signal_dock_OBJECTS = ap_signal_dock.$(OBJEXT)
+ap_signal_dock_OBJECTS = $(am_ap_signal_dock_OBJECTS)
+ap_signal_dock_DEPENDENCIES =
+am_ap_signal_sender_OBJECTS = ap_signal_sender.$(OBJEXT)
+ap_signal_sender_OBJECTS = $(am_ap_signal_sender_OBJECTS)
+ap_signal_sender_DEPENDENCIES =
 am_robot_commander_OBJECTS = robot_commander.$(OBJEXT) \
 	user_map.$(OBJEXT)
 robot_commander_OBJECTS = $(am_robot_commander_OBJECTS)
@@ -77,10 +84,12 @@ CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
 SOURCES = $(ad_register_SOURCES) $(ad_request_SOURCES) \
-	$(adstat_SOURCES) $(robot_commander_SOURCES) \
+	$(adstat_SOURCES) $(ap_signal_dock_SOURCES) \
+	$(ap_signal_sender_SOURCES) $(robot_commander_SOURCES) \
 	$(user_op_SOURCES)
 DIST_SOURCES = $(ad_register_SOURCES) $(ad_request_SOURCES) \
-	$(adstat_SOURCES) $(robot_commander_SOURCES) \
+	$(adstat_SOURCES) $(ap_signal_dock_SOURCES) \
+	$(ap_signal_sender_SOURCES) $(robot_commander_SOURCES) \
 	$(user_op_SOURCES)
 ETAGS = etags
 CTAGS = ctags
@@ -198,6 +207,10 @@ user_op_SOURCES = user_op.cpp  user_map.cpp
 user_op_LDADD = -lfcgi -luriparser -lc++ -ljsoncpp
 robot_commander_SOURCES = robot_commander.cpp user_map.cpp
 robot_commander_LDADD = -lc++ -ljsoncpp
+ap_signal_dock_SOURCES = ap_signal_dock.cpp 
+ap_signal_dock_LDADD = -lc++ -lzmq
+ap_signal_sender_SOURCES = ap_signal_sender.cpp 
+ap_signal_sender_LDADD = -lc++ -lzmq
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -303,6 +316,12 @@ ad_request$(EXEEXT): $(ad_request_OBJECTS) $(ad_request_DEPENDENCIES)
 adstat$(EXEEXT): $(adstat_OBJECTS) $(adstat_DEPENDENCIES) 
 	@rm -f adstat$(EXEEXT)
 	$(CXXLINK) $(adstat_OBJECTS) $(adstat_LDADD) $(LIBS)
+ap_signal_dock$(EXEEXT): $(ap_signal_dock_OBJECTS) $(ap_signal_dock_DEPENDENCIES) 
+	@rm -f ap_signal_dock$(EXEEXT)
+	$(CXXLINK) $(ap_signal_dock_OBJECTS) $(ap_signal_dock_LDADD) $(LIBS)
+ap_signal_sender$(EXEEXT): $(ap_signal_sender_OBJECTS) $(ap_signal_sender_DEPENDENCIES) 
+	@rm -f ap_signal_sender$(EXEEXT)
+	$(CXXLINK) $(ap_signal_sender_OBJECTS) $(ap_signal_sender_LDADD) $(LIBS)
 robot_commander$(EXEEXT): $(robot_commander_OBJECTS) $(robot_commander_DEPENDENCIES) 
 	@rm -f robot_commander$(EXEEXT)
 	$(CXXLINK) $(robot_commander_OBJECTS) $(robot_commander_LDADD) $(LIBS)
@@ -319,6 +338,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ad_register.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ad_request.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/adstat.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ap_signal_dock.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ap_signal_sender.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/robot_commander.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/user_map.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/user_op.Po@am__quote@

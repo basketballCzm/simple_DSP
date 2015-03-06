@@ -46,7 +46,7 @@ int user_add(int user_id, float x, float y, int z)
 {
     if(g_p_user_map==NULL)
         user_map_init();
-    syslog(LOG_INFO, "adstat user_add number : %d, user_id : %d",int(g_p_user_map->number) ,user_id);
+    //syslog(LOG_INFO, "adstat user_add number : %d, user_id : %d",int(g_p_user_map->number) ,user_id);
     if(user_update(user_id,x,y,z) == -1)
         //update fail ,need add a new user
     {
@@ -79,7 +79,6 @@ int user_update(int user_id, float x, float y, int z)
     {
         if(g_p_user_map->list[i].user_id == user_id )
         {
-            syslog(LOG_INFO, "adstat user_update found user %d",user_id);
             g_p_user_map->list[i].position.x=x;
             g_p_user_map->list[i].position.y=y;
             g_p_user_map->list[i].position.z=z;
@@ -87,6 +86,7 @@ int user_update(int user_id, float x, float y, int z)
             return 1;
         }
     }
+    syslog(LOG_INFO, "adstat user_update user %d not found ",user_id);
     return -1;
 }
 
