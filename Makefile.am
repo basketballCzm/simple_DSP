@@ -1,7 +1,6 @@
 
 AUTOMAKE_OPTIONS = foreign
-AM_CPPFLAGS = -std=c++11 -stdlib=libc++ -Weverything -Wno-c++98-compat \
-	-I/data/caster_zeng/package/libcxx/build/include/c++/v1
+AM_CPPFLAGS = -std=c++11 -stdlib=libc++ -Weverything -Wno-c++98-compat -I/usr/local/include/c++/v1 
 
 bin_PROGRAMS=adstat ad_register  ad_request user_op
 adstat_SOURCES=adstat.cpp 
