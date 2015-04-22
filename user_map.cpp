@@ -107,7 +107,8 @@ void user_list_all(Json::Value & user_list)
             user["x"]=g_p_user_map->list[i].position.x;
             user["y"]=g_p_user_map->list[i].position.y;
             user["z"]=g_p_user_map->list[i].position.z;
-            user_list[std::to_string(j)]=user;
+            //user_list[std::to_string(j).c_str()]=user;
+	    user_list["123"]=user;	
             ++j;
         }
     }
