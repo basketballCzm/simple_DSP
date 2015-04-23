@@ -60,7 +60,7 @@ int main()
     FCGX_Request request;
     FCGX_InitRequest(&request, 0, 0);
 
-    g_p_ad_data = init_shared_data<AdData,AdInfo>(AD_DATA_FILE);
+    g_p_ad_data = load_shared_data<AdData,AdInfo>(AD_DATA_FILE);
 
     UriParserStateA state;
 

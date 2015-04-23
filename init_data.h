@@ -9,19 +9,48 @@
 #include <atomic>
 #include <syslog.h>
 #include <new>
-
+#include <sys/stat.h>
+#include <errno.h>
 
 template<typename T,typename T_item>
-T *init_shared_data(const char * filename)
+void init_shared_data(const char * filename)
+{
+    struct stat buffer;   
+    if(stat (filename, &buffer) == 0)
+    {
+        //file exist
+        return;
+    }
+    else 
+    {
+        int fd=open(filename,O_CREAT|O_EXCL|O_WRONLY,00777);
+        if(fd==-1)
+        {
+            syslog(LOG_INFO, "init_shared_data create file  errno=%d",errno);
+            return;
+        }
+        else
+        {
+            lseek(fd,sizeof(T)-sizeof(T_item),SEEK_SET);
+            write(fd,"",1);
+            syslog(LOG_INFO, "init_shared_data create file %s",filename);
+            close(fd);
+        }
+    }
+}
+
+template<typename T,typename T_item>
+T *load_shared_data(const char * filename)
 {
     syslog(LOG_INFO, "ad_stat enter init_shared_data");
+    init_shared_data<T,T_item>(filename);
     T* g_data=NULL;
     int fd;
     fd=open(filename,O_RDWR,00777); 
     
     if(fd<0)
     {
-        syslog(LOG_ERR, "fail to open ad_data_file : %s",filename);
+        syslog(LOG_ERR, "fail to open ad_data_file : %s ,errno=%d",filename,errno);
         return NULL;     
     }
 
