@@ -6,7 +6,7 @@ using namespace std;
 static const string s_topic="lbs-point";
 static const string brokers = "WUSHUU-KAFKA";
 static bool exit_eof = false;
-static int64_t start_offset = 0; 
+static int64_t start_offset = RdKafka::Topic::OFFSET_STORED; 
 static int32_t partition = 0; 
 
 static bool run = true;
@@ -53,6 +53,9 @@ int main ()
     string errstr;
     RdKafka::Conf *conf = RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL);
     RdKafka::Conf *tconf = RdKafka::Conf::create(RdKafka::Conf::CONF_TOPIC);
+    conf->set("client.id","tair-rdb-client", errstr);
+    tconf->set("auto.commit.enable","true", errstr);
+    tconf->set("auto.commit.interval.ms","200", errstr);
 
     conf->set("metadata.broker.list", brokers, errstr);
     RdKafka::Consumer *consumer = RdKafka::Consumer::create(conf, errstr);
