@@ -21,6 +21,7 @@
 
 #include "user_map.h"
 #include <json/json.h>
+#include <limits.h>
 
 using namespace std;
 

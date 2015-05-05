@@ -13,8 +13,8 @@ AC_DEFINE([USER_MAP_FILE],["/tmp/user_map.data"],[users map file path])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_PREFIX_DEFAULT([/usr/local/nginx/simple_DSP_cgi])
 # Checks for programs.
-AC_PROG_CXX([clang++ g++])
-AC_PROG_CC([clang gcc])
+AC_PROG_CXX([g++])
+AC_PROG_CC([gcc])
 
 # Checks for libraries.
 
