@@ -18,6 +18,7 @@
 #include "user_map.h" 
 
 using namespace std;
+using namespace user_map;
 //#define MALLPOINT 10
 #define ROBOT_SUM 500 //顾客数
 #define NUM2 100//商场坐标数

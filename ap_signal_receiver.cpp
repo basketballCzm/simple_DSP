@@ -1,7 +1,10 @@
 #include <iostream>
+#include <sstream>
 #include "librdkafka/rdkafkacpp.h"
+#include "user_map.h"
 
 using namespace std;
+using namespace user_map;
 
 static const string s_topic="lbs-point";
 static const string brokers = "WUSHUU-KAFKA";
@@ -12,40 +15,52 @@ static int32_t partition = 0;
 static bool run = true;
 
 void msg_consume(RdKafka::Message* message, void* opaque) {
-  switch (message->err()) {
-    case RdKafka::ERR__TIMED_OUT:
-      break;
+    switch (message->err()) {
+        case RdKafka::ERR__TIMED_OUT:
+            break;
 
-    case RdKafka::ERR_NO_ERROR:
-      /* Real message */
-      std::cout << "Read msg at offset " << message->offset() << std::endl;
-      if (message->key()) {
-        std::cout << "Key: " << *message->key() << std::endl;
-      }
-      printf("%.*s\n",
-        static_cast<int>(message->len()),
-        static_cast<const char *>(message->payload()));
-      break;
+        case RdKafka::ERR_NO_ERROR:
+            /* Real message */
+            //std::cout << "Read msg at offset " << message->offset() << std::endl;
+            if (message->key()) {
+                std::cout << "Key: " << *message->key() << std::endl;
+            }
+            /*printf("%.*s\n",
+                    static_cast<int>(message->len()),
+                    static_cast<const char *>(message->payload()));*/
+            union {
+                unsigned long long mac_number;
+                unsigned char mac_array[16];//LBF
+            }mac;
+            mac.mac_number=0;
+            int x,y,width,height;
+            sscanf(static_cast<const char *>(message->payload()),"Mac:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx Rect:%d,%d,%d,%d",
+                    mac.mac_array+5,mac.mac_array+4,mac.mac_array+3,mac.mac_array+2,mac.mac_array+1,mac.mac_array,&x,&y,&width,&height);
+            //cout<<"mac is "<<static_cast<int> (mac.mac_array[5])<<":"<<static_cast<int>(mac.mac_array[4])<<":"<<static_cast<int>(mac.mac_array[3])
+            //    <<":"<<static_cast<int>(mac.mac_array[2])<<":"<<static_cast<int>(mac.mac_array[1])<<":"<<static_cast<int>(mac.mac_array[0])<<endl;
+            //cout<<"x="<<x<<",y="<<y<<",width="<<width<<",height="<<height<<",mac_number is "<<mac.mac_number<<endl;
+            user_add(mac.mac_number,x+width/2.0,y+height/2.0,0, static_cast<int>(message->len()));
+            break;
 
-    case RdKafka::ERR__PARTITION_EOF:
-      /* Last message */
-      if (exit_eof) {
-        run = false;
-      }
-      break;
+        case RdKafka::ERR__PARTITION_EOF:
+            /* Last message */
+            if (exit_eof) {
+                run = false;
+            }
+            break;
 
-    default:
-      /* Errors */
-      std::cerr << "Consume failed: " << message->errstr() << std::endl;
-      run = false;
-  }
+        default:
+            /* Errors */
+            std::cerr << "Consume failed: " << message->errstr() << std::endl;
+            run = false;
+    }
 }
 
 class TairConsumeCb : public RdKafka::ConsumeCb {
- public:
-  void consume_cb (RdKafka::Message &msg, void *opaque) {
-    msg_consume(&msg, opaque);
-  }
+    public:
+        void consume_cb (RdKafka::Message &msg, void *opaque) {
+            msg_consume(&msg, opaque);
+        }
 };
 
 int main ()
@@ -75,15 +90,15 @@ int main ()
         std::cerr << "Failed to create topic: " << errstr << std::endl;
         exit(1);
     }
-    
+
     /*
      * Start consumer for topic+partition at start offset
      */
     RdKafka::ErrorCode resp = consumer->start(topic, partition, start_offset);
     if (resp != RdKafka::ERR_NO_ERROR) {
-      std::cerr << "Failed to start consumer: " <<
-	RdKafka::err2str(resp) << std::endl;
-      exit(1);
+        std::cerr << "Failed to start consumer: " <<
+            RdKafka::err2str(resp) << std::endl;
+        exit(1);
     }
 
     TairConsumeCb consume_cb;

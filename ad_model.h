@@ -70,7 +70,7 @@ struct AdData
 
 struct UserPosition
 {
-    int user_id;
+    unsigned long long user_id;
     GeoInfo position;
     int valid;
 };

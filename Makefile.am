@@ -14,8 +14,8 @@ noinst_PROGRAMS=robot_commander ap_signal_receiver #ap_signal_dock ap_signal_sen
 robot_commander_SOURCES=robot_commander.cpp user_map.cpp
 robot_commander_LDADD=-lc++ -ljsoncpp  -ltairclientapi $(TBLIB_ROOT)/lib/libtbnet.a $(TBLIB_ROOT)/lib/libtbsys.a
 
-ap_signal_receiver_SOURCES=ap_signal_receiver.cpp 
-ap_signal_receiver_LDADD= -lrdkafka -lrdkafka++ -lz -lpthread -lrt
+ap_signal_receiver_SOURCES=ap_signal_receiver.cpp user_map.cpp
+ap_signal_receiver_LDADD= -lrdkafka -lrdkafka++ -lz -lpthread -lrt -ltairclientapi $(TBLIB_ROOT)/lib/libtbnet.a $(TBLIB_ROOT)/lib/libtbsys.a
 
 #ap_signal_dock_SOURCES=ap_signal_dock.cpp 
 #ap_signal_dock_LDADD=-lc++ -lzmq

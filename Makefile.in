@@ -94,9 +94,11 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
-am_ap_signal_receiver_OBJECTS = ap_signal_receiver.$(OBJEXT)
+am_ap_signal_receiver_OBJECTS = ap_signal_receiver.$(OBJEXT) \
+	user_map.$(OBJEXT)
 ap_signal_receiver_OBJECTS = $(am_ap_signal_receiver_OBJECTS)
-ap_signal_receiver_DEPENDENCIES =
+ap_signal_receiver_DEPENDENCIES = $(TBLIB_ROOT)/lib/libtbnet.a \
+	$(TBLIB_ROOT)/lib/libtbsys.a
 am_robot_commander_OBJECTS = robot_commander.$(OBJEXT) \
 	user_map.$(OBJEXT)
 robot_commander_OBJECTS = $(am_robot_commander_OBJECTS)
@@ -282,8 +284,8 @@ user_op_SOURCES = user_op.cpp  user_map.cpp
 user_op_LDADD = -lfcgi -luriparser -lc++ -ljsoncpp -ljsoncpp -ltairclientapi $(TBLIB_ROOT)/lib/libtbnet.a $(TBLIB_ROOT)/lib/libtbsys.a
 robot_commander_SOURCES = robot_commander.cpp user_map.cpp
 robot_commander_LDADD = -lc++ -ljsoncpp  -ltairclientapi $(TBLIB_ROOT)/lib/libtbnet.a $(TBLIB_ROOT)/lib/libtbsys.a
-ap_signal_receiver_SOURCES = ap_signal_receiver.cpp 
-ap_signal_receiver_LDADD = -lrdkafka -lrdkafka++ -lz -lpthread -lrt
+ap_signal_receiver_SOURCES = ap_signal_receiver.cpp user_map.cpp
+ap_signal_receiver_LDADD = -lrdkafka -lrdkafka++ -lz -lpthread -lrt -ltairclientapi $(TBLIB_ROOT)/lib/libtbnet.a $(TBLIB_ROOT)/lib/libtbsys.a
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 

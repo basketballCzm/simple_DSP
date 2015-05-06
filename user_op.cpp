@@ -24,6 +24,7 @@
 #include <limits.h>
 
 using namespace std;
+using namespace user_map;
 
 int parseQueryString(char *request_string ,UriParserStateA &state, UriQueryListA * &  queryList)
 {
