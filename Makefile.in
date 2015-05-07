@@ -285,7 +285,7 @@ user_op_LDADD = -lfcgi -luriparser -lc++ -ljsoncpp -ljsoncpp -ltairclientapi $(T
 robot_commander_SOURCES = robot_commander.cpp user_map.cpp
 robot_commander_LDADD = -lc++ -ljsoncpp  -ltairclientapi $(TBLIB_ROOT)/lib/libtbnet.a $(TBLIB_ROOT)/lib/libtbsys.a
 ap_signal_receiver_SOURCES = ap_signal_receiver.cpp user_map.cpp
-ap_signal_receiver_LDADD = -lrdkafka -lrdkafka++ -lz -lpthread -lrt -ltairclientapi $(TBLIB_ROOT)/lib/libtbnet.a $(TBLIB_ROOT)/lib/libtbsys.a
+ap_signal_receiver_LDADD = -lrdkafka -lrdkafka++ -lz -lpthread -lrt -ltairclientapi $(TBLIB_ROOT)/lib/libtbnet.a $(TBLIB_ROOT)/lib/libtbsys.a -ljsoncpp
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 

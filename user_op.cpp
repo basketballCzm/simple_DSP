@@ -142,6 +142,7 @@ void user_op(UriQueryListA * queryList, Json::Value & ret)
     }
     else if(strcmp("list_all",action.c_str())==0)
     {
+        syslog(LOG_INFO, "user_op: call user_list_all ");
         user_list_all(ret);
     }
     else

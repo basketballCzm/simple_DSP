@@ -10,7 +10,8 @@ using namespace user_map;
 static const string s_topic="lbs-point";
 static const string brokers = "WUSHUU-KAFKA";
 static bool exit_eof = false;
-static int64_t start_offset = RdKafka::Topic::OFFSET_STORED; 
+static int64_t start_offset = RdKafka::Topic::OFFSET_BEGINNING; 
+//static int64_t start_offset = RdKafka::Topic::OFFSET_STORED; 
 static int32_t partition = 0; 
 
 static bool run = true;
@@ -22,7 +23,7 @@ void msg_consume(RdKafka::Message* message, void* opaque) {
 
         case RdKafka::ERR_NO_ERROR:
             /* Real message */
-            //std::cout << "Read msg at offset " << message->offset() << std::endl;
+            std::cout << "Read msg at offset " << message->offset() << std::endl;
             if (message->key()) {
                 std::cout << "Key: " << *message->key() << std::endl;
             }
@@ -69,11 +70,12 @@ int main ()
     string errstr;
     RdKafka::Conf *conf = RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL);
     RdKafka::Conf *tconf = RdKafka::Conf::create(RdKafka::Conf::CONF_TOPIC);
-    conf->set("client.id","tair-rdb-client", errstr);
+    conf->set("client.id","tair-rdb-client1", errstr);
     tconf->set("auto.commit.enable","true", errstr);
     tconf->set("auto.commit.interval.ms","200", errstr);
 
     conf->set("metadata.broker.list", brokers, errstr);
+    conf->set("group.id","tair-rdb-group1", errstr);
     RdKafka::Consumer *consumer = RdKafka::Consumer::create(conf, errstr);
     if (!consumer) {
         std::cerr << "Failed to create consumer: " << errstr << std::endl;

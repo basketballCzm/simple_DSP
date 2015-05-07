@@ -5,6 +5,8 @@
 #include <sstream>
 #include <iomanip>
 #include <ctime>
+#include <limits>
+#include <vector>
 #include <data_entry.hpp>
 
 using namespace std;
@@ -27,7 +29,6 @@ namespace user_map
         static bool b_started=false;
         if(!b_started)
         {
-            // can't set log level to debug or the program will core dump.
             TBSYS_LOGGER.setFileName(tb_log_file);
             TBSYS_LOGGER.setLogLevel("DEBUG");
 
@@ -65,8 +66,8 @@ namespace user_map
 
     inline void tair_put(const string & s_key, const string & s_value)
     {
-        tair::common::data_entry key(s_key.c_str(),s_key.size(),false);
-        tair::common::data_entry value(s_value.c_str(),s_value.size(),false);
+        tair::common::data_entry key(s_key.c_str(),s_key.size()+1,true);
+        tair::common::data_entry value(s_value.c_str(),s_value.size()+1,true);
         int ret=g_tair.put(tair_namespace,key,value,0,0);
         fprintf(stderr, "tair_put: %s\n",g_tair.get_error_msg(ret));
 /*
@@ -115,12 +116,12 @@ namespace user_map
         stringstream ss_key,ss_value;
         ss_key<<"location.update.time:"<<mall_id;
         ss_value<<user_id;
-        tair::common::data_entry key(ss_key.str().c_str(),ss_key.str().size(),false);
-        tair::common::data_entry value(ss_value.str().c_str(),ss_value.str().size(),false);
-        double shrink=0.000000001;
-        double score=t_now*shrink;
+        tair::common::data_entry key(ss_key.str().c_str(),ss_key.str().size()+1,true);
+        tair::common::data_entry value(ss_value.str().c_str(),ss_value.str().size()+1,true);
+        double score=t_now;
         int ret=g_tair.zadd(tair_namespace,key,score,value,0,0);
-        cout<<"zadd "<<tair_namespace<<","<<ss_key.str()<<","<<ss_value.str()<<","<<setprecision(17)<<score;
+        cout<<"zadd ns="<<tair_namespace<<",key="<<key.get_data()<<",size="
+            <<key.get_size()<<",value="<<value.get_data()<<",score="<<setprecision(17)<<score<<endl;
         fprintf(stderr, "user_add tair.zadd: %s\n",g_tair.get_error_msg(ret));
 
         return 2;
@@ -133,6 +134,24 @@ namespace user_map
 
     void user_list_all(Json::Value & user_list, int mall_id)
     {
+        TBSYS_LOG(INFO, "user_list_all() enter"); 
+        user_map_init(); 
+        stringstream ss_key;
+        ss_key<<"location.update.time:"<<mall_id;
+        tair::common::data_entry key(ss_key.str().c_str(),ss_key.str().size()+1,true);
+        
+        vector <tair::common::data_entry *> vals;
+        vector <double> scores;
+        g_tair.zrangebyscore(tair_namespace,key,0,numeric_limits<unsigned int>::max(),
+            vals,scores,0,0);
+
+        int number=0;
+        for(vector<tair::common::data_entry *>::iterator it=vals.begin();it!=vals.end();it++)
+        {
+            Json::Value user;
+            number++;
+        }
+        user_list["size"]=number;
     }
 
 }
