@@ -22,6 +22,7 @@
 #include "user_map.h"
 #include <json/json.h>
 #include <limits.h>
+#include <limits>
 
 using namespace std;
 using namespace user_map;
@@ -66,6 +67,8 @@ void user_op(UriQueryListA * queryList, Json::Value & ret)
     float x=FLT_MAX;
     float y=FLT_MAX;
     int z=INT_MIN;
+    double start=0;
+    double end=std::numeric_limits<unsigned int>::max();
 
     for(UriQueryListA *p_para=queryList ;p_para!=NULL;p_para=p_para->next)
     {
@@ -79,7 +82,10 @@ void user_op(UriQueryListA * queryList, Json::Value & ret)
             stringstream( p_para->value )>> z;
         else if (strcmp(p_para->key,"user_id")==0)
             stringstream( p_para->value )>> user_id;
-
+        else if (strcmp(p_para->key,"start")==0)
+            stringstream( p_para->value )>>start;
+        else if (strcmp(p_para->key,"end")==0)
+            stringstream( p_para->value )>>end;
     }
 
 
@@ -143,7 +149,7 @@ void user_op(UriQueryListA * queryList, Json::Value & ret)
     else if(strcmp("list_all",action.c_str())==0)
     {
         syslog(LOG_INFO, "user_op: call user_list_all ");
-        user_list_all(ret);
+        user_list_all(ret,start,end);
     }
     else
     {

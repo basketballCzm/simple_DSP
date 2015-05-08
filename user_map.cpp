@@ -9,10 +9,21 @@
 #include <vector>
 #include <data_entry.hpp>
 
+
 using namespace std;
 
 namespace user_map
 {
+
+    std::string hexStr(char *data, int len)
+    {
+        std::stringstream ss;
+        ss<<std::hex;
+        ss<<std::setfill('0')<<std::setw(2);
+        for(int i(0);i<len;++i)
+            ss<<"\\x"<<(int)data[i];
+        return ss.str();
+    }
 
     static tair::tair_client_api g_tair;
     static const char * master_addr="WUSHUU-TAIR-RDB:5198";
@@ -64,10 +75,11 @@ namespace user_map
         return -1;
     }
 
-    inline void tair_put(const string & s_key, const string & s_value)
+    template <typename V_TYPE>
+    inline void tair_put(const string & s_key, const V_TYPE & data)
     {
         tair::common::data_entry key(s_key.c_str(),s_key.size()+1,true);
-        tair::common::data_entry value(s_value.c_str(),s_value.size()+1,true);
+        tair::common::data_entry value((char *)(&data),sizeof(V_TYPE),true);
         int ret=g_tair.put(tair_namespace,key,value,0,0);
         fprintf(stderr, "tair_put: %s\n",g_tair.get_error_msg(ret));
 /*
@@ -80,14 +92,23 @@ namespace user_map
   */
     }
     template <typename V_TYPE>
-    inline void tair_set_user_prop(const int mall_id,const unsigned long long user_id,string prop,V_TYPE value)
+    inline void tair_set_user_prop(const int mall_id,const unsigned long long user_id,string prop,const V_TYPE &value)
     {
-        stringstream ss_key,ss_value;
+        stringstream ss_key;
         
         ss_key<<"location:"<<mall_id<<":"<<user_id<<":"<<prop;
-        ss_value<<value;
-        tair_put(ss_key.str(),ss_value.str());
+        tair_put(ss_key.str(),value);
 
+    }
+
+    inline void tair_get_user_prop(const int mall_id,const char * user_id,string prop,tair::common::data_entry * &value )
+    {
+        stringstream ss_key;
+        
+        ss_key<<"location:"<<mall_id<<":"<<user_id<<":"<<prop;
+        tair::common::data_entry key(ss_key.str().c_str(),ss_key.str().size()+1,true);
+        g_tair.get(tair_namespace,key,value);
+        TBSYS_LOG(DEBUG,"tair_get_user_prop() return ,value = %s, size = %d \n",hexStr(value->get_data(),value->get_size()).c_str(),value->get_size());
     }
     
     int user_add(const unsigned long long  user_id,const float x,const float y,const int z,const int kafka_offset, int mall_id )
@@ -132,25 +153,48 @@ namespace user_map
         return -1;
     }
 
-    void user_list_all(Json::Value & user_list, int mall_id)
+    void user_list_all(Json::Value & user_list,double start,double end, int mall_id)
     {
-        TBSYS_LOG(INFO, "user_list_all() enter"); 
         user_map_init(); 
+
+        TBSYS_LOG(INFO, "user_list_all() enter"); 
         stringstream ss_key;
         ss_key<<"location.update.time:"<<mall_id;
         tair::common::data_entry key(ss_key.str().c_str(),ss_key.str().size()+1,true);
         
         vector <tair::common::data_entry *> vals;
         vector <double> scores;
-        g_tair.zrangebyscore(tair_namespace,key,0,numeric_limits<unsigned int>::max(),
+        g_tair.zrangebyscore(tair_namespace, key, start, end,
             vals,scores,0,0);
 
         int number=0;
         for(vector<tair::common::data_entry *>::iterator it=vals.begin();it!=vals.end();it++)
         {
             Json::Value user;
+            tair::common::data_entry *value=NULL;
+
             number++;
+            user["id"]=(*it)->get_data();
+
+            tair_get_user_prop(mall_id,(*it)->get_data(),"x",value);
+            TBSYS_LOG(DEBUG, "user_list_all() tair_get_user_prop return value=%f",*(float *)(value->get_data()));
+            user["x"]=*(float*)(value->get_data());
+            delete (value);
+
+            tair_get_user_prop(mall_id,(*it)->get_data(),"y",value);
+            user["y"]=*(float*)value->get_data();
+            delete (value);
+/*
+            tair_get_user_prop(mall_id,(*it)->get_data(),"z",value);
+            user["z"]=value->get_data();
+            delete (value);
+*/
+            user["z"]=0;
+
+            user_list[std::to_string(number).c_str()]=user;
+            delete (*it);
         }
+        vals.clear();
         user_list["size"]=number;
     }
 

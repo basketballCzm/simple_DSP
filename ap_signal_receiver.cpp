@@ -10,8 +10,8 @@ using namespace user_map;
 static const string s_topic="lbs-point";
 static const string brokers = "WUSHUU-KAFKA";
 static bool exit_eof = false;
-static int64_t start_offset = RdKafka::Topic::OFFSET_BEGINNING; 
-//static int64_t start_offset = RdKafka::Topic::OFFSET_STORED; 
+//static int64_t start_offset = RdKafka::Topic::OFFSET_BEGINNING; 
+static int64_t start_offset = RdKafka::Topic::OFFSET_STORED; 
 static int32_t partition = 0; 
 
 static bool run = true;
