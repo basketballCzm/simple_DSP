@@ -107,7 +107,7 @@ namespace user_map
     {
         stringstream ss_key;
         
-        ss_key<<"location.log:"<<mall_id<<":"<<s_date_time<<":"<<log_id<<":mac";
+        ss_key<<"location.log:"<<mall_id<<":"<<s_date_time<<":"<<log_id<<":"<<prop;
         tair_put(ss_key.str(),value);
     }
 
