@@ -7,6 +7,7 @@
 #include <ctime>
 #include <limits>
 #include <vector>
+#include <unordered_map>
 #include <data_entry.hpp>
 
 
@@ -101,6 +102,15 @@ namespace user_map
 
     }
 
+    template <typename V_TYPE>
+    inline void tair_set_log_prop(const int mall_id,const string & s_date_time,const int log_id,string prop,const V_TYPE &value)
+    {
+        stringstream ss_key;
+        
+        ss_key<<"location.log:"<<mall_id<<":"<<s_date_time<<":"<<log_id<<":mac";
+        tair_put(ss_key.str(),value);
+    }
+
     inline void tair_get_user_prop(const int mall_id,const char * user_id,string prop,tair::common::data_entry * &value )
     {
         stringstream ss_key;
@@ -110,19 +120,81 @@ namespace user_map
         g_tair.get(tair_namespace,key,value);
         TBSYS_LOG(DEBUG,"tair_get_user_prop() return ,value = %s, size = %d \n",hexStr(value->get_data(),value->get_size()).c_str(),value->get_size());
     }
+
+    inline void user_location_log_add(const unsigned long long  user_id,const float x,
+        const float y,const int z,const int kafka_offset, int mall_id,time_t t_time)
+    {
+        static unordered_map<int,string> last_date_time_map;
+        stringstream ss_key,ss_value;
+        
+        //get log id
+        const string & s_date_time=get_date_time_str(t_time);
+        ss_key<<"location.log:"<<mall_id<<":"<<s_date_time<<":counter";
+        tair::common::data_entry key_counter(ss_key.str().c_str(),ss_key.str().size()+1,true);
+        int log_id;
+        g_tair.incr(tair_namespace,key_counter,1,&log_id,0,0);
+        TBSYS_LOG(DEBUG,"user_location_log_add() date_time=%s, log_id=%d",s_date_time.c_str(),log_id);
+        
+        //set data.time.set
+        if(last_date_time_map[mall_id]!=s_date_time)
+        {
+            ss_key.str("");
+            ss_key<<"location.log:"<<mall_id<<":data.time.set";
+            tair::common::data_entry key_date_time(ss_key.str().c_str(),ss_key.str().size()+1,true);
+            tair::common::data_entry value_date_time((char *) &t_time,sizeof(time_t),true);
+            double score=t_time;
+            int ret=g_tair.zadd(tair_namespace,key_date_time,score,value_date_time,0,0);
+            cout<<"user_location_log_add() zadd ns="<<tair_namespace<<",key="<<key_date_time.get_data()<<endl;
+            last_date_time_map[mall_id]=s_date_time;
+        }
+        
+        //set kafka offset
+        if(kafka_offset!=-1)
+        {
+            //TODO
+            ss_key.str("");
+        }
+       
+        //set mac.set
+        ss_key.str("");
+        ss_key<<"location.log:"<<mall_id<<":"<<s_date_time<<":mac.set";
+        ss_value.str("");
+        ss_value<<user_id;
+        tair::common::data_entry key_mac_set(ss_key.str().c_str(),ss_key.str().size()+1,true);
+        tair::common::data_entry value_mac_set(ss_value.str().c_str(),ss_value.str().size()+1,true);
+        g_tair.sadd(tair_namespace,key_mac_set,value_mac_set,0,0);
+
+
+        //set loc.log.set
+        ss_key.str("");
+        ss_key<<"location.log:"<<mall_id<<":"<<s_date_time<<":"<<user_id<<":loc.log.set";
+        ss_value.str("");
+        ss_value<<log_id;
+        tair::common::data_entry key_log_set(ss_key.str().c_str(),ss_key.str().size()+1,true);
+        tair::common::data_entry value_log_set(ss_value.str().c_str(),ss_value.str().size()+1,true);
+        double score=t_time;
+        int ret=g_tair.zadd(tair_namespace,key_log_set,score,value_log_set,0,0);
+        
+        //set log's property
+        tair_set_log_prop<unsigned long long>(mall_id,s_date_time,log_id,"mac",user_id);
+        tair_set_log_prop<time_t>(mall_id,s_date_time,log_id,"time",t_time);
+        tair_set_log_prop<float>(mall_id,s_date_time,log_id,"x",x);
+        tair_set_log_prop<float>(mall_id,s_date_time,log_id,"y",y);
+        if(z!=INT_MIN)
+            tair_set_log_prop<int>(mall_id,s_date_time,log_id,"z",z);
+        
+    }
     
     int user_add(const unsigned long long  user_id,const float x,const float y,const int z,const int kafka_offset, int mall_id )
     {
         user_map_init();
         syslog(LOG_INFO, "user_map::user_add() enter");
         time_t t_now=time(0);
-        const string & s_date_time=get_date_time_str(t_now);
-        cout<<"s_date_time="<<s_date_time<<"\n";
         
         tair_set_user_prop<float>(mall_id,user_id,"x",x);
         tair_set_user_prop<float>(mall_id,user_id,"y",y);
         if(z!=INT_MIN)
-            tair_set_user_prop<float>(mall_id,user_id,"z",z);
+            tair_set_user_prop<int>(mall_id,user_id,"z",z);
 
         /*
         stringstream ss_key,ss_value;
@@ -144,9 +216,12 @@ namespace user_map
         cout<<"zadd ns="<<tair_namespace<<",key="<<key.get_data()<<",size="
             <<key.get_size()<<",value="<<value.get_data()<<",score="<<setprecision(17)<<score<<endl;
         fprintf(stderr, "user_add tair.zadd: %s\n",g_tair.get_error_msg(ret));
+        
+        user_location_log_add(user_id,x,y,z,kafka_offset,mall_id,t_now);
 
         return 2;
     }
+
 
     int user_update(const unsigned long long user_id,const float x,const float y,const int z,const int kafka_offset, int mall_id )
     {
