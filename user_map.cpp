@@ -3,29 +3,18 @@
 #include <tair_client_api.hpp>
 #include <iostream>
 #include <sstream>
-#include <iomanip>
 #include <ctime>
 #include <limits>
 #include <vector>
 #include <unordered_map>
 #include <data_entry.hpp>
+#include "tair_common.h"
 
 
 using namespace std;
 
 namespace user_map
 {
-
-    std::string hexStr(char *data, int len)
-    {
-        std::stringstream ss;
-        ss<<std::hex;
-        ss<<std::setfill('0')<<std::setw(2);
-        for(int i(0);i<len;++i)
-            ss<<"\\x"<<(int)data[i];
-        return ss.str();
-    }
-
     static tair::tair_client_api g_tair;
     static const char * master_addr="WUSHUU-TAIR-RDB:5198";
     static const char * slave_addr=NULL;
@@ -54,18 +43,6 @@ namespace user_map
         }
     }
 
-    inline string  get_date_time_str(time_t t)
-    {
-        struct tm * now = localtime( & t );
-        stringstream ss_datetime;
-        ss_datetime<<(now->tm_year + 1900)   
-            <<setfill('0') << setw(2)<<  (now->tm_mon + 1) 
-            <<setfill('0') << setw(2)<<  now->tm_mday
-            <<setfill('0') << setw(2)<<  now->tm_hour
-            <<setfill('0') << setw(2)<<  now->tm_min - now->tm_min%time_slice;
-        return ss_datetime.str();
-    }
-
     int user_remove(int user_id, int mall_id)
     {
         return -1;
@@ -73,32 +50,22 @@ namespace user_map
 
     int user_query(UserPosition& pos, int mall_id)
     {
-        return -1;
+		tair::common::data_entry key;
+		get_data_entry(key,"location:",mall_id,":",pos.user_id,":x");
+		pos.position.x = tair_get<float>(g_tair,tair_namespace,key,0);
+		get_data_entry(key,"location:",mall_id,":",pos.user_id,":y");
+		pos.position.y = tair_get<float>(g_tair,tair_namespace,key,0);
+		get_data_entry(key,"location:",mall_id,":",pos.user_id,":z");
+		pos.position.z = tair_get<int>(g_tair,tair_namespace,key,0);
+        return 0;
     }
 
-    template <typename V_TYPE>
-    inline void tair_put(const string & s_key, const V_TYPE & data)
-    {
-        tair::common::data_entry key(s_key.c_str(),s_key.size()+1,true);
-        tair::common::data_entry value((char *)(&data),sizeof(V_TYPE),true);
-        int ret=g_tair.put(tair_namespace,key,value,0,0);
-        fprintf(stderr, "tair_put: %s\n",g_tair.get_error_msg(ret));
-/*
-        tair::common::data_entry *data = NULL;
-        g_tair.get(tair_namespace,key,data);
-        char *p = tair::util::string_util::conv_show_string(data->get_data(), data->get_size());
-        fprintf(stderr, "KEY: %s, LEN: %d\n raw data: %s, %s\n",s_key.c_str(), data->get_size(), data->get_data(), p);
-        free(p);
-        delete data;
-  */
-    }
     template <typename V_TYPE>
     inline void tair_set_user_prop(const int mall_id,const unsigned long long user_id,string prop,const V_TYPE &value)
     {
         stringstream ss_key;
-        
         ss_key<<"location:"<<mall_id<<":"<<user_id<<":"<<prop;
-        tair_put(ss_key.str(),value);
+        tair_put(g_tair,tair_namespace,ss_key.str(),value);
 
     }
 
@@ -108,7 +75,7 @@ namespace user_map
         stringstream ss_key;
         
         ss_key<<"location.log:"<<mall_id<<":"<<s_date_time<<":"<<log_id<<":"<<prop;
-        tair_put(ss_key.str(),value);
+        tair_put(g_tair,tair_namespace,ss_key.str(),value);
     }
 
     inline void tair_get_user_prop(const int mall_id,const char * user_id,string prop,tair::common::data_entry * &value )
@@ -128,7 +95,7 @@ namespace user_map
         stringstream ss_key,ss_value;
         
         //get log id
-        const string & s_date_time=get_date_time_str(t_time);
+        const string & s_date_time=get_date_time_str(t_time,time_slice);
         ss_key<<"location.log:"<<mall_id<<":"<<s_date_time<<":counter";
         tair::common::data_entry key_counter(ss_key.str().c_str(),ss_key.str().size()+1,true);
         int log_id;
@@ -196,16 +163,6 @@ namespace user_map
         if(z!=INT_MIN)
             tair_set_user_prop<int>(mall_id,user_id,"z",z);
 
-        /*
-        stringstream ss_key,ss_value;
-        
-        ss_key<<"location:"<<mall_id<<":"<<user_id<<":x";
-        ss_value<<x;
-        cout<<"ss_key "<<ss_key.str()<<"\n";
-        tair_put(ss_key.str(),ss_value.str());
-        ss_key.str("");
-        ss_value.str("");
-        */
         stringstream ss_key,ss_value;
         ss_key<<"location.update.time:"<<mall_id;
         ss_value<<user_id;

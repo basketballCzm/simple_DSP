@@ -6,6 +6,7 @@
 #include <vector>
 #include <sstream>
 #include "tair_common.h"
+#include "user_map.h"
 
 
 #define HIGHEST_N_ADS 1
@@ -48,7 +49,7 @@ namespace ad_map
 			time_slice=config.getInt("tair-rdb","time_slice",10);
 			tair_namespace=config.getInt("tair-rdb","namespace",0);
 			
-			tb_log_file=config.getInt("ad_map","log_file",NULL);
+			tb_log_file=config.getString("ad_map","log_file",NULL);
 			
             TBSYS_LOGGER.setFileName(tb_log_file);
             TBSYS_LOGGER.setLogLevel("DEBUG");
@@ -83,13 +84,14 @@ namespace ad_map
 	{
 		tair::common::data_entry ad_group_set_key;
 		vector<tair::common::data_entry*> values;
+        std::vector<double> scores;
 		
 		get_data_entry( ad_group_set_key,"ad.space:",mall_id,":",space_id,":ad.group.set");
-		g_tair.zrangebyscore(tair_namespace,ad_group_set_key,-1,UINT_MAX,values,0,0);
+		g_tair.zrangebyscore(tair_namespace,ad_group_set_key,-1,UINT_MAX,values,scores,0,0);
 
 		for(vector<tair::common::data_entry *>::iterator it=values.begin();it!=values.end();it++)
 		{
-			ad_group_set.push(*(int*)((*it)->get_data()));
+			ad_group_set.push_back(*(int*)((*it)->get_data()));
 			delete (*it);
 		}
 		values.clear();
@@ -100,15 +102,16 @@ namespace ad_map
 	{
 		tair::common::data_entry ad_group_set_key;
 		vector<tair::common::data_entry*> values;
+        std::vector<double> scores;
 		
 		
 		get_data_entry( ad_group_set_key,"ad.location:",mall_id,":"
 			,pos.position.x/slice_x,":",pos.position.y/slice_y,":",pos.position.z,":ad.group.set");
-		g_tair.zrangebyscore(tair_namespace,ad_group_set_key,-1,UINT_MAX,values,0,0);
+		g_tair.zrangebyscore(tair_namespace,ad_group_set_key,-1,UINT_MAX,values,scores,0,0);
 
 		for(vector<tair::common::data_entry *>::iterator it=values.begin();it!=values.end();it++)
 		{
-			ad_group_set.push(*(int*)((*it)->get_data()));
+			ad_group_set.push_back(*(int*)((*it)->get_data()));
 			delete (*it);
 		}
 		values.clear();
@@ -128,20 +131,20 @@ namespace ad_map
 		int sum_weight=0;
 		double sum_eCPM=0;
 		get_data_entry( key,"ad.group:",mall_id,":",ad_group_id,":show.price");
-		const double & show_price=tair_get<double>(g_tair,tair_namespace,key);
+		const double & show_price=tair_get<double>(g_tair,tair_namespace,key,0);
 		get_data_entry( key,"ad.group:",mall_id,":",ad_group_id,":click.price");
-		const double & click_price=tair_get<double>(g_tair,tair_namespace,key);
+		const double & click_price=tair_get<double>(g_tair,tair_namespace,key,0);
 		double max_show_weight=0;
 		for(vector<tair::common::data_entry *>::iterator it=ad_id_set.begin();it!=ad_id_set.end();it++)
 		{
 			int ad_id=*( int*)((*it)->get_data());
 			
 			get_data_entry(key,"ad:",mall_id,":",ad_id,":show.counter");
-			const int & show_counter=tair_get<int>(g_tair,tair_namespace,key);
+			const int & show_counter=tair_get<int>(g_tair,tair_namespace,key,0);
 			get_data_entry(key,"ad:",mall_id,":",ad_id,":click.counter");
-			const int & click_counter=tair_get<int>(g_tair,tair_namespace,key);
+			const int & click_counter=tair_get<int>(g_tair,tair_namespace,key,0);
 			get_data_entry(key,"ad:",mall_id,":",ad_id,":weight");
-			const int & weight=tair_get<int>(g_tair,tair_namespace,key);
+			int weight=tair_get<int>(g_tair,tair_namespace,key,0);
 			if(weight==0)
 			{
 				TBSYS_LOG(WARN,"ad_map::get_eCPM() weight of group (id:%d) ad (id:%d) not set",ad_group_id,ad_id);
@@ -160,7 +163,7 @@ namespace ad_map
 			if(show_weight>max_show_weight)
 			{
 				max_show_weight=show_weight;
-				next_ad_id=ad_id;
+				next_ad_id=ad_id;
 			}
 			delete (*it);
 		}
@@ -171,7 +174,7 @@ namespace ad_map
 			return sum_eCPM/sum_weight;
 	}
 
-	void bidding(const int mall_id, const UserPosition &pos, const  int space_id, Json::Value &ret)
+	void bidding(Json::Value &ret, const UserPosition &pos, const int space_id, const int mall_id)
 	{
     	int highest_ad_group_list[HIGHEST_N_ADS]{};
     	double highest_eCPM_list[HIGHEST_N_ADS]{};
@@ -238,9 +241,9 @@ namespace ad_map
 			int show_ad_id=next_ad_list[show_no];
 	        tair::common::data_entry key;
 			get_data_entry(key,"ad:",mall_id,":",show_ad_id,":content");
-	        ret["content"]=tair_get<string>(g_tair,tair_namespace,key);
+	        ret["content"]=tair_get<string>(g_tair,tair_namespace,key,"");
 			get_data_entry(key,"ad:",mall_id,":",show_ad_id,":jump.url");
-	        ret["jump_url"]=tair_get<string>(g_tair,tair_namespace,key);
+	        ret["jump_url"]=tair_get<string>(g_tair,tair_namespace,key,"");
 	        ret["id"]=show_ad_id;
 	        ret["result"]="ok";
 	    }
@@ -270,9 +273,16 @@ namespace ad_map
         return -1;
     }
 
-	int ad_request(const unsigned long long user_id,const  int space_id)
+	int ad_request(Json::Value &ret, const unsigned long long user_id, const int space_id, const int mall_id)
 	{
-		
+		UserPosition pos;
+		pos.user_id=user_id;
+		if( user_map::user_query( pos,mall_id) ==-1)
+        //user id not found!
+        {
+            syslog(LOG_INFO, "ad_op ad_request, user id :%d , location data not found!",pos.user_id);   
+        }
+	    bidding(ret,pos,space_id,mall_id);	
 		return -1;
 	}
 

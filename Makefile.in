@@ -76,7 +76,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-bin_PROGRAMS = user_op$(EXEEXT)
+bin_PROGRAMS = user_op$(EXEEXT) ad_op$(EXEEXT)
 noinst_PROGRAMS = robot_commander$(EXEEXT) ap_signal_receiver$(EXEEXT)
 subdir = .
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
@@ -94,6 +94,10 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
+am_ad_op_OBJECTS = ad_op.$(OBJEXT) ad_map.$(OBJEXT) user_map.$(OBJEXT)
+ad_op_OBJECTS = $(am_ad_op_OBJECTS)
+ad_op_DEPENDENCIES = $(TBLIB_ROOT)/lib/libtbnet.a \
+	$(TBLIB_ROOT)/lib/libtbsys.a
 am_ap_signal_receiver_OBJECTS = ap_signal_receiver.$(OBJEXT) \
 	user_map.$(OBJEXT)
 ap_signal_receiver_OBJECTS = $(am_ap_signal_receiver_OBJECTS)
@@ -137,9 +141,9 @@ AM_V_CXXLD = $(am__v_CXXLD_@AM_V@)
 am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
-SOURCES = $(ap_signal_receiver_SOURCES) $(robot_commander_SOURCES) \
-	$(user_op_SOURCES)
-DIST_SOURCES = $(ap_signal_receiver_SOURCES) \
+SOURCES = $(ad_op_SOURCES) $(ap_signal_receiver_SOURCES) \
+	$(robot_commander_SOURCES) $(user_op_SOURCES)
+DIST_SOURCES = $(ad_op_SOURCES) $(ap_signal_receiver_SOURCES) \
 	$(robot_commander_SOURCES) $(user_op_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
@@ -282,6 +286,8 @@ AM_CPPFLAGS = -std=c++11  -Wno-c++98-compat -I/opt/tair_rdb_bin/include \
 
 user_op_SOURCES = user_op.cpp  user_map.cpp
 user_op_LDADD = -lfcgi -luriparser -lc++ -ljsoncpp -ljsoncpp -ltairclientapi $(TBLIB_ROOT)/lib/libtbnet.a $(TBLIB_ROOT)/lib/libtbsys.a
+ad_op_SOURCES = ad_op.cpp  ad_map.cpp user_map.cpp
+ad_op_LDADD = -lfcgi -luriparser -lc++ -ljsoncpp -ljsoncpp -ltairclientapi $(TBLIB_ROOT)/lib/libtbnet.a $(TBLIB_ROOT)/lib/libtbsys.a
 robot_commander_SOURCES = robot_commander.cpp user_map.cpp
 robot_commander_LDADD = -lc++ -ljsoncpp  -ltairclientapi $(TBLIB_ROOT)/lib/libtbnet.a $(TBLIB_ROOT)/lib/libtbsys.a
 ap_signal_receiver_SOURCES = ap_signal_receiver.cpp user_map.cpp
@@ -386,6 +392,10 @@ clean-binPROGRAMS:
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
 
+ad_op$(EXEEXT): $(ad_op_OBJECTS) $(ad_op_DEPENDENCIES) $(EXTRA_ad_op_DEPENDENCIES) 
+	@rm -f ad_op$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(ad_op_OBJECTS) $(ad_op_LDADD) $(LIBS)
+
 ap_signal_receiver$(EXEEXT): $(ap_signal_receiver_OBJECTS) $(ap_signal_receiver_DEPENDENCIES) $(EXTRA_ap_signal_receiver_DEPENDENCIES) 
 	@rm -f ap_signal_receiver$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(ap_signal_receiver_OBJECTS) $(ap_signal_receiver_LDADD) $(LIBS)
@@ -404,6 +414,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ad_map.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ad_op.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ap_signal_receiver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/robot_commander.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/user_map.Po@am__quote@

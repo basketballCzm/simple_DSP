@@ -3,11 +3,14 @@ AUTOMAKE_OPTIONS = foreign
 AM_CPPFLAGS = -std=c++11  -Wno-c++98-compat -I/opt/tair_rdb_bin/include \
 	-I${TBLIB_ROOT}/include/tbnet -I${TBLIB_ROOT}/include/tbsys 
 
-bin_PROGRAMS=user_op 
+bin_PROGRAMS=user_op ad_op
 
 
 user_op_SOURCES=user_op.cpp  user_map.cpp
 user_op_LDADD=-lfcgi -luriparser -lc++ -ljsoncpp -ljsoncpp -ltairclientapi $(TBLIB_ROOT)/lib/libtbnet.a $(TBLIB_ROOT)/lib/libtbsys.a
+
+ad_op_SOURCES=ad_op.cpp  ad_map.cpp user_map.cpp
+ad_op_LDADD=-lfcgi -luriparser -lc++ -ljsoncpp -ljsoncpp -ltairclientapi $(TBLIB_ROOT)/lib/libtbnet.a $(TBLIB_ROOT)/lib/libtbsys.a
 
 noinst_PROGRAMS=robot_commander ap_signal_receiver #ap_signal_dock ap_signal_sender 
 
