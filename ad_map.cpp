@@ -8,6 +8,7 @@
 #include <sstream>
 #include "tair_common.h"
 #include "user_map.h"
+#include "cron_timing.h"
 
 
 #define HIGHEST_N_ADS 1
@@ -167,9 +168,35 @@ namespace ad_map
 			return sum_eCPM/sum_weight;
 	}
 
+    bool check_time_range_set(const int mall_id,const time_t time,const int ad_group_id)
+    {
+		tair::common::data_entry key;
+        get_data_entry(key,"ad.group:",mall_id,":",ad_group_id,":time.range.list");
+        vector<tair::common::data_entry *> time_range_set;
+        g_tair.smembers(tair_namespace,key,time_range_set);
+        
+        bool b_fit_time_range=false;
+		for(vector<tair::common::data_entry *>::iterator it=time_range_set.begin();it!=time_range_set.end();it++)
+		{
+            if(!b_fit_time_range) 
+            {
+                cron_timing *time_range=(cron_timing*)((*it)->get_data());
+                if(check_cron_timing(time,time_range))
+                {
+                    b_fit_time_range=true;
+                    continue;
+                }
+            }
+            delete (*it);
+        }
+        time_range_set.clear();
+
+        return b_fit_time_range;
+
+    }
+
 	void bidding(Json::Value &ret, const UserPosition &pos, const int space_id, const int mall_id)
 	{
-        TBSYS_LOG(INFO,"enter ad_map::bidding()");   
         syslog(LOG_INFO, "enter ad_map::bidding() tbsys logger level is %d",TBSYS_LOGGER._level);   
     	int highest_ad_group_list[HIGHEST_N_ADS]{};
     	double highest_eCPM_list[HIGHEST_N_ADS]{};
@@ -190,6 +217,9 @@ namespace ad_map
 	    for(vector< int>::iterator it=ad_group_list.begin();it!=ad_group_list.end();++it)
 	    {
 	        //filter by timerange
+            time_t t_now=time(0);
+            if(check_time_range_set(mall_id,t_now,*it)==false)
+                continue;
 	        //filter by users' tag
 	        int next_ad_id=-1;
 	        double eCPM=get_eCPM(mall_id,pos.user_id,*it,next_ad_id);

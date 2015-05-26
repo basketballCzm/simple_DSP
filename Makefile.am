@@ -9,7 +9,7 @@ bin_PROGRAMS=user_op ad_op
 user_op_SOURCES=user_op.cpp  user_map.cpp
 user_op_LDADD=-lfcgi -luriparser -lc++ -ljsoncpp -ljsoncpp -ltairclientapi $(TBLIB_ROOT)/lib/libtbnet.a $(TBLIB_ROOT)/lib/libtbsys.a
 
-ad_op_SOURCES=ad_op.cpp  ad_map.cpp user_map.cpp
+ad_op_SOURCES=ad_op.cpp  ad_map.cpp user_map.cpp cron_timing.cpp
 ad_op_LDADD=-lfcgi -luriparser -lc++ -ljsoncpp -ljsoncpp -ltairclientapi $(TBLIB_ROOT)/lib/libtbnet.a $(TBLIB_ROOT)/lib/libtbsys.a
 
 noinst_PROGRAMS=robot_commander ap_signal_receiver #ap_signal_dock ap_signal_sender 
