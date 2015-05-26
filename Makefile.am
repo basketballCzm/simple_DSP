@@ -26,3 +26,6 @@ ap_signal_receiver_LDADD= -lrdkafka -lrdkafka++ -lz -lpthread -lrt -ltairclienta
 #ap_signal_sender_SOURCES=ap_signal_sender.cpp 
 #ap_signal_sender_LDADD=-lc++ -lzmq
 
+
+configdir = $(prefix)/bin
+config_DATA =  config.ini

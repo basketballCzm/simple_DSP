@@ -103,7 +103,9 @@ int main()
 
     UriParserStateA state;
     Json::StyledWriter writer;
-
+    
+    ad_map::ad_map_init();
+    
     while(FCGX_Accept_r(&request) >= 0)
     {
         //penv(request.envp);

@@ -6,8 +6,8 @@
 //user_id is mac address
 namespace ad_map
 {
-    inline void ad_map_init(int ns=0);
     //kafka_offset default -1 meanes none
+    void ad_map_init();
     int ad_add();
     int ad_remove();
     int ad_update();

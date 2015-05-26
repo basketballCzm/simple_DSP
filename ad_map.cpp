@@ -3,6 +3,7 @@
 #include <tair_client_api.hpp>
 #include <data_entry.hpp>
 #include "tbsys/config.h"
+#include "tbsys/tblog.h"
 #include <vector>
 #include <sstream>
 #include "tair_common.h"
@@ -34,20 +35,22 @@ namespace ad_map
 
     static const char * tb_log_file;
 	
-    inline void ad_map_init()
+    void ad_map_init()
     {
+        syslog(LOG_INFO,"enter ad_map_init()");
         static bool b_started=false;
         if(!b_started)
         {
 			if(config.load(config_file) == EXIT_FAILURE) {
-        		log_error("load config file %s error", config_file);
+        		syslog(LOG_INFO,"load config file %s error", config_file);
         		return;
       		}
-			master_addr=config.getString("tair-rdb","master_addr",NULL);
-			slave_addr=config.getString("tair-rdb","slave_addr",NULL);			
-			group_name=config.getString("tair-rdb","group_name",NULL);			
-			time_slice=config.getInt("tair-rdb","time_slice",10);
-			tair_namespace=config.getInt("tair-rdb","namespace",0);
+            syslog(LOG_INFO,"ad_map_init() load config ok!");
+			master_addr=config.getString("tair_rdb","master_addr",NULL);
+			slave_addr=config.getString("tair_rdb","slave_addr",NULL);			
+			group_name=config.getString("tair_rdb","group_name",NULL);			
+			time_slice=config.getInt("tair_rdb","time_slice",10);
+			tair_namespace=config.getInt("tair_rdb","namespace",0);
 			
 			tb_log_file=config.getString("ad_map","log_file",NULL);
 			
@@ -56,25 +59,15 @@ namespace ad_map
 
             g_tair.set_timeout(5000);
             g_tair.startup(master_addr,slave_addr,group_name); 
+            syslog(LOG_INFO,"ad_map_init() after g_tair.startup; log file is %s",tb_log_file);
             b_started=true;
 
-			tair::common::data_entry *value=NULL;
-			stringstream ss_key;
+			tair::common::data_entry key;
 			
-			ss_key<<"config:slice.x";
-			tair::common::data_entry key_x(ss_key.str().c_str(),ss_key.str().size()+1,true);
-			g_tair.get(tair_namespace,key_x,value);
-			slice_x=*(int*)value->get_data();
-			delete (value);
-
-			
-			ss_key.str("");
-			ss_key<<"config:slice.y";
-			tair::common::data_entry key_y(ss_key.str().c_str(),ss_key.str().size()+1,true);
-			g_tair.get(tair_namespace,key_y,value);
-			slice_y=*(int*)value->get_data();
-			delete (value);
-			
+			get_data_entry(key,"config:slice.x");
+            slice_x=tair_get<int>(g_tair,tair_namespace,key,10);
+			get_data_entry(key,"config:slice.y");
+            slice_y=tair_get<int>(g_tair,tair_namespace,key,10);
         }
     }
 
@@ -176,6 +169,8 @@ namespace ad_map
 
 	void bidding(Json::Value &ret, const UserPosition &pos, const int space_id, const int mall_id)
 	{
+        TBSYS_LOG(INFO,"enter ad_map::bidding()");   
+        syslog(LOG_INFO, "enter ad_map::bidding() tbsys logger level is %d",TBSYS_LOGGER._level);   
     	int highest_ad_group_list[HIGHEST_N_ADS]{};
     	double highest_eCPM_list[HIGHEST_N_ADS]{};
 		int next_ad_list[HIGHEST_N_ADS]{};
@@ -275,12 +270,14 @@ namespace ad_map
 
 	int ad_request(Json::Value &ret, const unsigned long long user_id, const int space_id, const int mall_id)
 	{
+        ad_map_init();
+
 		UserPosition pos;
 		pos.user_id=user_id;
 		if( user_map::user_query( pos,mall_id) ==-1)
         //user id not found!
         {
-            syslog(LOG_INFO, "ad_op ad_request, user id :%d , location data not found!",pos.user_id);   
+            TBSYS_LOG(DEBUG, "ad_op ad_request, user id :%d , location data not found!",pos.user_id);   
         }
 	    bidding(ret,pos,space_id,mall_id);	
 		return -1;

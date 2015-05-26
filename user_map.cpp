@@ -50,6 +50,7 @@ namespace user_map
 
     int user_query(UserPosition& pos, int mall_id)
     {
+        user_map_init();
 		tair::common::data_entry key;
 		get_data_entry(key,"location:",mall_id,":",pos.user_id,":x");
 		pos.position.x = tair_get<float>(g_tair,tair_namespace,key,0);
