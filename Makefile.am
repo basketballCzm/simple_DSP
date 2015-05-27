@@ -1,6 +1,6 @@
 
 AUTOMAKE_OPTIONS = foreign
-AM_CPPFLAGS = -std=c++11  -Wno-c++98-compat -I/opt/tair_rdb_bin/include \
+AM_CPPFLAGS = -std=c++11  -I/opt/tair_rdb_bin/include \
 	-I${TBLIB_ROOT}/include/tbnet -I${TBLIB_ROOT}/include/tbsys 
 
 bin_PROGRAMS=user_op ad_op

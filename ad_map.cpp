@@ -77,39 +77,20 @@ namespace ad_map
 	void get_ad_group_set_of_space(const int mall_id, const int space_id, std::vector< int> &ad_group_set)
 	{
 		tair::common::data_entry ad_group_set_key;
-		vector<tair::common::data_entry*> values;
-        std::vector<double> scores;
 		
 		get_data_entry( ad_group_set_key,"ad.space:",mall_id,":",space_id,":ad.group.set");
-		g_tair.zrangebyscore(tair_namespace,ad_group_set_key,-1,UINT_MAX,values,scores,0,0);
-
-		for(vector<tair::common::data_entry *>::iterator it=values.begin();it!=values.end();it++)
-		{
-			ad_group_set.push_back(*(int*)((*it)->get_data()));
-			delete (*it);
-		}
-		values.clear();
+        tair_zmembers<int>(g_tair,tair_namespace,ad_group_set_key,ad_group_set);
 		return;
 	}
 
 	void get_ad_group_set_of_location(const int mall_id, const UserPosition &pos, std::vector<int> &ad_group_set)
 	{
 		tair::common::data_entry ad_group_set_key;
-		vector<tair::common::data_entry*> values;
-        std::vector<double> scores;
-		
-		
+
 		get_data_entry( ad_group_set_key,"ad.location:",mall_id,":"
 			,pos.position.x/slice_x,":",pos.position.y/slice_y,":",pos.position.z,":ad.group.set");
-		g_tair.zrangebyscore(tair_namespace,ad_group_set_key,-1,UINT_MAX,values,scores,0,0);
-
-		for(vector<tair::common::data_entry *>::iterator it=values.begin();it!=values.end();it++)
-		{
-			ad_group_set.push_back(*(int*)((*it)->get_data()));
-			delete (*it);
-		}
-		values.clear();
-		return;
+        tair_zmembers<int>(g_tair,tair_namespace,ad_group_set_key,ad_group_set);
+        return;
 	}
 
 
@@ -201,6 +182,7 @@ namespace ad_map
     	int highest_ad_group_list[HIGHEST_N_ADS]{};
     	double highest_eCPM_list[HIGHEST_N_ADS]{};
 		int next_ad_list[HIGHEST_N_ADS]{};
+        tair::common::data_entry key;
 		
 		vector< int>  ad_group_set_of_space;
 		get_ad_group_set_of_space(mall_id,space_id, ad_group_set_of_space);
@@ -213,6 +195,9 @@ namespace ad_map
 			ad_group_set_of_location.begin(),ad_group_set_of_location.end(),back_inserter(ad_group_list));
 		
 		
+        get_data_entry(key,"user:",pos.user_id,":label.set");
+        vector<string> user_label_set;
+        tair_zmembers<string>(g_tair,tair_namespace,key,user_label_set);
   		
 	    for(vector< int>::iterator it=ad_group_list.begin();it!=ad_group_list.end();++it)
 	    {
@@ -221,6 +206,17 @@ namespace ad_map
             if(check_time_range_set(mall_id,t_now,*it)==false)
                 continue;
 	        //filter by users' tag
+            get_data_entry(key,"ad.group:",mall_id,":",*it,":target.label.set");
+            vector<string> ad_group_label_set;
+            tair_zmembers<string>(g_tair,tair_namespace,key,ad_group_label_set);
+
+            vector<string> label_intersection;
+            set_intersection(user_label_set.begin(),user_label_set.end(),
+                ad_group_label_set.begin(),ad_group_label_set.end(),back_inserter(label_intersection));
+
+            if(label_intersection.size()==0)
+                continue;
+
 	        int next_ad_id=-1;
 	        double eCPM=get_eCPM(mall_id,pos.user_id,*it,next_ad_id);
 	        
@@ -264,7 +260,6 @@ namespace ad_map
 	        int show_no=rand()%length;
 	        int show_ad_group_id=highest_ad_group_list[show_no];
 			int show_ad_id=next_ad_list[show_no];
-	        tair::common::data_entry key;
 			get_data_entry(key,"ad:",mall_id,":",show_ad_id,":content");
 	        ret["content"]=tair_get<string>(g_tair,tair_namespace,key,"");
 			get_data_entry(key,"ad:",mall_id,":",show_ad_id,":jump.url");

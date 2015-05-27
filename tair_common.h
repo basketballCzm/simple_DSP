@@ -5,6 +5,8 @@
 #include <sstream>
 #include <iomanip>
 #include <ctime>
+#include <limits>
+
 
 using namespace std;
 
@@ -113,3 +115,20 @@ inline string  get_date_time_str(time_t t,int time_slice)
 		<<setfill('0') << setw(2)<<  now->tm_min - now->tm_min%time_slice;
 	return ss_datetime.str();
 }
+
+template <typename V_TYPE>
+vector<V_TYPE>* tair_zmembers(tair::tair_client_api & tair_instance,int area, const tair::common::data_entry &key, vector<V_TYPE> &members_set)
+{
+    vector<tair::common::data_entry*> values; 
+    vector<double> scores; 
+    tair_instance.zrangebyscore(area,key,std::numeric_limits<double>::lowest(),std::numeric_limits<double>::max(),values,scores,0,0);
+    for(vector<tair::common::data_entry *>::iterator it=values.begin();it!=values.end();it++)
+    {
+        members_set.push_back(get_value<V_TYPE>((*it)->get_data(),(*it)->get_size()));
+        delete (*it);
+    }
+    values.clear();
+    return & members_set;
+}
+
+
