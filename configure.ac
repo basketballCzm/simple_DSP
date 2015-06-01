@@ -26,5 +26,5 @@ AC_CHECK_HEADERS([uriparser/Uri.h],[],[AC_MSG_ERROR([Unable to find uriparser, p
 
 # Checks for library functions.
 
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile test/Makefile])
 AC_OUTPUT

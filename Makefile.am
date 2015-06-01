@@ -29,3 +29,5 @@ ap_signal_receiver_LDADD= -lrdkafka -lrdkafka++ -lz -lpthread -lrt -ltairclienta
 
 configdir = $(prefix)/bin
 config_DATA =  config.ini
+
+SUBDIRS= test

@@ -152,7 +152,7 @@ namespace ad_map
     bool check_time_range_set(const int mall_id,const time_t time,const int ad_group_id)
     {
 		tair::common::data_entry key;
-        get_data_entry(key,"ad.group:",mall_id,":",ad_group_id,":time.range.list");
+        get_data_entry(key,"ad.group:",mall_id,":",ad_group_id,":time.range.set");
         vector<tair::common::data_entry *> time_range_set;
         g_tair.smembers(tair_namespace,key,time_range_set);
         
