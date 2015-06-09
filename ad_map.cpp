@@ -55,7 +55,7 @@ namespace ad_map
 			
 			tb_log_file=config.getString("ad_map","log_file",NULL);
 			
-            TBSYS_LOGGER.setFileName(tb_log_file);
+            TBSYS_LOGGER.setFileName(tb_log_file,true);
             TBSYS_LOGGER.setLogLevel("DEBUG");
 
             g_tair.set_timeout(5000);
