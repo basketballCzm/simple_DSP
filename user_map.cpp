@@ -23,14 +23,13 @@ namespace user_map
     static int tair_namespace=2;
 
     static const char * tb_log_file="user_map.log";
-    
-
-    inline void user_map_init(int ns)
+   
+    void user_map_init(int ns)
     {
         static bool b_started=false;
         if(!b_started)
         {
-            TBSYS_LOGGER.setFileName(tb_log_file);
+            TBSYS_LOGGER.setFileName(tb_log_file,true);
             TBSYS_LOGGER.setLogLevel("DEBUG");
 
             g_tair.set_timeout(5000);
@@ -177,7 +176,7 @@ namespace user_map
         
         user_location_log_add(user_id,x,y,z,kafka_offset,mall_id,t_now);
 
-        return 2;
+        return 0;
     }
 
 
