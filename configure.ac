@@ -19,9 +19,13 @@ AC_PROG_CC([gcc])
 # Checks for libraries.
 
 # Checks for header files.
-AC_CHECK_HEADERS([stdlib.h])
+AC_LANG_PUSH([C++])
 AC_CHECK_HEADERS([fcgi_config.h],[],[AC_MSG_ERROR([Unable to find fcgi, please install fcgi])])
 AC_CHECK_HEADERS([uriparser/Uri.h],[],[AC_MSG_ERROR([Unable to find uriparser, please install uriparser])])
+AC_CHECK_HEADERS([json/json.h],[],[
+AC_CHECK_HEADERS([jsoncpp/json/json.h],[],[AC_MSG_ERROR([Unable to find jsoncpp, please install jsoncpp])])
+])
+AC_LANG_POP([C++])
 # Checks for typedefs, structures, and compiler characteristics.
 
 # Checks for library functions.
