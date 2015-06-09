@@ -16,7 +16,7 @@ using namespace std;
 namespace user_map
 {
     static tair::tair_client_api g_tair;
-    static const char * master_addr="WUSHUU-TAIR-RDB:5198";
+    static const char * master_addr="localhost:5198";
     static const char * slave_addr=NULL;
     static const char * group_name="group_1";
     static int time_slice=10; // minutes
