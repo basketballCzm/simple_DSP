@@ -10,6 +10,17 @@
 
 using namespace std;
 
+inline std::string hexStr(char *data, int len)
+{
+	std::stringstream ss;
+	ss<<std::hex;
+	ss<<std::setfill('0')<<std::setw(2);
+	for(int i(0);i<len;++i)
+		ss<<"\\x"<<(unsigned int)data[i];
+	return ss.str();
+}
+
+
 inline void get_data_entry_sstream(std::stringstream&)
 {
 }
@@ -50,6 +61,7 @@ T tair_get(tair::tair_client_api & tair_instance,int area, const tair::common::d
 	int ret=tair_instance.get(area,key,p_value);
 	if(ret==TAIR_RETURN_SUCCESS)
 	{
+		//fprintf(stderr, "tair_common.h tair_get() return value=%s",hexStr(p_value->get_data(),p_value->get_size()).c_str());
 		const T & value= get_value<T>(p_value->get_data(),p_value->get_size());
 		delete (p_value);
 		return value;
@@ -92,16 +104,6 @@ inline void tair_put(tair::tair_client_api & tair_instance,int area,const tair::
 	int ret=tair_instance.put(area,key,*p_value,0,0);
 	fprintf(stderr, "tair_put: %s\n",tair_instance.get_error_msg(ret));
 	delete (p_value);
-}
-
-inline std::string hexStr(char *data, int len)
-{
-	std::stringstream ss;
-	ss<<std::hex;
-	ss<<std::setfill('0')<<std::setw(2);
-	for(int i(0);i<len;++i)
-		ss<<"\\x"<<(unsigned int)data[i];
-	return ss.str();
 }
 
 inline string  get_date_time_str(time_t t,int time_slice)

@@ -8,13 +8,23 @@ var cli = require('tair');
 var should = require('should');
 var sys = require('sys')
 var exec = require('child_process').exec
+var deepcopy = require('deepcopy');
 
 var tair;
 var nm=3;
 var used_key={}
 var mall_id=2
+var mall_level=1
 
-function add_used_key(keys)
+var test_user_list=[
+      ["12345678",4.3,3.8,mall_level],
+      ["23456789",204,100.8,mall_level],
+      ["34567890",4.3,103.8,mall_level],
+      ["45678901",198.3,2.6,mall_level],
+      ["56789012",100.15,50.3,mall_level],
+    ]
+
+function save_used_key(keys)
 {
     if(keys.constructor === Array)
     {
@@ -29,7 +39,6 @@ function add_used_key(keys)
 }
 
 describe('ad_map.test.js', function () {
-
   before(function (done) {
     tair = new cli('group_1', [
       {host: 'localhost', port: 5198}
@@ -42,27 +51,26 @@ describe('ad_map.test.js', function () {
         done();
       });
   });
-  
+ 
   it("ad_map insert test data location should be ok!",function(done){
-      var test_entry_list=[
-        ["123456-lt",4.3,3.8,1],
-        ["234567-rb",204,100.8,1],
-        ["345678-lb",4.3,103.8,1],
-        ["abcdef-rt",198.3,2.6,1],
-        ["bcdefg-center",100.15,50.3,1],
-      ]
       var prop_list=["x","y","z"]
       var count=0
-      test_entry_list.forEach(function(c){
+      test_user_list.forEach(function(c){
           prop_list.forEach(function(d,j){
               var key="location:"+mall_id+":"+c[0]+":"+d
               var value=c[j+1]
-              add_used_key(key)
+              if(d=="x" || d== "y")
+              {
+                  var tmpBuffer = new Buffer(4)
+                  tmpBuffer.writeFloatLE(value,0)
+                  value= tmpBuffer
+              }
+              save_used_key(key)
               tair.set(key,value,0,nm,0,function(err,success){
                   should.not.exist(err)
                   success.should.equal(true)
                   count++;
-                  if(count==prop_list.length*test_entry_list.length){
+                  if(count==prop_list.length*test_user_list.length){
                     done()
                   }
                 })
@@ -81,7 +89,7 @@ describe('ad_map.test.js', function () {
           prop_list.forEach(function(d,j){
               var key="ad.space:"+mall_id+":"+c[0]+":"+d
               var value=c[j+1]
-              add_used_key(key)
+              save_used_key(key)
               if(d.indexOf("set",d.length-3)===-1)
               {
                 tair.set(key,value,0,nm,0,function(err,success){
@@ -141,7 +149,7 @@ describe('ad_map.test.js', function () {
                   tmpBuffer.writeDoubleLE(value,0)
                   value= tmpBuffer
                 }
-                add_used_key(key)
+                save_used_key(key)
                 tair.set(key,value,0,nm,0,function(err,success){
                     should.not.exist(err)
                     success.should.equal(true)
@@ -156,7 +164,7 @@ describe('ad_map.test.js', function () {
                 var zcount=0
                 if(c[j+1].length>=1)
                 {
-                  add_used_key(key)
+                  save_used_key(key)
                 }
                 else
                 {
@@ -184,7 +192,102 @@ describe('ad_map.test.js', function () {
         })
     })
 
+  it("ad_map insert test data to ad.location should be ok!",function(done){
+    //240*120 => 24*12
+    var x_len=24
+    var y_len=12
+    //this is a reverse data
+    var test_ad_loc_data=[
+      [
+        [0,0],[0,1],[0,2],
+        [1,1],[1,2],[1,3],
+        [2,2],[2,3],[2,4],
+        [3,3],[3,4],[3,5],
+      ],
+      [
+        [20,8],[20,9],[20,10],[20,11],
+        [21,8],[21,9],[21,10],[21,11],
+        [22,8],[22,9],[22,10],[22,11],
+        [23,8],[23,9],[23,10],[23,11],
+      ],
+      [
+        [0,8],[0,9],[0,10],[0,11],
+        [1,8],[1,9],[1,10],[1,11],
+        [2,8],[2,9],[2,10],[2,11],
+        [3,8],[3,9],[3,10],[3,11],
+      ],
+      [
+        [20,0],[20,1],[20,2],[20,3],
+        [21,0],[21,1],[21,2],[21,3],
+        [22,0],[22,1],[22,2],[22,3],
+        [23,0],[23,1],[23,2],[23,3],
+      ],
+      [
+        [8,4],[8,5],[8,6],[8,7],
+        [9,4],[9,5],[9,6],[9,7],
+        [10,4],[10,5],[10,6],[10,7],
+        [11,4],[11,5],[11,6],[11,7],
+      ],
+      [
+      ],
+    ]
+    var full_loc_mark=[]
+    for(var i=0;i<x_len;++i)
+    {
+      full_loc_mark[i]=[]
+      for(var j=0;j<y_len;++j)
+      {
+        full_loc_mark[i][j]=true
+      }
+    }
+    var count=0
+    test_ad_loc_data.forEach(function(d,ad_group_index){
+      var full_loc_mark_copy=deepcopy(full_loc_mark)
+      d.forEach(function(e){
+          full_loc_mark_copy[e[0]][e[1]]=false
+        })
+      var mcount=0
+      full_loc_mark_copy.forEach(function(line,i){
+        line.forEach(function(mark,j){
+            if(mark)
+            {
+              var key="ad.location:"+mall_id+":"+i+":"+j+":"+mall_level+":ad.group.set"  
+              save_used_key(key)
+              tair.zadd(key,nm,ad_group_index+1,ad_group_index+1,function(err, data){
+                  should.not.exist(err);
+                  data.should.equal(true);
+                  ++mcount
+                  if(mcount==x_len*y_len)
+                  {
+                    ++count
+                  }
+                  if(count==test_ad_loc_data.length)
+                  {
+                    done()
+                  }
+                })
+            }
+            else
+            {
+              ++mcount
+              if(mcount==x_len*y_len)
+              {
+                ++count
+              }
+              if(count==test_ad_loc_data.length)
+              {
+                done()
+              }
+            }
+          })
+      })
+    })
+
+
+
+  })
   it("c++ test ,ad_request should be ok!",function(done){
+      this.timeout(50000)
       exec(__dirname+'/ad_map_test',function(err,stdout,stderr){
           sys.print('stdout:'+ stdout)
           sys.print('stderr:'+ stderr)

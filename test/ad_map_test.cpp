@@ -1,4 +1,5 @@
 #include "ad_map.h"
+#include "user_map.h"
 #include <ctime>
 #include "tair_common.h"
 #include "gtest/gtest.h"
@@ -45,9 +46,38 @@ TEST_F(AdMapTest,getAdGroupSetOfSpace)
   EXPECT_EQ(ad_group_set[2],4);
 }
 
-TEST_F(AdMapTest,Bidding)
+TEST_F(AdMapTest,getAdGroupSetOfLocation)
 {
-  EXPECT_EQ(2,4);
+  int space_id=23;
+  int user_id=12345678;
+  std::vector< int> ad_group_set;
+  UserPosition pos;
+  pos.user_id=user_id;
+  user_map::user_map_init(3);
+  EXPECT_NE(user_map::user_query( pos,mall_id),-1);
+  EXPECT_EQ(pos.position.x,float(4.3));
+  EXPECT_EQ(pos.position.y,float(3.8));
+  EXPECT_EQ(pos.position.z,1);
+  get_ad_group_set_of_location(mall_id,pos,ad_group_set);
+  EXPECT_EQ(ad_group_set.size(),5);
+  EXPECT_EQ(ad_group_set[0],2);
+  EXPECT_EQ(ad_group_set[1],3);
+  EXPECT_EQ(ad_group_set[2],4);
+  EXPECT_EQ(ad_group_set[3],5);
+  EXPECT_EQ(ad_group_set[4],6);
+  pos.user_id=56789012;
+  EXPECT_NE(user_map::user_query( pos,mall_id),-1);
+  EXPECT_EQ(pos.position.x,float(100.15));
+  EXPECT_EQ(pos.position.y,float(50.3));
+  EXPECT_EQ(pos.position.z,1);
+  ad_group_set.clear();
+  get_ad_group_set_of_location(mall_id,pos,ad_group_set);
+  EXPECT_EQ(ad_group_set.size(),5);
+  EXPECT_EQ(ad_group_set[0],1);
+  EXPECT_EQ(ad_group_set[1],2);
+  EXPECT_EQ(ad_group_set[2],3);
+  EXPECT_EQ(ad_group_set[3],4);
+  EXPECT_EQ(ad_group_set[4],6);
 }
 
 TEST_F(AdMapTest,AdRequest)
