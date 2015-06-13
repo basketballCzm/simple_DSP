@@ -133,4 +133,18 @@ vector<V_TYPE>* tair_zmembers(tair::tair_client_api & tair_instance,int area, co
     return & members_set;
 }
 
+template <typename V_TYPE>
+vector<V_TYPE>* tair_smembers(tair::tair_client_api & tair_instance,int area, const tair::common::data_entry &key, vector<V_TYPE> &members_set)
+{
+    vector<tair::common::data_entry*> values; 
+    tair_instance.smembers(area,key,values);
+    for(vector<tair::common::data_entry *>::iterator it=values.begin();it!=values.end();it++)
+    {
+        members_set.push_back(get_value<V_TYPE>((*it)->get_data(),(*it)->get_size()));
+        delete (*it);
+    }
+    values.clear();
+    return & members_set;
+}
+
 

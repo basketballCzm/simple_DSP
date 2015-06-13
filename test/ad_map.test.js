@@ -17,11 +17,11 @@ var mall_id=2
 var mall_level=1
 
 var test_user_list=[
-      ["12345678",4.3,3.8,mall_level],
-      ["23456789",204,100.8,mall_level],
-      ["34567890",4.3,103.8,mall_level],
-      ["45678901",198.3,2.6,mall_level],
-      ["56789012",100.15,50.3,mall_level],
+      ["12345678",4.3,3.8,mall_level,['label1','label2','label3']],
+      ["23456789",204,100.8,mall_level,['label2','label4','label5']],
+      ["34567890",4.3,103.8,mall_level,[]],
+      ["45678901",198.3,2.6,mall_level,['label1','label2','label3','label4','label5','label6']],
+      ["56789012",100.15,50.3,mall_level,['label4','label5','label7']],
     ]
 
 function save_used_key(keys)
@@ -52,28 +52,62 @@ describe('ad_map.test.js', function () {
       });
   });
  
-  it("ad_map insert test data location should be ok!",function(done){
-      var prop_list=["x","y","z"]
+  it("ad_map insert test data users' location & label should be ok!",function(done){
+      var prop_list=["x","y","z","label.set"]
       var count=0
       test_user_list.forEach(function(c){
           prop_list.forEach(function(d,j){
               var key="location:"+mall_id+":"+c[0]+":"+d
               var value=c[j+1]
-              if(d=="x" || d== "y")
+              if(d==="x" || d=== "y")
               {
-                  var tmpBuffer = new Buffer(4)
-                  tmpBuffer.writeFloatLE(value,0)
-                  value= tmpBuffer
+                var tmpBuffer = new Buffer(4)
+                tmpBuffer.writeFloatLE(value,0)
+                value= tmpBuffer
               }
-              save_used_key(key)
-              tair.set(key,value,0,nm,0,function(err,success){
-                  should.not.exist(err)
-                  success.should.equal(true)
-                  count++;
+
+              if(d==="label.set")
+              {
+                key="user:"+c[0]+":label.set"
+                if(value.length<=0)
+                {
+                  count++
                   if(count==prop_list.length*test_user_list.length){
                     done()
                   }
-                })
+                }
+                else
+                {
+                  save_used_key(key)
+                  var zcount=0
+                  value.forEach(function(e){
+                      tair.sadd(key,nm,e,function(err, data){
+                          should.not.exist(err);
+                          data.should.equal(true);
+                          ++zcount
+                          if(zcount==value.length)
+                          {
+                            count++ 
+                            if(count==prop_list.length*test_user_list.length){
+                              done()
+                            }
+                          }
+                        })
+                    })
+                }
+              }
+              else
+              {
+                save_used_key(key)
+                tair.set(key,value,0,nm,0,function(err,success){
+                    should.not.exist(err)
+                    success.should.equal(true)
+                    count++;
+                    if(count==prop_list.length*test_user_list.length){
+                      done()
+                    }
+                  })
+              }
             })
         })
     })
@@ -174,6 +208,7 @@ describe('ad_map.test.js', function () {
                   }
                 }
                 c[j+1].forEach(function(v){
+                    console.log("sadd key="+key+",value="+v)
                     tair.sadd(key,nm,v,function(err, data){
                         should.not.exist(err);
                         data.should.equal(true);

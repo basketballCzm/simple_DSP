@@ -5,6 +5,7 @@
 #include "tbsys/config.h"
 #include "tbsys/tblog.h"
 #include <vector>
+#include <unordered_map>
 #include <sstream>
 #include "tair_common.h"
 #include "user_map.h"
@@ -156,6 +157,11 @@ namespace ad_map
     vector<tair::common::data_entry *> time_range_set;
     g_tair.smembers(tair_namespace,key,time_range_set);
 
+    if(time_range_set.size()==0)
+    {
+      return true;
+    }
+
     bool b_fit_time_range=false;
     for(vector<tair::common::data_entry *>::iterator it=time_range_set.begin();it!=time_range_set.end();it++)
     {
@@ -174,6 +180,25 @@ namespace ad_map
 
     return b_fit_time_range;
 
+  }
+
+  template <typename T>
+  inline bool check_intersection(const vector<T> &set1, const vector<T> &set2)
+  {
+    unordered_map<T,int> mark;
+    for(typename vector<T>::const_iterator it=set1.begin();it!=set1.end();++it)
+    {
+      mark[*it];
+    }
+
+    for(typename vector<T>::const_iterator it=set1.begin();it!=set1.end();++it)
+    {
+      if(mark.find(*it)!=mark.end())
+      {
+        return true;
+      }
+    }
+    return false;
   }
 
   void bidding(Json::Value &ret, const UserPosition &pos, const int space_id, const int mall_id)
@@ -197,7 +222,7 @@ namespace ad_map
 
     get_data_entry(key,"user:",pos.user_id,":label.set");
     vector<string> user_label_set;
-    tair_zmembers<string>(g_tair,tair_namespace,key,user_label_set);
+    tair_smembers<string>(g_tair,tair_namespace,key,user_label_set);
 
     for(vector< int>::iterator it=ad_group_list.begin();it!=ad_group_list.end();++it)
     {
@@ -208,13 +233,11 @@ namespace ad_map
       //filter by users' tag
       get_data_entry(key,"ad.group:",mall_id,":",*it,":target.label.set");
       vector<string> ad_group_label_set;
-      tair_zmembers<string>(g_tair,tair_namespace,key,ad_group_label_set);
+      tair_smembers<string>(g_tair,tair_namespace,key,ad_group_label_set);
+      cout<<"ad_map::bidding() ad_group_label_set.size()="<<ad_group_label_set.size()<<endl;
 
-      vector<string> label_intersection;
-      set_intersection(user_label_set.begin(),user_label_set.end(),
-          ad_group_label_set.begin(),ad_group_label_set.end(),back_inserter(label_intersection));
-
-      if(label_intersection.size()==0)
+      if( (ad_group_label_set.size()!=0) &&
+        !check_intersection(user_label_set,ad_group_label_set))
         continue;
 
       int next_ad_id=-1;
@@ -265,6 +288,7 @@ namespace ad_map
       get_data_entry(key,"ad:",mall_id,":",show_ad_id,":jump.url");
       ret["jump_url"]=tair_get<string>(g_tair,tair_namespace,key,"");
       ret["id"]=show_ad_id;
+      ret["group_id"]=show_ad_group_id;
       ret["result"]="ok";
     }
     else

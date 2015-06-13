@@ -4,6 +4,7 @@
 #include "tair_common.h"
 #include "gtest/gtest.h"
 #include <data_entry.hpp>
+#include <json/json.h>
 
 TEST(TairCommon,GetDataEntry)
 {
@@ -82,4 +83,9 @@ TEST_F(AdMapTest,getAdGroupSetOfLocation)
 
 TEST_F(AdMapTest,AdRequest)
 {
+  int space_id=23;
+  int user_id=12345678;
+  Json::Value ret;
+  ad_request(ret,user_id,space_id,mall_id);
+  EXPECT_EQ(Json::Value(4),ret["group_id"]);
 }
