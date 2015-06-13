@@ -21,6 +21,7 @@ namespace ad_map{
   void bidding(Json::Value &ret, const UserPosition &pos, const int space_id, const int mall_id);
   void get_ad_group_set_of_space(const int mall_id, const int space_id, std::vector< int> &ad_group_set);
   void get_ad_group_set_of_location(const int mall_id, const UserPosition &pos, std::vector<int> &ad_group_set);
+  double get_eCPM(const int mall_id,const unsigned long long user_id,const int ad_group_id, int &next_ad_id);
 }
 class AdMapTest : public testing::Test
 {
@@ -81,6 +82,14 @@ TEST_F(AdMapTest,getAdGroupSetOfLocation)
   EXPECT_EQ(ad_group_set[4],6);
 }
 
+TEST_F(AdMapTest,GeteCPM)
+{
+  int user_id=12345678;
+  int next_ad_id=-1;
+  double eCPM=get_eCPM(mall_id,user_id,4,next_ad_id);
+  EXPECT_EQ(double(84),eCPM);
+  EXPECT_EQ(5,next_ad_id);
+}
 TEST_F(AdMapTest,AdRequest)
 {
   int space_id=23;
@@ -88,4 +97,5 @@ TEST_F(AdMapTest,AdRequest)
   Json::Value ret;
   ad_request(ret,user_id,space_id,mall_id);
   EXPECT_EQ(Json::Value(4),ret["group_id"]);
+  EXPECT_EQ(Json::Value(5),ret["id"]);
 }

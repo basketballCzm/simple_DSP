@@ -12,13 +12,6 @@
 #include "cron_timing.h"
 
 
-#define HIGHEST_N_ADS 1
-#define NONE_INT_DATA INT_MIN
-#define NEW_AD_MIN_SHOW_COUNT 100
-#define NEW_AD_CTR 0.05
-
-
-
 using namespace std;
 
 namespace ad_map
@@ -94,8 +87,6 @@ namespace ad_map
     return;
   }
 
-
-
   double get_eCPM(const int mall_id,const unsigned long long user_id,const int ad_group_id, int &next_ad_id)
   {
     tair::common::data_entry key;
@@ -110,7 +101,8 @@ namespace ad_map
     const double & show_price=tair_get<double>(g_tair,tair_namespace,key,0);
     get_data_entry( key,"ad.group:",mall_id,":",ad_group_id,":click.price");
     const double & click_price=tair_get<double>(g_tair,tair_namespace,key,0);
-    double max_show_weight=0;
+	//min show weight win this show time.
+    double min_show_weight=std::numeric_limits<double>::max();;
     for(vector<tair::common::data_entry *>::iterator it=ad_id_set.begin();it!=ad_id_set.end();it++)
     {
       int ad_id=*( int*)((*it)->get_data());
@@ -135,10 +127,10 @@ namespace ad_map
         sum_eCPM+=1000.0*show_price+1000.0*click_price*click_counter/show_counter*weight; 
       }	
       sum_weight+=weight;	
-      double show_weight=show_counter/weight;
-      if(show_weight>max_show_weight)
+      double show_weight=(show_counter+1.0)/weight;
+      if(show_weight<min_show_weight)
       {
-        max_show_weight=show_weight;
+        min_show_weight=show_weight;
         next_ad_id=ad_id;
       }
       delete (*it);
