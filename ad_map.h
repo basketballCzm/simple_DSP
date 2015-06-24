@@ -3,6 +3,13 @@
 #include <limits.h>
 #include <limits>
 
+#define HIGHEST_N_ADS 1
+#define NONE_INT_DATA INT_MIN
+#define NEW_AD_MIN_SHOW_COUNT 100
+#define NEW_AD_CTR 0.05
+
+
+
 //user_id is mac address
 namespace ad_map
 {

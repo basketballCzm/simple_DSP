@@ -163,7 +163,7 @@ describe('ad_map.test.js', function () {
         [1,1.0,0.01,23,1,[1,2,7],['label1','label2', 'label3']],
         [2,1.1,0.02,23,1,[3],['label1','label3', 'label6']],
         [3,1.2,0.016,23,1,[4],['label3','label4']],
-        [4,1.4,0.014,28,1,[5],['label4','label5']],
+        [4,1.4,0.014,28,1,[1,2,5],['label4','label5']],
         [5,1.5,0.013,28,1,[],['label3','label6']],
         [6,1.6,0.011,28,1,[6],['label4','label7']],
       ]
@@ -344,4 +344,5 @@ describe('ad_map.test.js', function () {
         })
       }
     })
+
 });
