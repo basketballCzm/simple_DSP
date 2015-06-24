@@ -61,6 +61,8 @@ static void ad_op(UriQueryListA * queryList,Json::Value & ret)
     string action;
     unsigned long long user_id=INT_MIN;
     int ad_space=INT_MIN;
+    int n=1;
+    int mall_id=2;
     for(UriQueryListA *p_para=queryList ;p_para!=NULL;p_para=p_para->next)
     {
         if (strcmp(p_para->key,"user_id")==0)
@@ -75,7 +77,12 @@ static void ad_op(UriQueryListA * queryList,Json::Value & ret)
         {
             action = p_para->value;
         }
-
+        else if (strcmp(p_para->key,"n")==0)
+        {
+            stringstream( p_para->value )>>n;
+            if(n<1)
+              n=1;
+        }
     }
     if(strcmp("request",action.c_str())==0)
     {
@@ -83,7 +90,7 @@ static void ad_op(UriQueryListA * queryList,Json::Value & ret)
         {
             syslog(LOG_INFO, "ad_op ad_request(), no user id");   
         }
-        ad_map::ad_request(ret,user_id,ad_space);
+        ad_map::ad_request(ret,user_id,ad_space,mall_id,n);
         return;
     }
     else

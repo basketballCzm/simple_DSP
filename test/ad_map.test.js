@@ -331,7 +331,7 @@ describe('ad_map.test.js', function () {
         })
     })
 
-  it("clear up test data should work",function(done){
+/*  it("clear up test data should work",function(done){
       var count=0
       for(var key in used_key){
         console.log('remove '+key)
@@ -344,5 +344,5 @@ describe('ad_map.test.js', function () {
         })
       }
     })
-
+*/
 });

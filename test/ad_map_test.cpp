@@ -96,6 +96,10 @@ TEST_F(AdMapTest,AdRequest)
   int user_id=12345678;
   Json::Value ret;
   ad_request(ret,user_id,space_id,mall_id);
+  
+  Json::StyledWriter writer;
+  const string output = writer.write(ret);
+  cout<<"request return json="<< output<<endl;
   EXPECT_EQ(Json::Value(4),ret["ad"][0]["group_id"]);
   EXPECT_EQ(Json::Value(5),ret["ad"][0]["id"]);
 }
