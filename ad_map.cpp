@@ -199,7 +199,7 @@ namespace ad_map
 
   void bidding(Json::Value &ret, const UserPosition &pos, const int space_id, const int mall_id,const int n)
   {
-    syslog(LOG_INFO, "enter ad_map::bidding() tbsys logger level is %d",TBSYS_LOGGER._level);   
+    syslog(LOG_INFO, "enter ad_map::bidding() namespace=%d", tair_namespace);   
     int *highest_ad_group_list=new int[n]{};
     double *highest_eCPM_list=new double[n]{};
     int *next_ad_list=new int[n]{};
@@ -230,7 +230,7 @@ namespace ad_map
       get_data_entry(key,"ad.group:",mall_id,":",*it,":target.label.set");
       vector<string> ad_group_label_set;
       tair_smembers<string>(g_tair,tair_namespace,key,ad_group_label_set);
-      cout<<"ad_map::bidding() ad_group_label_set.size()="<<ad_group_label_set.size()<<endl;
+      syslog(LOG_INFO,"ad_map::bidding() ad_group_label_set.size()=%d\n",ad_group_label_set.size());
 
       if( (ad_group_label_set.size()!=0) &&
         !check_intersection(user_label_set,ad_group_label_set))

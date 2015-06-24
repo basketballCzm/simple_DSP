@@ -93,9 +93,9 @@ TEST_F(AdMapTest,GeteCPM)
 TEST_F(AdMapTest,AdRequest)
 {
   int space_id=23;
-  int user_id=12345678;
+  unsigned long long user_id=12345678;
   Json::Value ret;
-  ad_request(ret,user_id,space_id,mall_id);
+  ad_request(ret,user_id,space_id,mall_id,1);
   
   Json::StyledWriter writer;
   const string output = writer.write(ret);

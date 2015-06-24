@@ -90,6 +90,8 @@ static void ad_op(UriQueryListA * queryList,Json::Value & ret)
         {
             syslog(LOG_INFO, "ad_op ad_request(), no user id");   
         }
+        syslog(LOG_INFO, "ad_op ad_request() user_id=%ld, ad_space=%d, mall_id=%d, n=%d"
+            ,user_id,ad_space,mall_id,n);   
         ad_map::ad_request(ret,user_id,ad_space,mall_id,n);
         return;
     }
