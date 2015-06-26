@@ -230,4 +230,24 @@ namespace user_map
         user_list["size"]=number;
     }
 
+    int user_tag_update(const unsigned long long user_id, const char* user_tag, const float user_value)
+    {
+        user_map_init();
+        syslog(LOG_INFO, "user_map::user_tag_update() enter");
+        
+        stringstream ss_key,ss_field,ss_value;
+        ss_key<<"user:"<<user_id<<":label.set";
+        ss_field<<user_tag;
+        ss_value<<user_value;
+        tair::common::data_entry key(ss_key.str().c_str(),ss_key.str().size()+1,true);
+        tair::common::data_entry field(ss_field.str().c_str(),ss_field.str().size()+1,true);
+        tair::common::data_entry value(ss_value.str().c_str(),ss_value.str().size()+1,true);
+        
+        int ret=g_tair.hset(tair_namespace,key,field,value,0,0);
+        cout<<"hset ns="<<tair_namespace<<",key="<<key.get_data()<<",size="
+            <<key.get_size()<<",field="<<field.get_data()<<",size="<<field.get_size()<<",value="<<value.get_data()<<endl;
+        fprintf(stderr, "user_tag_update tair.hset: %s\n",g_tair.get_error_msg(ret));
+        return 0;
+    }
+
 }
