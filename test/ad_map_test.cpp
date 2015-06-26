@@ -90,6 +90,7 @@ TEST_F(AdMapTest,GeteCPM)
   EXPECT_EQ(double(84),eCPM);
   EXPECT_EQ(5,next_ad_id);
 }
+
 TEST_F(AdMapTest,AdRequest)
 {
   int space_id=23;

@@ -218,7 +218,7 @@ namespace ad_map
 
     get_data_entry(key,"user:",pos.user_id,":label.set");
     vector<string> user_label_set;
-    tair_smembers<string>(g_tair,tair_namespace,key,user_label_set);
+    tair_hgetall<string>(g_tair,tair_namespace,key,user_label_set);
 
     for(vector< int>::iterator it=ad_group_list.begin();it!=ad_group_list.end();++it)
     {

@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <ctime>
 #include <limits>
+#include <map>
 
 
 using namespace std;
@@ -144,6 +145,21 @@ vector<V_TYPE>* tair_smembers(tair::tair_client_api & tair_instance,int area, co
         delete (*it);
     }
     values.clear();
+    return & members_set;
+}
+
+template <typename V_TYPE>
+vector<V_TYPE>* tair_hgetall(tair::tair_client_api & tair_instance,int area, const tair::common::data_entry &key, vector<V_TYPE> &members_set)
+{
+    map<tair::common::data_entry*, tair::common::data_entry*> field_values; 
+    tair_instance.hgetall(area,key,field_values);
+    for(map<tair::common::data_entry*, tair::common::data_entry*>::iterator it=field_values.begin();it!=field_values.end();it++)
+    {
+        members_set.push_back(get_value<V_TYPE>((it->first)->get_data(),(it->first)->get_size()));
+        delete (it->first);
+        delete (it->second);
+    }
+    field_values.clear();
     return & members_set;
 }
 
