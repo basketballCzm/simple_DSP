@@ -11,12 +11,9 @@
 #include "user_map.h"
 #include "cron_timing.h"
 
-
-#define HIGHEST_N_ADS 1
 #define NONE_INT_DATA INT_MIN
 #define NEW_AD_MIN_SHOW_COUNT 100
 #define NEW_AD_CTR 0.05
-
 
 
 using namespace std;
@@ -94,8 +91,6 @@ namespace ad_map
     return;
   }
 
-
-
   double get_eCPM(const int mall_id,const unsigned long long user_id,const int ad_group_id, int &next_ad_id)
   {
     tair::common::data_entry key;
@@ -110,7 +105,8 @@ namespace ad_map
     const double & show_price=tair_get<double>(g_tair,tair_namespace,key,0);
     get_data_entry( key,"ad.group:",mall_id,":",ad_group_id,":click.price");
     const double & click_price=tair_get<double>(g_tair,tair_namespace,key,0);
-    double max_show_weight=0;
+	//min show weight win this show time.
+    double min_show_weight=std::numeric_limits<double>::max();;
     for(vector<tair::common::data_entry *>::iterator it=ad_id_set.begin();it!=ad_id_set.end();it++)
     {
       int ad_id=*( int*)((*it)->get_data());
@@ -135,10 +131,10 @@ namespace ad_map
         sum_eCPM+=1000.0*show_price+1000.0*click_price*click_counter/show_counter*weight; 
       }	
       sum_weight+=weight;	
-      double show_weight=show_counter/weight;
-      if(show_weight>max_show_weight)
+      double show_weight=(show_counter+1.0)/weight;
+      if(show_weight<min_show_weight)
       {
-        max_show_weight=show_weight;
+        min_show_weight=show_weight;
         next_ad_id=ad_id;
       }
       delete (*it);
@@ -201,12 +197,12 @@ namespace ad_map
     return false;
   }
 
-  void bidding(Json::Value &ret, const UserPosition &pos, const int space_id, const int mall_id)
+  void bidding(Json::Value &ret, const UserPosition &pos, const int space_id, const int mall_id,const int n)
   {
-    syslog(LOG_INFO, "enter ad_map::bidding() tbsys logger level is %d",TBSYS_LOGGER._level);   
-    int highest_ad_group_list[HIGHEST_N_ADS]{};
-    double highest_eCPM_list[HIGHEST_N_ADS]{};
-    int next_ad_list[HIGHEST_N_ADS]{};
+    syslog(LOG_INFO, "enter ad_map::bidding() namespace=%d", tair_namespace);   
+    int *highest_ad_group_list=new int[n]{};
+    double *highest_eCPM_list=new double[n]{};
+    int *next_ad_list=new int[n]{};
     tair::common::data_entry key;
 
     vector< int>  ad_group_set_of_space;
@@ -234,7 +230,7 @@ namespace ad_map
       get_data_entry(key,"ad.group:",mall_id,":",*it,":target.label.set");
       vector<string> ad_group_label_set;
       tair_smembers<string>(g_tair,tair_namespace,key,ad_group_label_set);
-      cout<<"ad_map::bidding() ad_group_label_set.size()="<<ad_group_label_set.size()<<endl;
+      syslog(LOG_INFO,"ad_map::bidding() ad_group_label_set.size()=%d\n",ad_group_label_set.size());
 
       if( (ad_group_label_set.size()!=0) &&
         !check_intersection(user_label_set,ad_group_label_set))
@@ -243,11 +239,11 @@ namespace ad_map
       int next_ad_id=-1;
       double eCPM=get_eCPM(mall_id,pos.user_id,*it,next_ad_id);
 
-      for(int j=HIGHEST_N_ADS-1;j<=0;--j)
+      for(int j=n-1;j>=0;--j)
       {
         if(eCPM > highest_eCPM_list[j] )    
         {
-          if(j==HIGHEST_N_ADS-1)
+          if(j==n-1)
           {
             highest_eCPM_list[j]=eCPM;
             highest_ad_group_list[j]=*it;
@@ -271,30 +267,37 @@ namespace ad_map
     }
 
     int length=0;
-    for(int i=0;i<HIGHEST_N_ADS;++i)
+    for(int i=0;i<n;++i)
     {
       if(highest_eCPM_list[i]!=0)
+      {
         length++;
+        Json::Value ad_node;
+        int show_ad_group_id=highest_ad_group_list[i];
+        int show_ad_id=next_ad_list[i];
+        get_data_entry(key,"ad:",mall_id,":",show_ad_id,":content");
+        ad_node["content"]=tair_get<string>(g_tair,tair_namespace,key,"");
+        get_data_entry(key,"ad:",mall_id,":",show_ad_id,":jump.url");
+        ad_node["jump_url"]=tair_get<string>(g_tair,tair_namespace,key,"");
+        ad_node["id"]=show_ad_id;
+        ad_node["group_id"]=show_ad_group_id;
+        ret["ad"].append(ad_node);
+      }
       else
         break;
     }
     if(length)
     {    
-      int show_no=rand()%length;
-      int show_ad_group_id=highest_ad_group_list[show_no];
-      int show_ad_id=next_ad_list[show_no];
-      get_data_entry(key,"ad:",mall_id,":",show_ad_id,":content");
-      ret["content"]=tair_get<string>(g_tair,tair_namespace,key,"");
-      get_data_entry(key,"ad:",mall_id,":",show_ad_id,":jump.url");
-      ret["jump_url"]=tair_get<string>(g_tair,tair_namespace,key,"");
-      ret["id"]=show_ad_id;
-      ret["group_id"]=show_ad_group_id;
       ret["result"]="ok";
     }
     else
     {
       ret["result"]="no valid ad";    
     }
+    delete highest_ad_group_list;
+    delete highest_eCPM_list;
+    delete next_ad_list;
+    return;
   }
 
   int ad_add()
@@ -317,7 +320,7 @@ namespace ad_map
     return -1;
   }
 
-  int ad_request(Json::Value &ret, const unsigned long long user_id, const int space_id, const int mall_id)
+  int ad_request(Json::Value &ret, const unsigned long long user_id, const int space_id, const int mall_id, const int n)
   {
     ad_map_init();
 
@@ -328,7 +331,7 @@ namespace ad_map
     {
       TBSYS_LOG(DEBUG, "ad_op ad_request, user id :%d , location data not found!",pos.user_id);   
     }
-    bidding(ret,pos,space_id,mall_id);	
+    bidding(ret,pos,space_id,mall_id,n);	
     return -1;
   }
 

@@ -11,7 +11,7 @@ var exec = require('child_process').exec
 var deepcopy = require('deepcopy');
 
 var tair;
-var nm=3;
+var nm=2;
 var used_key={}
 var mall_id=2
 var mall_level=1
@@ -163,7 +163,7 @@ describe('ad_map.test.js', function () {
         [1,1.0,0.01,23,1,[1,2,7],['label1','label2', 'label3']],
         [2,1.1,0.02,23,1,[3],['label1','label3', 'label6']],
         [3,1.2,0.016,23,1,[4],['label3','label4']],
-        [4,1.4,0.014,28,1,[5],['label4','label5']],
+        [4,1.4,0.014,28,1,[1,2,5],['label4','label5']],
         [5,1.5,0.013,28,1,[],['label3','label6']],
         [6,1.6,0.011,28,1,[6],['label4','label7']],
       ]
@@ -331,7 +331,7 @@ describe('ad_map.test.js', function () {
         })
     })
 
-  it("clear up test data should work",function(done){
+/*  it("clear up test data should work",function(done){
       var count=0
       for(var key in used_key){
         console.log('remove '+key)
@@ -344,4 +344,5 @@ describe('ad_map.test.js', function () {
         })
       }
     })
+*/
 });
