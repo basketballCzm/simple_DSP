@@ -20,19 +20,19 @@ using namespace std;
 
 namespace ad_map
 {
-  static tair::tair_client_api g_tair;
-  static const char * config_file="config.ini";
-  static tbsys::CConfig config;
-  static const char * master_addr;
-  static const char * slave_addr;
-  static const char * group_name;
-  static int time_slice; // minutes
+  tair::tair_client_api g_tair;
+  const char * config_file="config.ini";
+  tbsys::CConfig config;
+  const char * master_addr;
+  const char * slave_addr;
+  const char * group_name;
+  int time_slice; // minutes
   int tair_namespace;
-  static int slice_x;
-  static int slice_y;
+  int slice_x;
+  int slice_y;
 
 
-  static const char * tb_log_file;
+  const char * tb_log_file;
 
   void ad_map_init()
   {

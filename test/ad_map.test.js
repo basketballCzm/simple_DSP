@@ -11,7 +11,7 @@ var exec = require('child_process').exec
 var deepcopy = require('deepcopy');
 
 var tair;
-var nm=2;
+var nm=3;
 var used_key={}
 var mall_id=2
 var mall_level=1
@@ -81,7 +81,7 @@ describe('ad_map.test.js', function () {
                   save_used_key(key)
                   var zcount=0
                   value.forEach(function(e){
-                      tair.sadd(key,nm,e,function(err, data){
+                      tair.hset(key,nm,e,1,function(err, data){
                           should.not.exist(err);
                           data.should.equal(true);
                           ++zcount
@@ -331,7 +331,7 @@ describe('ad_map.test.js', function () {
         })
     })
 
-/*  it("clear up test data should work",function(done){
+  it("clear up test data should work",function(done){
       var count=0
       for(var key in used_key){
         console.log('remove '+key)
@@ -344,5 +344,5 @@ describe('ad_map.test.js', function () {
         })
       }
     })
-*/
+
 });

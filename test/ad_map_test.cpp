@@ -22,6 +22,7 @@ namespace ad_map{
   void get_ad_group_set_of_space(const int mall_id, const int space_id, std::vector< int> &ad_group_set);
   void get_ad_group_set_of_location(const int mall_id, const UserPosition &pos, std::vector<int> &ad_group_set);
   double get_eCPM(const int mall_id,const unsigned long long user_id,const int ad_group_id, int &next_ad_id);
+  extern tair::tair_client_api g_tair;
 }
 class AdMapTest : public testing::Test
 {
@@ -35,6 +36,7 @@ protected:
         //user_map::close();
     }
     const int mall_id=2;
+    const int nm=3;
 };
 
 TEST_F(AdMapTest,getAdGroupSetOfSpace)
@@ -55,7 +57,7 @@ TEST_F(AdMapTest,getAdGroupSetOfLocation)
   std::vector< int> ad_group_set;
   UserPosition pos;
   pos.user_id=user_id;
-  user_map::user_map_init(3);
+  user_map::user_map_init(nm);
   EXPECT_NE(user_map::user_query( pos,mall_id),-1);
   EXPECT_EQ(pos.position.x,float(4.3));
   EXPECT_EQ(pos.position.y,float(3.8));
@@ -89,6 +91,19 @@ TEST_F(AdMapTest,GeteCPM)
   double eCPM=get_eCPM(mall_id,user_id,4,next_ad_id);
   EXPECT_EQ(double(84),eCPM);
   EXPECT_EQ(5,next_ad_id);
+}
+
+TEST_F(AdMapTest,GetUserLabel)
+{
+  tair::common::data_entry key;
+  int user_id=12345678;
+  get_data_entry(key,"user:",user_id,":label.set");
+  vector<string> user_label_set;
+  tair_hgetall<string>(ad_map::g_tair,nm,key,user_label_set);
+  EXPECT_EQ(user_label_set.size(),3);
+  EXPECT_EQ(user_label_set[0],"label1");
+  EXPECT_EQ(user_label_set[1],"label2");
+  EXPECT_EQ(user_label_set[2],"label3");
 }
 
 TEST_F(AdMapTest,AdRequest)
