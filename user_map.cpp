@@ -155,7 +155,7 @@ namespace user_map
     int user_add(const unsigned long long  user_id,const float x,const float y,const int z,const int kafka_offset, int mall_id )
     {
         user_map_init();
-        syslog(LOG_INFO, "user_map::user_add() enter");
+        syslog(LOG_INFO, "user_map::user_add() enter user_id=%d,x=%f,y=%f,z=%f",user_id,x,y,z);
         time_t t_now=time(0);
         
         tair_set_user_prop<float>(mall_id,user_id,"x",x);

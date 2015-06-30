@@ -98,7 +98,7 @@ void user_op(UriQueryListA * queryList, Json::Value & ret)
         }
         else
         {
-            user_add(user_id,x,y,z);
+            user_add(user_id,x,y,z,-1,2);
             ret["result"]="success";
         }
     }

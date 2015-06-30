@@ -87,6 +87,8 @@ namespace ad_map
 
     get_data_entry( ad_group_set_key,"ad.location:",mall_id,":"
         ,int(pos.position.x/slice_x),":",int(pos.position.y/slice_y),":",pos.position.z,":ad.group.set");
+
+    syslog(LOG_INFO, "ad_map::get_ad_group_set_of_location() slice_x=%d,pos.x=%f",slice_x ,pos.position.x);   
     tair_zmembers<int>(g_tair,tair_namespace,ad_group_set_key,ad_group_set);
     return;
   }
@@ -178,25 +180,6 @@ namespace ad_map
 
   }
 
-  template <typename T>
-  inline bool check_intersection(const vector<T> &set1, const vector<T> &set2)
-  {
-    unordered_map<T,int> mark;
-    for(typename vector<T>::const_iterator it=set1.begin();it!=set1.end();++it)
-    {
-      mark[*it];
-    }
-
-    for(typename vector<T>::const_iterator it=set1.begin();it!=set1.end();++it)
-    {
-      if(mark.find(*it)!=mark.end())
-      {
-        return true;
-      }
-    }
-    return false;
-  }
-
   void bidding(Json::Value &ret, const UserPosition &pos, const int space_id, const int mall_id,const int n)
   {
     syslog(LOG_INFO, "enter ad_map::bidding() namespace=%d", tair_namespace);   
@@ -238,6 +221,7 @@ namespace ad_map
 
       int next_ad_id=-1;
       double eCPM=get_eCPM(mall_id,pos.user_id,*it,next_ad_id);
+      syslog(LOG_INFO,"ad_map::bidding() eCPM=%f\n",eCPM);
 
       for(int j=n-1;j>=0;--j)
       {

@@ -93,7 +93,22 @@ TEST_F(AdMapTest,GeteCPM)
   EXPECT_EQ(5,next_ad_id);
 }
 
-TEST_F(AdMapTest,GetUserLabel)
+TEST_F(AdMapTest,CheckIntersection)
+{
+    vector<string> set1,set2;
+    set1.push_back("label1");
+    set1.push_back("label2");
+    set1.push_back("label3");
+    set2.push_back("label4");
+    set2.push_back("label5");
+    bool has_intersection=check_intersection(set1,set2);
+    EXPECT_EQ(has_intersection,false);
+    set2.push_back("label3");
+    has_intersection=check_intersection(set1,set2);
+    EXPECT_EQ(has_intersection,true);
+}
+
+TEST_F(AdMapTest,)
 {
   tair::common::data_entry key;
   int user_id=12345678;
@@ -116,6 +131,6 @@ TEST_F(AdMapTest,AdRequest)
   Json::StyledWriter writer;
   const string output = writer.write(ret);
   cout<<"request return json="<< output<<endl;
-  EXPECT_EQ(Json::Value(4),ret["ad"][0]["group_id"]);
-  EXPECT_EQ(Json::Value(5),ret["ad"][0]["id"]);
+  EXPECT_EQ(Json::Value(3),ret["ad"][0]["group_id"]);
+  EXPECT_EQ(Json::Value(4),ret["ad"][0]["id"]);
 }
