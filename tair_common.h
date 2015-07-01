@@ -7,6 +7,7 @@
 #include <ctime>
 #include <limits>
 #include <map>
+#include <unordered_map>
 
 
 using namespace std;
@@ -161,6 +162,25 @@ vector<V_TYPE>* tair_hgetall(tair::tair_client_api & tair_instance,int area, con
     }
     field_values.clear();
     return & members_set;
+}
+
+template <typename T>
+inline bool check_intersection(const vector<T> &set1, const vector<T> &set2)
+{
+    unordered_map<T,int> mark;
+    for(typename vector<T>::const_iterator it=set1.begin();it!=set1.end();++it)
+    {
+        mark[*it];
+    }
+
+    for(typename vector<T>::const_iterator it=set2.begin();it!=set2.end();++it)
+    {
+        if(mark.find(*it)!=mark.end())
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 
