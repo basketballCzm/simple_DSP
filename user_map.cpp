@@ -162,6 +162,7 @@ namespace user_map
         tair_set_user_prop<float>(mall_id,user_id,"y",y);
         if(z!=INT_MIN)
             tair_set_user_prop<int>(mall_id,user_id,"z",z);
+        tair_set_user_prop<time_t>(mall_id,user_id,"time",t_now);
 
         stringstream ss_key,ss_value;
         ss_key<<"location.update.time:"<<mall_id;
