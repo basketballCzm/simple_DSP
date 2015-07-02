@@ -15,12 +15,13 @@ using namespace std;
 
 namespace user_map
 {
-    static tair::tair_client_api g_tair;
-    static const char * master_addr="localhost:5198";
-    static const char * slave_addr=NULL;
-    static const char * group_name="group_1";
-    static int time_slice=10; // minutes
-    static int tair_namespace=2;
+    tair::tair_client_api g_tair;
+    const char * master_addr="localhost:5198";
+    const char * slave_addr=NULL;
+    const char * group_name="group_1";
+    int time_slice=10; // minutes
+    int tair_namespace=2;
+    int max_duration_gap=30;// users' stay time gap
 
     static const char * tb_log_file="user_map.log";
    
@@ -78,14 +79,37 @@ namespace user_map
         tair_put(g_tair,tair_namespace,ss_key.str(),value);
     }
 
-    inline void tair_get_user_prop(const int mall_id,const char * user_id,string prop,tair::common::data_entry * &value )
+    template <typename V_TYPE>
+    inline V_TYPE tair_get_user_prop(const int mall_id,const char * user_id,string prop,V_TYPE  default_v )
     {
-        stringstream ss_key;
-        
-        ss_key<<"location:"<<mall_id<<":"<<user_id<<":"<<prop;
-        tair::common::data_entry key(ss_key.str().c_str(),ss_key.str().size()+1,true);
-        g_tair.get(tair_namespace,key,value);
-        TBSYS_LOG(DEBUG,"tair_get_user_prop() return ,value = %s, size = %d \n",hexStr(value->get_data(),value->get_size()).c_str(),value->get_size());
+        tair::common::data_entry key;
+        get_data_entry(key,"location:",mall_id,":",user_id,":",prop);
+
+        return tair_get(g_tair,tair_namespace,key,default_v);
+    }
+
+    template <typename V_TYPE>
+    inline V_TYPE tair_get_user_prop(const int mall_id,const unsigned long long user_id,string prop,V_TYPE  default_v )
+    {
+        tair::common::data_entry key;
+        get_data_entry(key,"location:",mall_id,":",user_id,":",prop);
+
+        return tair_get(g_tair,tair_namespace,key,default_v);
+    }
+
+    inline void user_duration_add(const unsigned long long user_id,const int mall_id,
+        const time_t t_pre_time,const time_t t_now)
+    {
+        const string & s_date=get_date_str(t_now);
+        tair::common::data_entry key;
+        get_data_entry(key,"user:",s_date,":",mall_id,":",user_id,":duration");
+        int new_duration;
+        int delta=t_now-t_pre_time;
+        if(delta>max_duration_gap)
+          delta=max_duration_gap;
+        if(delta>0)
+          cout<<"delta="<<delta<<endl;
+          g_tair.incr(tair_namespace,key,delta,&new_duration);
     }
 
     inline void user_location_log_add(const unsigned long long  user_id,const float x,
@@ -99,7 +123,7 @@ namespace user_map
         ss_key<<"location.log:"<<mall_id<<":"<<s_date_time<<":counter";
         tair::common::data_entry key_counter(ss_key.str().c_str(),ss_key.str().size()+1,true);
         int log_id;
-        g_tair.incr(tair_namespace,key_counter,1,&log_id,0,0);
+        g_tair.incr(tair_namespace,key_counter,1,&log_id);
         TBSYS_LOG(DEBUG,"user_location_log_add() date_time=%s, log_id=%d",s_date_time.c_str(),log_id);
         
         //set data.time.set
@@ -162,6 +186,7 @@ namespace user_map
         tair_set_user_prop<float>(mall_id,user_id,"y",y);
         if(z!=INT_MIN)
             tair_set_user_prop<int>(mall_id,user_id,"z",z);
+        const time_t &t_pre_time = tair_get_user_prop<time_t>(mall_id,user_id,"time",0);
         tair_set_user_prop<time_t>(mall_id,user_id,"time",t_now);
 
         stringstream ss_key,ss_value;
@@ -176,6 +201,7 @@ namespace user_map
         fprintf(stderr, "user_add tair.zadd: %s\n",g_tair.get_error_msg(ret));
         
         user_location_log_add(user_id,x,y,z,kafka_offset,mall_id,t_now);
+        user_duration_add(user_id,mall_id,t_pre_time,t_now);
 
         return 0;
     }
@@ -204,25 +230,19 @@ namespace user_map
         for(vector<tair::common::data_entry *>::iterator it=vals.begin();it!=vals.end();it++)
         {
             Json::Value user;
-            tair::common::data_entry *value=NULL;
 
             number++;
             user["id"]=(*it)->get_data();
 
-            tair_get_user_prop(mall_id,(*it)->get_data(),"x",value);
-            TBSYS_LOG(DEBUG, "user_list_all() tair_get_user_prop return value=%f",*(float *)(value->get_data()));
-            user["x"]=*(float*)(value->get_data());
-            delete (value);
+            user["x"]=tair_get_user_prop<float>(mall_id,(*it)->get_data(),"x",0.0);
+            user["y"]=tair_get_user_prop<float>(mall_id,(*it)->get_data(),"y",0.0);
+            user["z"]=tair_get_user_prop<int>(mall_id,(*it)->get_data(),"z",0);
 
-            tair_get_user_prop(mall_id,(*it)->get_data(),"y",value);
-            user["y"]=*(float*)value->get_data();
-            delete (value);
 /*
             tair_get_user_prop(mall_id,(*it)->get_data(),"z",value);
             user["z"]=value->get_data();
             delete (value);
 */
-            user["z"]=0;
 
             user_list[std::to_string(number).c_str()]=user;
             delete (*it);

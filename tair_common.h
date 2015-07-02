@@ -63,7 +63,7 @@ T tair_get(tair::tair_client_api & tair_instance,int area, const tair::common::d
 	int ret=tair_instance.get(area,key,p_value);
 	if(ret==TAIR_RETURN_SUCCESS)
 	{
-		//fprintf(stderr, "tair_common.h tair_get() return value=%s",hexStr(p_value->get_data(),p_value->get_size()).c_str());
+		//fprintf(stderr, "tair_common.h tair_get() return value=%s\n",hexStr(p_value->get_data(),p_value->get_size()).c_str());
 		const T & value= get_value<T>(p_value->get_data(),p_value->get_size());
 		delete (p_value);
 		return value;
@@ -118,6 +118,16 @@ inline string  get_date_time_str(time_t t,int time_slice)
 		<<setfill('0') << setw(2)<<  now->tm_hour
 		<<setfill('0') << setw(2)<<  now->tm_min - now->tm_min%time_slice;
 	return ss_datetime.str();
+}
+
+inline string  get_date_str(time_t t)
+{
+	struct tm * now = localtime( & t );
+	stringstream ss_date;
+	ss_date<<(now->tm_year + 1900)   
+		<<setfill('0') << setw(2)<<  (now->tm_mon + 1) 
+		<<setfill('0') << setw(2)<<  now->tm_mday;
+	return ss_date.str();
 }
 
 template <typename V_TYPE>
