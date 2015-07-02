@@ -20,7 +20,7 @@ protected:
     {
         //user_map::close();
     }
-    const unsigned long long  user_id=123456789;
+    const unsigned long long  user_id=1234567890;
     float x=3.1415926535;
     float y=2.718281828;
     int z=4;
@@ -61,4 +61,22 @@ TEST_F(UserMapTest,UserQuery)
     EXPECT_EQ(pos.position.x,x+2);
     EXPECT_EQ(pos.position.y,y+4);
     EXPECT_EQ(pos.position.z,z);
+}
+
+TEST_F(UserMapTest,VipArriveTime)
+{
+    tair::common::data_entry key;
+    get_data_entry(key,"user.vip:",mall_id,":arrive.time");
+    cout<<"key is "<<key.get_data()<<endl;
+    time_t t_now=time(0);
+    
+    vector<string> mac_list;
+    tair_zrangebyscore<string>(g_tair,nm,key,double(t_now-20),double(t_now),mac_list);
+    ASSERT_GE(mac_list.size(),1);
+    EXPECT_STREQ(mac_list[0].c_str(),"1234567890");
+
+    get_data_entry(key,"location.update.time:",mall_id);
+    user_map::g_tair.remove(nm,key);
+    get_data_entry(key,"location:",mall_id,":",user_id,":time");
+    user_map::g_tair.remove(nm,key);
 }

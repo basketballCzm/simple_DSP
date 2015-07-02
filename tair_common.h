@@ -131,11 +131,12 @@ inline string  get_date_str(time_t t)
 }
 
 template <typename V_TYPE>
-vector<V_TYPE>* tair_zmembers(tair::tair_client_api & tair_instance,int area, const tair::common::data_entry &key, vector<V_TYPE> &members_set)
+vector<V_TYPE>* tair_zrangebyscore(tair::tair_client_api & tair_instance,const int area, const tair::common::data_entry &key, 
+    double start,double end, vector<V_TYPE> &members_set)
 {
     vector<tair::common::data_entry*> values; 
     vector<double> scores; 
-    tair_instance.zrangebyscore(area,key,std::numeric_limits<double>::lowest(),std::numeric_limits<double>::max(),values,scores,0,0);
+    tair_instance.zrangebyscore(area,key,start,end,values,scores,0,0);
     for(vector<tair::common::data_entry *>::iterator it=values.begin();it!=values.end();it++)
     {
         members_set.push_back(get_value<V_TYPE>((*it)->get_data(),(*it)->get_size()));
@@ -143,6 +144,13 @@ vector<V_TYPE>* tair_zmembers(tair::tair_client_api & tair_instance,int area, co
     }
     values.clear();
     return & members_set;
+}
+
+template <typename V_TYPE>
+vector<V_TYPE>* tair_zmembers(tair::tair_client_api & tair_instance,const int area, const tair::common::data_entry &key, vector<V_TYPE> &members_set)
+{
+    return tair_zrangebyscore<V_TYPE>(tair_instance,area,key,std::numeric_limits<double>::lowest(),
+      std::numeric_limits<double>::max(),members_set);
 }
 
 template <typename V_TYPE>

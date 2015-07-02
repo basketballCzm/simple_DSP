@@ -175,7 +175,25 @@ namespace user_map
             tair_set_log_prop<int>(mall_id,s_date_time,log_id,"z",z);
         
     }
+
+    inline bool is_mall_vip(const unsigned long long user_id, const int mall_id)
+    {
+        return true; 
+    }
     
+    void vip_arrive_time_record(const unsigned long long user_id,const int mall_id,time_t t_pre,time_t t_now)
+    {
+        if(t_now - t_pre> 60*60 && is_mall_vip(user_id,mall_id))
+        {
+            tair::common::data_entry key,value;
+            get_data_entry(key,"user.vip:",mall_id,":arrive.time");
+            get_data_entry(value,user_id);
+            double score=t_now;
+
+            g_tair.zadd(tair_namespace,key,score,value,0,0);     
+        }
+    }
+
     int user_add(const unsigned long long  user_id,const float x,const float y,const int z,const int kafka_offset, int mall_id )
     {
         user_map_init();
@@ -202,6 +220,7 @@ namespace user_map
         
         user_location_log_add(user_id,x,y,z,kafka_offset,mall_id,t_now);
         user_duration_add(user_id,mall_id,t_pre_time,t_now);
+        vip_arrive_time_record(user_id,mall_id, t_pre_time, t_now);
 
         return 0;
     }
