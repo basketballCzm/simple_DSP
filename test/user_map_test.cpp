@@ -6,7 +6,8 @@
 
 using namespace user_map;
 namespace user_map{
-  extern tair::tair_client_api g_tair;  
+    extern tair::tair_client_api g_tair;  
+    bool is_mall_vip(const unsigned long long user_id, const int mall_id);
 }
 
 class UserMapTest : public testing::Test
@@ -65,18 +66,33 @@ TEST_F(UserMapTest,UserQuery)
 
 TEST_F(UserMapTest,VipArriveTime)
 {
-    tair::common::data_entry key;
+    tair::common::data_entry key,is_vip_key, user_location_time_key;
     get_data_entry(key,"user.vip:",mall_id,":arrive.time");
+    get_data_entry(user_location_time_key,"location:",mall_id,":",user_id,":time");
     cout<<"key is "<<key.get_data()<<endl;
     time_t t_now=time(0);
     
     vector<string> mac_list;
     tair_zrangebyscore<string>(g_tair,nm,key,double(t_now-20),double(t_now),mac_list);
+    ASSERT_EQ(mac_list.size(),0);
+
+    get_data_entry(is_vip_key,"user:",mall_id,":",user_id,":is.mall.vip");
+    tair_put<int>(g_tair,nm,is_vip_key,1);
+    user_map::g_tair.remove(nm,user_location_time_key);
+    int ret = user_add(user_id,x+2,y+4,z,-1,mall_id);
+    EXPECT_EQ(0,ret);
+
+    EXPECT_EQ(true,is_mall_vip(user_id,mall_id));
+
+    t_now=time(0);
+    tair_zrangebyscore<string>(g_tair,nm,key,double(t_now-20),double(t_now),mac_list);
     ASSERT_GE(mac_list.size(),1);
     EXPECT_STREQ(mac_list[0].c_str(),"1234567890");
 
-    get_data_entry(key,"location.update.time:",mall_id);
     user_map::g_tair.remove(nm,key);
-    get_data_entry(key,"location:",mall_id,":",user_id,":time");
+    user_map::g_tair.remove(nm,is_vip_key);
+    user_map::g_tair.remove(nm,user_location_time_key);
+
+    get_data_entry(key,"location.update.time:",mall_id);
     user_map::g_tair.remove(nm,key);
 }

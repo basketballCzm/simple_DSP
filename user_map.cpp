@@ -176,9 +176,11 @@ namespace user_map
         
     }
 
-    inline bool is_mall_vip(const unsigned long long user_id, const int mall_id)
+    bool is_mall_vip(const unsigned long long user_id, const int mall_id)
     {
-        return true; 
+        tair::common::data_entry key;
+        get_data_entry(key,"user:",mall_id,":",user_id,":is.mall.vip");
+        return tair_get<int>(g_tair,tair_namespace,key,0);
     }
     
     void vip_arrive_time_record(const unsigned long long user_id,const int mall_id,time_t t_pre,time_t t_now)
