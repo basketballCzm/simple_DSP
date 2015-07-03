@@ -114,9 +114,11 @@ namespace ad_map
       int ad_id=*( int*)((*it)->get_data());
 
       get_data_entry(key,"ad:",mall_id,":",ad_id,":show.counter");
-      const int & show_counter=tair_get<int>(g_tair,tair_namespace,key,0);
+      const string & s_show_counter=tair_get<string>(g_tair,tair_namespace,key,"0");
+      const int show_counter=std::stoi(s_show_counter);
       get_data_entry(key,"ad:",mall_id,":",ad_id,":click.counter");
-      const int & click_counter=tair_get<int>(g_tair,tair_namespace,key,0);
+      const string & s_click_counter=tair_get<string>(g_tair,tair_namespace,key,"0");
+      const int click_counter=std::stoi(s_click_counter);
       get_data_entry(key,"ad:",mall_id,":",ad_id,":weight");
       int weight=tair_get<int>(g_tair,tair_namespace,key,0);
       if(weight==0)
@@ -266,6 +268,11 @@ namespace ad_map
         ad_node["id"]=show_ad_id;
         ad_node["group_id"]=show_ad_group_id;
         ret["ad"].append(ad_node);
+
+        //increase show time
+        get_data_entry(key,"ad:",mall_id,":",show_ad_id,":show.counter");
+        int show_counter;
+        g_tair.incr(tair_namespace,key,1,&show_counter);
       }
       else
         break;
