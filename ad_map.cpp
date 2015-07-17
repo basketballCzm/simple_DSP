@@ -88,7 +88,8 @@ namespace ad_map
     get_data_entry( ad_group_set_key,"ad.location:",mall_id,":"
         ,int(pos.position.x/slice_x),":",int(pos.position.y/slice_y),":",pos.position.z,":ad.group.set");
 
-    syslog(LOG_INFO, "ad_map::get_ad_group_set_of_location() slice_x=%d,pos.x=%f",slice_x ,pos.position.x);   
+    syslog(LOG_INFO, "ad_map::get_ad_group_set_of_location() slice_x=%d,pos.x=%f slice_y=%d pos.y=%f key=%s"
+        ,slice_x ,pos.position.x, slice_y, pos.position.y, ad_group_set_key.get_data());   
     tair_zmembers<int>(g_tair,tair_namespace,ad_group_set_key,ad_group_set);
     return;
   }
@@ -192,14 +193,16 @@ namespace ad_map
 
     vector< int>  ad_group_set_of_space;
     get_ad_group_set_of_space(mall_id,space_id, ad_group_set_of_space);
-    fprintf(stderr,"ad_map::bidding() ad_group_set_of_space.size()=%d\n",ad_group_set_of_space.size());
+    syslog(LOG_INFO,"ad_map::bidding() ad_group_set_of_space.size()=%d\n",ad_group_set_of_space.size());
 
     vector< int>  ad_group_set_of_location;
     get_ad_group_set_of_location(mall_id,pos, ad_group_set_of_location);
+    syslog(LOG_INFO,"ad_map::bidding() ad_group_set_of_location.size()=%d\n",ad_group_set_of_location.size());
 
     vector< int> ad_group_list;
     set_intersection(ad_group_set_of_space.begin(),ad_group_set_of_space.end(),
         ad_group_set_of_location.begin(),ad_group_set_of_location.end(),back_inserter(ad_group_list));
+    syslog(LOG_INFO,"ad_map::bidding() ad_group_list.size()=%d\n",ad_group_list.size());
 
 
     get_data_entry(key,"user:",pos.mac,":label.set");
