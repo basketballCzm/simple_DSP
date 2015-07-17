@@ -5,6 +5,11 @@
 #include "gtest/gtest.h"
 #include <data_entry.hpp>
 #include <json/json.h>
+#include <syslog.h>
+
+
+
+
 
 TEST(TairCommon,GetDataEntry)
 {
@@ -21,7 +26,7 @@ namespace ad_map{
   void bidding(Json::Value &ret, const UserPosition &pos, const int space_id, const int mall_id);
   void get_ad_group_set_of_space(const int mall_id, const int space_id, std::vector< int> &ad_group_set);
   void get_ad_group_set_of_location(const int mall_id, const UserPosition &pos, std::vector<int> &ad_group_set);
-  double get_eCPM(const int mall_id,const unsigned long long user_id,const int ad_group_id, int &next_ad_id);
+  double get_eCPM(const int mall_id,const unsigned long long mac,const int ad_group_id, int &next_ad_id);
   extern tair::tair_client_api g_tair;
 }
 class AdMapTest : public testing::Test
@@ -29,6 +34,7 @@ class AdMapTest : public testing::Test
 protected:  
     virtual void SetUp()
     {
+      openlog("ad_map_test", LOG_PID|LOG_CONS, LOG_LOCAL0 );
       ad_map_init();
     }
     virtual void TearDown()
@@ -53,10 +59,10 @@ TEST_F(AdMapTest,getAdGroupSetOfSpace)
 TEST_F(AdMapTest,getAdGroupSetOfLocation)
 {
   int space_id=23;
-  int user_id=12345678;
+  int mac=12345678;
   std::vector< int> ad_group_set;
   UserPosition pos;
-  pos.user_id=user_id;
+  pos.mac=mac;
   user_map::user_map_init(nm);
   EXPECT_NE(user_map::user_query( pos,mall_id),-1);
   EXPECT_EQ(pos.position.x,float(4.3));
@@ -69,7 +75,7 @@ TEST_F(AdMapTest,getAdGroupSetOfLocation)
   EXPECT_EQ(ad_group_set[2],4);
   EXPECT_EQ(ad_group_set[3],5);
   EXPECT_EQ(ad_group_set[4],6);
-  pos.user_id=56789012;
+  pos.mac=56789012;
   EXPECT_NE(user_map::user_query( pos,mall_id),-1);
   EXPECT_EQ(pos.position.x,float(100.15));
   EXPECT_EQ(pos.position.y,float(50.3));
@@ -86,9 +92,9 @@ TEST_F(AdMapTest,getAdGroupSetOfLocation)
 
 TEST_F(AdMapTest,GeteCPM)
 {
-  int user_id=12345678;
+  int mac=12345678;
   int next_ad_id=-1;
-  double eCPM=get_eCPM(mall_id,user_id,4,next_ad_id);
+  double eCPM=get_eCPM(mall_id,mac,4,next_ad_id);
   EXPECT_EQ(double(84),eCPM);
   EXPECT_EQ(5,next_ad_id);
 }
@@ -108,25 +114,22 @@ TEST_F(AdMapTest,CheckIntersection)
     EXPECT_EQ(has_intersection,true);
 }
 
-TEST_F(AdMapTest,)
+TEST_F(AdMapTest,UserLabelSet)
 {
   tair::common::data_entry key;
-  int user_id=12345678;
-  get_data_entry(key,"user:",user_id,":label.set");
+  int mac=12345678;
+  get_data_entry(key,"user:",mac,":label.set");
   vector<string> user_label_set;
   tair_hgetall<string>(ad_map::g_tair,nm,key,user_label_set);
   EXPECT_EQ(user_label_set.size(),3);
-  EXPECT_EQ(user_label_set[0],"label1");
-  EXPECT_EQ(user_label_set[1],"label2");
-  EXPECT_EQ(user_label_set[2],"label3");
 }
 
 TEST_F(AdMapTest,AdRequest)
 {
   int space_id=23;
-  unsigned long long user_id=12345678;
+  unsigned long long mac=12345678;
   Json::Value ret;
-  ad_request(ret,user_id,space_id,mall_id,1);
+  ad_request(ret,mac,0,space_id,mall_id,1);
   
   Json::StyledWriter writer;
   const string output = writer.write(ret);

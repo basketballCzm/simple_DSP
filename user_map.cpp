@@ -43,7 +43,7 @@ namespace user_map
         }
     }
 
-    int user_remove(int user_id, int mall_id)
+    int user_remove(int mac, int mall_id)
     {
         return -1;
     }
@@ -52,20 +52,20 @@ namespace user_map
     {
         user_map_init();
 		tair::common::data_entry key;
-		get_data_entry(key,"location:",mall_id,":",pos.user_id,":x");
+		get_data_entry(key,"location:",mall_id,":",pos.mac,":x");
 		pos.position.x = tair_get<float>(g_tair,tair_namespace,key,0);
-		get_data_entry(key,"location:",mall_id,":",pos.user_id,":y");
+		get_data_entry(key,"location:",mall_id,":",pos.mac,":y");
 		pos.position.y = tair_get<float>(g_tair,tair_namespace,key,0);
-		get_data_entry(key,"location:",mall_id,":",pos.user_id,":z");
+		get_data_entry(key,"location:",mall_id,":",pos.mac,":z");
 		pos.position.z = tair_get<int>(g_tair,tair_namespace,key,0);
         return 0;
     }
 
     template <typename V_TYPE>
-    inline void tair_set_user_prop(const int mall_id,const unsigned long long user_id,string prop,const V_TYPE &value)
+    inline void tair_set_user_prop(const int mall_id,const unsigned long long mac,string prop,const V_TYPE &value)
     {
         stringstream ss_key;
-        ss_key<<"location:"<<mall_id<<":"<<user_id<<":"<<prop;
+        ss_key<<"location:"<<mall_id<<":"<<mac<<":"<<prop;
         tair_put(g_tair,tair_namespace,ss_key.str(),value);
 
     }
@@ -80,29 +80,29 @@ namespace user_map
     }
 
     template <typename V_TYPE>
-    inline V_TYPE tair_get_user_prop(const int mall_id,const char * user_id,string prop,V_TYPE  default_v )
+    inline V_TYPE tair_get_user_prop(const int mall_id,const char * mac,string prop,V_TYPE  default_v )
     {
         tair::common::data_entry key;
-        get_data_entry(key,"location:",mall_id,":",user_id,":",prop);
+        get_data_entry(key,"location:",mall_id,":",mac,":",prop);
 
         return tair_get(g_tair,tair_namespace,key,default_v);
     }
 
     template <typename V_TYPE>
-    inline V_TYPE tair_get_user_prop(const int mall_id,const unsigned long long user_id,string prop,V_TYPE  default_v )
+    inline V_TYPE tair_get_user_prop(const int mall_id,const unsigned long long mac,string prop,V_TYPE  default_v )
     {
         tair::common::data_entry key;
-        get_data_entry(key,"location:",mall_id,":",user_id,":",prop);
+        get_data_entry(key,"location:",mall_id,":",mac,":",prop);
 
         return tair_get(g_tair,tair_namespace,key,default_v);
     }
 
-    inline void user_duration_add(const unsigned long long user_id,const int mall_id,
+    inline void user_duration_add(const unsigned long long mac,const int mall_id,
         const time_t t_pre_time,const time_t t_now)
     {
         const string & s_date=get_date_str(t_now);
         tair::common::data_entry key;
-        get_data_entry(key,"user:",s_date,":",mall_id,":",user_id,":duration");
+        get_data_entry(key,"user:",s_date,":",mall_id,":",mac,":duration");
         int new_duration;
         int delta=t_now-t_pre_time;
         if(delta>max_duration_gap)
@@ -112,7 +112,7 @@ namespace user_map
           g_tair.incr(tair_namespace,key,delta,&new_duration);
     }
 
-    inline void user_location_log_add(const unsigned long long  user_id,const float x,
+    inline void user_location_log_add(const unsigned long long  mac,const float x,
         const float y,const int z,const int kafka_offset, int mall_id,time_t t_time)
     {
         static unordered_map<int,string> last_date_time_map;
@@ -150,7 +150,7 @@ namespace user_map
         ss_key.str("");
         ss_key<<"location.log:"<<mall_id<<":"<<s_date_time<<":mac.set";
         ss_value.str("");
-        ss_value<<user_id;
+        ss_value<<mac;
         tair::common::data_entry key_mac_set(ss_key.str().c_str(),ss_key.str().size()+1,true);
         tair::common::data_entry value_mac_set(ss_value.str().c_str(),ss_value.str().size()+1,true);
         g_tair.sadd(tair_namespace,key_mac_set,value_mac_set,0,0);
@@ -158,7 +158,7 @@ namespace user_map
 
         //set loc.log.set
         ss_key.str("");
-        ss_key<<"location.log:"<<mall_id<<":"<<s_date_time<<":"<<user_id<<":loc.log.set";
+        ss_key<<"location.log:"<<mall_id<<":"<<s_date_time<<":"<<mac<<":loc.log.set";
         ss_value.str("");
         ss_value<<log_id;
         tair::common::data_entry key_log_set(ss_key.str().c_str(),ss_key.str().size()+1,true);
@@ -167,7 +167,7 @@ namespace user_map
         int ret=g_tair.zadd(tair_namespace,key_log_set,score,value_log_set,0,0);
         
         //set log's property
-        tair_set_log_prop<unsigned long long>(mall_id,s_date_time,log_id,"mac",user_id);
+        tair_set_log_prop<unsigned long long>(mall_id,s_date_time,log_id,"mac",mac);
         tair_set_log_prop<time_t>(mall_id,s_date_time,log_id,"time",t_time);
         tair_set_log_prop<float>(mall_id,s_date_time,log_id,"x",x);
         tair_set_log_prop<float>(mall_id,s_date_time,log_id,"y",y);
@@ -176,42 +176,42 @@ namespace user_map
         
     }
 
-    bool is_mall_vip(const unsigned long long user_id, const int mall_id)
+    bool is_mall_vip(const unsigned long long mac, const int mall_id)
     {
         tair::common::data_entry key;
-        get_data_entry(key,"user:",mall_id,":",user_id,":is.mall.vip");
+        get_data_entry(key,"user:",mall_id,":",mac,":is.mall.vip");
         return tair_get<int>(g_tair,tair_namespace,key,0);
     }
     
-    void vip_arrive_time_record(const unsigned long long user_id,const int mall_id,time_t t_pre,time_t t_now)
+    void vip_arrive_time_record(const unsigned long long mac,const int mall_id,time_t t_pre,time_t t_now)
     {
-        if(t_now - t_pre> 60*60 && is_mall_vip(user_id,mall_id))
+        if(t_now - t_pre> 60*60 && is_mall_vip(mac,mall_id))
         {
             tair::common::data_entry key,value;
             get_data_entry(key,"user.vip:",mall_id,":arrive.time");
-            get_data_entry(value,user_id);
+            get_data_entry(value,mac);
             double score=t_now;
 
             g_tair.zadd(tair_namespace,key,score,value,0,0);     
         }
     }
 
-    int user_add(const unsigned long long  user_id,const float x,const float y,const int z,const int kafka_offset, int mall_id )
+    int user_add(const unsigned long long  mac,const float x,const float y,const int z,const int kafka_offset, int mall_id )
     {
         user_map_init();
-        syslog(LOG_INFO, "user_map::user_add() enter user_id=%d,x=%f,y=%f,z=%f",user_id,x,y,z);
+        syslog(LOG_INFO, "user_map::user_add() enter mac=%d,x=%f,y=%f,z=%f",mac,x,y,z);
         time_t t_now=time(0);
         
-        tair_set_user_prop<float>(mall_id,user_id,"x",x);
-        tair_set_user_prop<float>(mall_id,user_id,"y",y);
+        tair_set_user_prop<float>(mall_id,mac,"x",x);
+        tair_set_user_prop<float>(mall_id,mac,"y",y);
         if(z!=INT_MIN)
-            tair_set_user_prop<int>(mall_id,user_id,"z",z);
-        const time_t &t_pre_time = tair_get_user_prop<time_t>(mall_id,user_id,"time",0);
-        tair_set_user_prop<time_t>(mall_id,user_id,"time",t_now);
+            tair_set_user_prop<int>(mall_id,mac,"z",z);
+        const time_t &t_pre_time = tair_get_user_prop<time_t>(mall_id,mac,"time",0);
+        tair_set_user_prop<time_t>(mall_id,mac,"time",t_now);
 
         stringstream ss_key,ss_value;
         ss_key<<"location.update.time:"<<mall_id;
-        ss_value<<user_id;
+        ss_value<<mac;
         tair::common::data_entry key(ss_key.str().c_str(),ss_key.str().size()+1,true);
         tair::common::data_entry value(ss_value.str().c_str(),ss_value.str().size()+1,true);
         double score=t_now;
@@ -220,15 +220,15 @@ namespace user_map
             <<key.get_size()<<",value="<<value.get_data()<<",score="<<setprecision(17)<<score<<endl;
         fprintf(stderr, "user_add tair.zadd: %s\n",g_tair.get_error_msg(ret));
         
-        user_location_log_add(user_id,x,y,z,kafka_offset,mall_id,t_now);
-        user_duration_add(user_id,mall_id,t_pre_time,t_now);
-        vip_arrive_time_record(user_id,mall_id, t_pre_time, t_now);
+        user_location_log_add(mac,x,y,z,kafka_offset,mall_id,t_now);
+        user_duration_add(mac,mall_id,t_pre_time,t_now);
+        vip_arrive_time_record(mac,mall_id, t_pre_time, t_now);
 
         return 0;
     }
 
 
-    int user_update(const unsigned long long user_id,const float x,const float y,const int z,const int kafka_offset, int mall_id )
+    int user_update(const unsigned long long mac,const float x,const float y,const int z,const int kafka_offset, int mall_id )
     {
         return -1;
     }
@@ -272,13 +272,13 @@ namespace user_map
         user_list["size"]=number;
     }
 
-    int user_tag_update(const unsigned long long user_id, const char* user_tag, const float user_value)
+    int user_tag_update(const unsigned long long mac, const char* user_tag, const float user_value)
     {
         user_map_init();
         syslog(LOG_INFO, "user_map::user_tag_update() enter");
         
         stringstream ss_key,ss_field,ss_value;
-        ss_key<<"user:"<<user_id<<":label.set";
+        ss_key<<"user:"<<mac<<":label.set";
         ss_field<<user_tag;
         ss_value<<user_value;
         tair::common::data_entry key(ss_key.str().c_str(),ss_key.str().size()+1,true);
@@ -292,4 +292,16 @@ namespace user_map
         return 0;
     }
 
+    unsigned long long user_get_mac(const int user_id)
+    {
+        tair::common::data_entry key;
+        get_data_entry(key,"user:",user_id,":mac");
+        return tair_get<unsigned long long >(g_tair,tair_namespace,key,0);
+    }
+    int user_get_id(const unsigned long long mac)
+    {
+        tair::common::data_entry key;
+        get_data_entry(key,"mac:",mac,":user.id");
+        return tair_get<int >(g_tair,tair_namespace,key,0);
+    }
 }

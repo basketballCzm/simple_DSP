@@ -20,7 +20,7 @@ namespace ad_map
   int ad_update();
   int ad_query();
   void ad_list_all();
-  int ad_request(Json::Value &ret, const unsigned long long user_id, const int space_id, const int mall_id=0,const int n=1);
-  int ad_click();
+  int ad_request(Json::Value &ret, const unsigned long long mac, const int user_id, const int space_id, const int mall_id=0,const int n=1);
+  int ad_click(Json::Value &ret, const int ad_id, const int user_id, const int mall_id);
 }
 

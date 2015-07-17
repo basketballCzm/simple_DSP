@@ -63,7 +63,7 @@ static void penv(const char * const * envp)
 void user_op(UriQueryListA * queryList, Json::Value & ret)
 {
     string action;
-    int user_id=INT_MIN;
+    int mac=INT_MIN;
     float x=FLT_MAX;
     float y=FLT_MAX;
     int z=INT_MIN;
@@ -80,8 +80,8 @@ void user_op(UriQueryListA * queryList, Json::Value & ret)
             stringstream( p_para->value )>> y;
         else if (strcmp(p_para->key,"z")==0||strcmp(p_para->key,"level")==0)
             stringstream( p_para->value )>> z;
-        else if (strcmp(p_para->key,"user_id")==0)
-            stringstream( p_para->value )>> user_id;
+        else if (strcmp(p_para->key,"mac")==0)
+            stringstream( p_para->value )>> mac;
         else if (strcmp(p_para->key,"start")==0)
             stringstream( p_para->value )>>start;
         else if (strcmp(p_para->key,"end")==0)
@@ -91,46 +91,46 @@ void user_op(UriQueryListA * queryList, Json::Value & ret)
 
     if(strcmp("add",action.c_str())==0)
     {
-        if(user_id==INT_MIN || x==FLT_MAX || y==FLT_MAX || z == INT_MIN)
+        if(mac==INT_MIN || x==FLT_MAX || y==FLT_MAX || z == INT_MIN)
         {
             syslog(LOG_INFO, "adstat user_op: %s uncompleted parameters !",action.c_str());
             ret["result"]="fail";
         }
         else
         {
-            user_add(user_id,x,y,z,-1,2);
+            user_add(mac,x,y,z,-1,2);
             ret["result"]="success";
         }
     }
     else if (strcmp("remove",action.c_str())==0)
     {
-        if(user_id==INT_MIN)
+        if(mac==INT_MIN)
         {
             syslog(LOG_INFO, "adstat user_op: %s uncompleted parameters !",action.c_str());
             ret["result"]="fail";
         }
         else
         {
-            user_remove(user_id);
+            user_remove(mac);
             ret["result"]="success";
         }
     }
     else if(strcmp("update",action.c_str())==0)
     {
-        if(user_id==INT_MIN || x==FLT_MAX || y==FLT_MAX || z == INT_MIN)
+        if(mac==INT_MIN || x==FLT_MAX || y==FLT_MAX || z == INT_MIN)
         {
             syslog(LOG_INFO, "adstat user_op: %s uncompleted parameters !",action.c_str());
             ret["result"]="fail";
         }
         else
         {
-            user_update(user_id,x,y,z);
+            user_update(mac,x,y,z);
             ret["result"]="success";
         }
     }
     else if(strcmp("query",action.c_str())==0)
     {
-        if(user_id==INT_MIN)
+        if(mac==INT_MIN)
         {
             syslog(LOG_INFO, "adstat user_op: %s uncompleted parameters !",action.c_str());
             ret["result"]="fail";
@@ -138,7 +138,7 @@ void user_op(UriQueryListA * queryList, Json::Value & ret)
         else
         {
             UserPosition pos;
-            pos.user_id=user_id;
+            pos.mac=mac;
             user_query(pos);
             ret["result"]="success";
             ret["x"]=pos.position.longitude;

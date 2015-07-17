@@ -93,7 +93,7 @@ namespace ad_map
     return;
   }
 
-  double get_eCPM(const int mall_id,const unsigned long long user_id,const int ad_group_id, int &next_ad_id)
+  double get_eCPM(const int mall_id,const unsigned long long mac,const int ad_group_id, int &next_ad_id)
   {
     tair::common::data_entry key;
     vector<tair::common::data_entry*> ad_id_set;
@@ -192,6 +192,7 @@ namespace ad_map
 
     vector< int>  ad_group_set_of_space;
     get_ad_group_set_of_space(mall_id,space_id, ad_group_set_of_space);
+    fprintf(stderr,"ad_map::bidding() ad_group_set_of_space.size()=%d\n",ad_group_set_of_space.size());
 
     vector< int>  ad_group_set_of_location;
     get_ad_group_set_of_location(mall_id,pos, ad_group_set_of_location);
@@ -201,7 +202,7 @@ namespace ad_map
         ad_group_set_of_location.begin(),ad_group_set_of_location.end(),back_inserter(ad_group_list));
 
 
-    get_data_entry(key,"user:",pos.user_id,":label.set");
+    get_data_entry(key,"user:",pos.mac,":label.set");
     vector<string> user_label_set;
     tair_hgetall<string>(g_tair,tair_namespace,key,user_label_set);
 
@@ -222,7 +223,7 @@ namespace ad_map
         continue;
 
       int next_ad_id=-1;
-      double eCPM=get_eCPM(mall_id,pos.user_id,*it,next_ad_id);
+      double eCPM=get_eCPM(mall_id,pos.mac,*it,next_ad_id);
       syslog(LOG_INFO,"ad_map::bidding() eCPM=%f\n",eCPM);
 
       for(int j=n-1;j>=0;--j)
@@ -311,24 +312,38 @@ namespace ad_map
     return -1;
   }
 
-  int ad_request(Json::Value &ret, const unsigned long long user_id, const int space_id, const int mall_id, const int n)
+  int ad_request(Json::Value &ret, const unsigned long long mac,const int user_id, const int space_id, const int mall_id, const int n)
   {
     ad_map_init();
 
     UserPosition pos;
-    pos.user_id=user_id;
+    pos.mac=mac;
     if( user_map::user_query( pos,mall_id) ==-1)
       //user id not found!
     {
-      TBSYS_LOG(DEBUG, "ad_op ad_request, user id :%d , location data not found!",pos.user_id);   
+      TBSYS_LOG(DEBUG, "ad_op ad_request, user id :%d , location data not found!",pos.mac);   
     }
     bidding(ret,pos,space_id,mall_id,n);	
     return -1;
   }
 
-  int ad_click()
+  int ad_click(Json::Value &ret, const int ad_id, const int user_id, const int mall_id)
   {
-    return -1;
+    tair::common::data_entry key;
+    get_data_entry(key,"ad:",mall_id,":",ad_id,":group");
+    int group_id=tair_get<int>(g_tair,tair_namespace,key,-1); 
+    if (group_id== -1)
+    {
+      ret["result"]="no such ad";
+      return -1;
+    }
+
+    //increase show time
+    get_data_entry(key,"ad:",mall_id,":",ad_id,":click.counter");
+    int counter;
+    g_tair.incr(tair_namespace,key,1,&counter);
+    ret["result"]="ok";
+    return 0;
   }   
 
 
