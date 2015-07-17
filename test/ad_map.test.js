@@ -227,6 +227,37 @@ describe('ad_map.test.js', function () {
         })
     })
 
+  it("ad_map insert test data ad should be ok!",function(done){
+      var test_entry_list=[
+        [1,1],
+        [2,1],
+        [3,2],
+        [4,3],
+        [5,4],
+        [6,6],
+        [7,1],
+      ]
+      var prop_list=["group"]
+      var count=0
+
+      test_entry_list.forEach(function(c){
+          prop_list.forEach(function(d,j){
+              var key="ad:"+mall_id+":"+c[0]+":"+d
+              var value=c[j+1]
+              save_used_key(key)
+              tair.set(key,value,0,nm,0,function(err,success){
+                  should.not.exist(err)
+                  success.should.equal(true)
+                  count++;
+                  if(count==prop_list.length*test_entry_list.length){
+                    done()
+                  }
+                })
+           })
+      })
+    })
+
+    
   it("ad_map insert test data to ad.location should be ok!",function(done){
     //240*120 => 24*12
     var x_len=24
