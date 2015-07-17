@@ -137,3 +137,23 @@ TEST_F(AdMapTest,AdRequest)
   EXPECT_EQ(Json::Value(3),ret["ad"][0]["group_id"]);
   EXPECT_EQ(Json::Value(4),ret["ad"][0]["id"]);
 }
+
+TEST_F(AdMapTest,AdClick)
+{
+  int ad_id=4;
+  unsigned long long mac=12345678;
+  Json::Value ret;
+  
+  tair::common::data_entry key;
+  get_data_entry(key,"ad:",mall_id,":",ad_id,":click.counter");
+  string s_counter =tair_get<string>(ad_map::g_tair,nm,key,"");
+  int counter1=std::atoi(s_counter.c_str());
+  cout<<"counter1="<<counter1<<", key="<<key.get_data()<<endl;
+  ad_click(ret,ad_id,0,mall_id);
+  EXPECT_EQ(Json::Value("ok"),ret["result"]);
+  s_counter =tair_get<string>(ad_map::g_tair,nm,key,"");
+  int counter2=std::atoi(s_counter.c_str());
+  cout<<"counter2="<<counter2;
+  EXPECT_EQ(1,counter2-counter1);
+
+}
