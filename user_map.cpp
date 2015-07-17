@@ -196,6 +196,15 @@ namespace user_map
         }
     }
 
+    void mac_set_record(const unsigned long long mac, const int mall_id, time_t t_now)
+    {  
+        const string & s_date =  get_date_str(t_now);
+        tair::common::data_entry key,value;
+        get_data_entry(key,"mac.set:",s_date,":",mall_id,":daily");
+        get_data_entry(value,mac);
+        g_tair.sadd(tair_namespace,key,value,0,0);
+    }
+
     int user_add(const unsigned long long  mac,const float x,const float y,const int z,const int kafka_offset, int mall_id )
     {
         user_map_init();
@@ -223,6 +232,7 @@ namespace user_map
         user_location_log_add(mac,x,y,z,kafka_offset,mall_id,t_now);
         user_duration_add(mac,mall_id,t_pre_time,t_now);
         vip_arrive_time_record(mac,mall_id, t_pre_time, t_now);
+        mac_set_record(mac,mall_id,t_now);
 
         return 0;
     }
