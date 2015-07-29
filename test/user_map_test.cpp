@@ -3,10 +3,12 @@
 #include "tair_common.h"
 #include "gtest/gtest.h"
 #include <data_entry.hpp>
+#include "boost/format.hpp"
 
 using namespace user_map;
 namespace user_map{
     extern tair::tair_client_api g_tair;  
+    extern const char * pg_server; 
     bool is_mall_vip(const unsigned long long mac, const int mall_id);
 }
 
@@ -21,14 +23,20 @@ protected:
     {
         //user_map::close();
     }
-    const unsigned long long  mac=1234567890;
     float x=3.1415926535;
     float y=2.718281828;
     int z=4;
     int mall_id=5;
     int nm=3;
     static vector<tair::common::data_entry> saved_keys;
+public:    
+    static unsigned long long  mac;
+    static int user_id;
 };
+
+int UserMapTest::user_id=0;
+unsigned long long  UserMapTest::mac=1234567890;
+
 vector<tair::common::data_entry> UserMapTest::saved_keys;
 
 TEST_F(UserMapTest,UserAdd)
@@ -113,8 +121,48 @@ TEST_F(UserMapTest,MacSetDaily)
     EXPECT_STREQ(values[1].c_str(),"1234567891");
 }
 
+void* user_get_id_func(void *ptr)
+{
+    *(int *)ptr=user_get_id(UserMapTest::mac);
+    return NULL;
+}
+
+TEST_F(UserMapTest,UserGetId)
+{
+    int user_id_list[5];
+    pthread_t mThreadIDs[5];
+    for(int i=0;i<5;++i)
+    {
+        ::pthread_create(mThreadIDs+i, nullptr, user_get_id_func,user_id_list+i);
+    }
+    for(int i=0;i<5;++i)
+    {
+      ::pthread_join(mThreadIDs[i], nullptr);
+    }
+    EXPECT_GT(user_id_list[0],0);
+    EXPECT_EQ(user_id_list[0], user_id_list[1]);
+    EXPECT_EQ(user_id_list[0], user_id_list[2]);
+    EXPECT_EQ(user_id_list[0], user_id_list[3]);
+    EXPECT_EQ(user_id_list[0], user_id_list[4]);
+    user_id=user_id_list[0];
+    tair::common::data_entry key;
+    get_data_entry(key,"mac:",UserMapTest::mac,":user.id");
+    saved_keys.push_back(key);
+    get_data_entry(key,"user:",user_id,":mac");
+    unsigned long long saved_mac=user_get_mac(user_id);
+    EXPECT_EQ(saved_mac,UserMapTest::mac);
+
+    saved_keys.push_back(key);
+}
+
 TEST_F(UserMapTest,RemoveKeys)
 {
+    const char * remove_user_sql="echo  \"delete from users where id=%s \"\
+    | psql -h%s  -U postgres -w -d adsweb ";
+    string cmd=str(boost::format(remove_user_sql)%user_id%pg_server);
+    cout<<"command="<<cmd<<endl;
+    cout<<"sql executed:"<<exec(cmd.c_str())<<endl;
+
     tair::common::data_entry key;
     get_data_entry(key,"location.update.time:",mall_id);
     saved_keys.push_back(key);
@@ -126,3 +174,4 @@ TEST_F(UserMapTest,RemoveKeys)
         user_map::g_tair.remove(nm,*it);
     }
 }
+

@@ -9,9 +9,11 @@
 #include <unordered_map>
 #include <data_entry.hpp>
 #include "tair_common.h"
+#include "boost/format.hpp"
 
 
 using namespace std;
+
 
 namespace user_map
 {
@@ -22,6 +24,11 @@ namespace user_map
     int time_slice=10; // minutes
     int tair_namespace=2;
     int max_duration_gap=30;// users' stay time gap
+    const char * pg_server="172.17.42.1";
+    const char * add_user_sql="echo  \"begin transaction isolation level serializable;select \
+    add_user(%ld,'%s_%ld','%s_%ld');commit;\" \
+    | psql -h%s  -U postgres -w -d adsweb \ 
+    2>/dev/null  | grep -B 3 COMMIT | head -n 1 ";
 
     static const char * tb_log_file="user_map.log";
    
@@ -209,6 +216,7 @@ namespace user_map
     {
         user_map_init();
         syslog(LOG_INFO, "user_map::user_add() enter mac=%d,x=%f,y=%f,z=%f",mac,x,y,z);
+        //printf("user_map::user_add() enter mac=%d,x=%f,y=%f,z=%f",mac,x,y,z);
         time_t t_now=time(0);
         
         tair_set_user_prop<float>(mall_id,mac,"x",x);
@@ -312,6 +320,36 @@ namespace user_map
     {
         tair::common::data_entry key;
         get_data_entry(key,"mac:",mac,":user.id");
-        return tair_get<int >(g_tair,tair_namespace,key,0);
+        int user_id=tair_get<int >(g_tair,tair_namespace,key,0);
+        if(user_id==0)
+        {
+            //get user id from pg db
+            string cmd=str(boost::format(add_user_sql)%mac%"guest"%mac%"guest"%mac%pg_server);
+            string s_id;
+            for (int i=0;i<10;++i)
+            {
+                cout<<"NO."<<i+1<<" cmd="<<cmd<<endl;
+                s_id=exec(cmd.c_str());
+                cout<<"output:"<<s_id<<endl;
+                if(!s_id.empty())
+                {
+                  break;
+                }
+            }
+
+            if(!s_id.empty())
+            {
+                user_id=std::stoi(s_id);
+            }
+            cout <<"user_id="<<user_id<<endl;
+            if(user_id>0)
+            {
+                tair_put<int >(g_tair,tair_namespace,key,user_id);
+                get_data_entry(key,"user:",user_id,":mac");
+                tair_put<unsigned long long >(g_tair,tair_namespace,key,mac);
+            }
+        }
+        return user_id;
+        
     }
 }

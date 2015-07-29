@@ -8,6 +8,7 @@
 #include <limits>
 #include <map>
 #include <unordered_map>
+#include <stdio.h>
 
 
 using namespace std;
@@ -20,6 +21,20 @@ inline std::string hexStr(char *data, int len)
 	for(int i(0);i<len;++i)
 		ss<<"\\x"<<(unsigned int)data[i];
 	return ss.str();
+}
+
+
+inline std::string exec(const char* cmd) {
+  FILE* pipe = popen(cmd, "r");
+  if (!pipe) return "";
+  char buffer[128];
+  std::string result = "";
+  while(!feof(pipe)) {
+    if(fgets(buffer, 128, pipe) != NULL)
+      result += buffer;
+  }
+  pclose(pipe);
+  return result;
 }
 
 
