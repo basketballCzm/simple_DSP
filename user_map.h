@@ -6,7 +6,7 @@
 //mac is the mac address
 namespace user_map
 {
-    void user_map_init(int ns=0);
+    void user_map_init();
     int user_add(UserPosition pos,int mall_id=0);
     //kafka_offset default -1 meanes none
     int user_add(const unsigned long long mac,const float x,const float y,const int z, const int kafka_offset=-1,int mall_id=0);

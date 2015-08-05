@@ -17,7 +17,7 @@ class UserMapTest : public testing::Test
 protected:  
     virtual void SetUp()
     {
-        user_map_init(nm);
+        user_map_init();
     }
     virtual void TearDown()
     {

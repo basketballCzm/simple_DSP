@@ -63,7 +63,7 @@ TEST_F(AdMapTest,getAdGroupSetOfLocation)
   std::vector< int> ad_group_set;
   UserPosition pos;
   pos.mac=mac;
-  user_map::user_map_init(nm);
+  user_map::user_map_init();
   EXPECT_NE(user_map::user_query( pos,mall_id),-1);
   EXPECT_EQ(pos.position.x,float(4.3));
   EXPECT_EQ(pos.position.y,float(3.8));

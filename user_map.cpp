@@ -10,7 +10,7 @@
 #include <data_entry.hpp>
 #include "tair_common.h"
 #include "boost/format.hpp"
-
+#include "tbsys/config.h"
 
 using namespace std;
 
@@ -18,35 +18,47 @@ using namespace std;
 namespace user_map
 {
     tair::tair_client_api g_tair;
-    const char * master_addr="localhost:5198";
-    const char * slave_addr=NULL;
-    const char * group_name="group_1";
-    int time_slice=10; // minutes
-    int tair_namespace=2;
-    int max_duration_gap=30;// users' stay time gap
-    const char * pg_server="172.17.42.1";
-    const char * add_user_sql="echo  \"begin transaction isolation level serializable;select \
-    add_user(%ld,'%s_%ld','%s_%ld');commit;\" \
-    | psql -h%s  -U postgres -w -d adsweb \ 
-    2>/dev/null  | grep -B 3 COMMIT | head -n 1 ";
-
-    static const char * tb_log_file="user_map.log";
+    const char * config_file="config.ini";
+    tbsys::CConfig config;
+    const char * master_addr;
+    const char * slave_addr;
+    const char * group_name;
+    int time_slice; // minutes
+    int tair_namespace;
+    int max_duration_gap;// users' stay time gap
+    const char * pg_server;
+    const char * add_user_sql;
+    static const char * tb_log_file;
    
-    void user_map_init(int ns)
+    void user_map_init()
     {
         static bool b_started=false;
         if(!b_started)
         {
+            if(config.load(config_file) == EXIT_FAILURE) {
+                syslog(LOG_INFO,"load config file %s error", config_file);
+                return;
+            }
+            syslog(LOG_INFO,"user_map_init() load config ok!");
+            master_addr=config.getString("tair_rdb","master_addr",NULL);
+            slave_addr=config.getString("tair_rdb","slave_addr",NULL);            
+            group_name=config.getString("tair_rdb","group_name",NULL);            
+            time_slice=config.getInt("tair_rdb","time_slice",10);
+            tair_namespace=config.getInt("tair_rdb","namespace",0);
+
+            tb_log_file=config.getString("user_map","log_file",NULL);
+            max_duration_gap=config.getString("user_map","max_duration_gap",NULL);
+            max_duration_gap=config.getInt("user_map","max_duration_gap",NULL);
+            add_user_sql=config.getString("user_map","add_user_sql",NULL);
+            pg_server=config.getString("user_map","pg_server",NULL);
+
+
             TBSYS_LOGGER.setFileName(tb_log_file,true);
             TBSYS_LOGGER.setLogLevel("DEBUG");
 
             g_tair.set_timeout(5000);
             g_tair.startup(master_addr,slave_addr,group_name); 
             b_started=true;
-        }
-        if(ns!=0)
-        {
-            tair_namespace=ns;
         }
     }
 
