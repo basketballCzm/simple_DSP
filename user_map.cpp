@@ -47,8 +47,7 @@ namespace user_map
             tair_namespace=config.getInt("tair_rdb","namespace",0);
 
             tb_log_file=config.getString("user_map","log_file",NULL);
-            max_duration_gap=config.getString("user_map","max_duration_gap",NULL);
-            max_duration_gap=config.getInt("user_map","max_duration_gap",NULL);
+            max_duration_gap=config.getInt("user_map","max_duration_gap",30);
             add_user_sql=config.getString("user_map","add_user_sql",NULL);
             pg_server=config.getString("user_map","pg_server",NULL);
 
