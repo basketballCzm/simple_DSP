@@ -9,7 +9,9 @@ using namespace user_map;
 namespace user_map{
     extern tair::tair_client_api g_tair;  
     extern const char * pg_server; 
-    bool is_mall_vip(const unsigned long long mac, const int mall_id);
+    bool is_mall_vip(const int user_id, const int mall_id);
+    int user_get_id(const unsigned long long mac);
+    unsigned long long user_get_mac(const int id);
 }
 
 class UserMapTest : public testing::Test
@@ -39,6 +41,50 @@ unsigned long long  UserMapTest::mac=1234567890;
 
 vector<tair::common::data_entry> UserMapTest::saved_keys;
 
+void* user_get_id_func(void *ptr)
+{
+    *(int *)ptr=user_get_id(UserMapTest::mac);
+    return NULL;
+}
+
+TEST_F(UserMapTest,UserGetIdGetMac)
+{
+    int user_id_list[5];
+    pthread_t mThreadIDs[5];
+    for(int i=0;i<5;++i)
+    {
+        ::pthread_create(mThreadIDs+i, nullptr, user_get_id_func,user_id_list+i);
+    }
+    for(int i=0;i<5;++i)
+    {
+      ::pthread_join(mThreadIDs[i], nullptr);
+    }
+    EXPECT_GT(user_id_list[0],0);
+    EXPECT_EQ(user_id_list[0], user_id_list[1]);
+    EXPECT_EQ(user_id_list[0], user_id_list[2]);
+    EXPECT_EQ(user_id_list[0], user_id_list[3]);
+    EXPECT_EQ(user_id_list[0], user_id_list[4]);
+    user_id=user_id_list[0];
+    tair::common::data_entry key_id;
+    get_data_entry(key_id,"mac:",UserMapTest::mac,":user.id");
+    saved_keys.push_back(key_id);
+    //query from tair-rdb
+    unsigned long long saved_mac=user_get_mac(user_id);
+    EXPECT_EQ(saved_mac,UserMapTest::mac);
+
+    // query from pg
+    tair::common::data_entry key_mac;
+    get_data_entry(key_mac,"user:",user_id,":mac");
+    user_map::g_tair.remove(nm,key_mac);
+    saved_mac=user_get_mac(user_id);
+    EXPECT_EQ(saved_mac,UserMapTest::mac);
+
+    EXPECT_EQ(saved_mac,tair_get<unsigned long long>(user_map::g_tair,nm,key_mac,0));
+    EXPECT_EQ(user_id,tair_get<int>(user_map::g_tair,nm,key_id,0));
+
+    saved_keys.push_back(key_mac);
+}
+
 TEST_F(UserMapTest,UserAdd)
 {
     int ret = user_add(mac,x,y,z,-1,mall_id);
@@ -51,7 +97,8 @@ TEST_F(UserMapTest,UserDuration)
 {
     tair::common::data_entry key;
     const string & s_date=get_date_str(time(0));
-    get_data_entry(key,"user:",s_date,":",mall_id,":",mac,":duration");
+    int user_id=user_get_id(mac);
+    get_data_entry(key,"user:",s_date,":",mall_id,":",user_id,":duration");
     saved_keys.push_back(key);
     string duration=tair_get<string>(user_map::g_tair,nm,key,"");
     EXPECT_STREQ("30",duration.c_str());
@@ -81,6 +128,7 @@ TEST_F(UserMapTest,UserQuery)
 TEST_F(UserMapTest,VipArriveTime)
 {
     tair::common::data_entry key,is_vip_key, user_location_time_key;
+    int user_id=user_get_id(mac);
     get_data_entry(key,"user.vip:",mall_id,":arrive.time");
     saved_keys.push_back(key);
     get_data_entry(user_location_time_key,"location:",mall_id,":",mac,":time");
@@ -88,24 +136,24 @@ TEST_F(UserMapTest,VipArriveTime)
     cout<<"key is "<<key.get_data()<<endl;
     time_t t_now=time(0);
     
-    vector<string> mac_list;
-    tair_zrangebyscore<string>(g_tair,nm,key,double(t_now-20),double(t_now),mac_list);
-    ASSERT_EQ(mac_list.size(),0);
+    vector<string> user_list;
+    tair_zrangebyscore<string>(g_tair,nm,key,double(t_now-20),double(t_now),user_list);
+    ASSERT_EQ(user_list.size(),0);
 
-    get_data_entry(is_vip_key,"user:",mall_id,":",mac,":is.mall.vip");
+    get_data_entry(is_vip_key,"user:",mall_id,":",user_id,":is.mall.vip");
     saved_keys.push_back(is_vip_key);
     tair_put<int>(g_tair,nm,is_vip_key,1);
     user_map::g_tair.remove(nm,user_location_time_key);
     int ret = user_add(mac,x+2,y+4,z,-1,mall_id);
     EXPECT_EQ(0,ret);
+    
 
-    EXPECT_EQ(true,is_mall_vip(mac,mall_id));
+    EXPECT_EQ(true,is_mall_vip(user_id,mall_id));
 
     t_now=time(0);
-    tair_zrangebyscore<string>(g_tair,nm,key,double(t_now-20),double(t_now),mac_list);
-    ASSERT_GE(mac_list.size(),1);
-    EXPECT_STREQ(mac_list[0].c_str(),"1234567890");
-
+    tair_zrangebyscore<string>(g_tair,nm,key,double(t_now-20),double(t_now),user_list);
+    ASSERT_GE(user_list.size(),1);
+    EXPECT_STREQ(user_list[0].c_str(),to_string(user_id).c_str());
 }
 
 TEST_F(UserMapTest,MacSetDaily)
@@ -119,40 +167,6 @@ TEST_F(UserMapTest,MacSetDaily)
     ASSERT_EQ(values.size(),2);
     EXPECT_STREQ(values[0].c_str(),"1234567890");
     EXPECT_STREQ(values[1].c_str(),"1234567891");
-}
-
-void* user_get_id_func(void *ptr)
-{
-    *(int *)ptr=user_get_id(UserMapTest::mac);
-    return NULL;
-}
-
-TEST_F(UserMapTest,UserGetId)
-{
-    int user_id_list[5];
-    pthread_t mThreadIDs[5];
-    for(int i=0;i<5;++i)
-    {
-        ::pthread_create(mThreadIDs+i, nullptr, user_get_id_func,user_id_list+i);
-    }
-    for(int i=0;i<5;++i)
-    {
-      ::pthread_join(mThreadIDs[i], nullptr);
-    }
-    EXPECT_GT(user_id_list[0],0);
-    EXPECT_EQ(user_id_list[0], user_id_list[1]);
-    EXPECT_EQ(user_id_list[0], user_id_list[2]);
-    EXPECT_EQ(user_id_list[0], user_id_list[3]);
-    EXPECT_EQ(user_id_list[0], user_id_list[4]);
-    user_id=user_id_list[0];
-    tair::common::data_entry key;
-    get_data_entry(key,"mac:",UserMapTest::mac,":user.id");
-    saved_keys.push_back(key);
-    get_data_entry(key,"user:",user_id,":mac");
-    unsigned long long saved_mac=user_get_mac(user_id);
-    EXPECT_EQ(saved_mac,UserMapTest::mac);
-
-    saved_keys.push_back(key);
 }
 
 TEST_F(UserMapTest,RemoveKeys)

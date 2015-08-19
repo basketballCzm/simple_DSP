@@ -73,8 +73,8 @@ static void ad_op(UriQueryListA * queryList,Json::Value & ret)
         }
         else if (strcmp(p_para->key,"user_id")==0)
         {
-            //stringstream( p_para->value )>>user_id;
-            stringstream( p_para->value )>>mac;
+            stringstream( p_para->value )>>user_id;
+            //stringstream( p_para->value )>>mac;
         }
         else if (strcmp(p_para->key,"ad_id")==0)
         {
@@ -97,15 +97,18 @@ static void ad_op(UriQueryListA * queryList,Json::Value & ret)
     }
     if(strcmp("request",action.c_str())==0)
     {
-        /*
-        if(user_id==0 && mac!=0)
+        if(user_id==INT_MIN && mac!=0)
         {
             user_id=user_map::user_get_id(mac);
         }
         if(user_id==0)
         {
             syslog(LOG_INFO, "ad_op ad_request(), no user id");   
-        }*/
+        }
+        if(mac==0 && user_id!=INT_MIN)
+        {
+            mac= user_map::user_get_mac(user_id);
+        }
         syslog(LOG_INFO, "ad_op ad_request() mac=%ld, ad_space=%d, mall_id=%d, n=%d"
             ,mac,ad_space,mall_id,n);   
         ad_map::ad_request(ret,mac,user_id,ad_space,mall_id,n);

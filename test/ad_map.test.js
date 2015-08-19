@@ -53,6 +53,7 @@ describe('ad_map.test.js', function () {
   });
  
   it("ad_map insert test data users' location & label should be ok!",function(done){
+      this.timeout(50000)
       var prop_list=["x","y","z","label.set"]
       var count=0
       test_user_list.forEach(function(c){
@@ -68,33 +69,41 @@ describe('ad_map.test.js', function () {
 
               if(d==="label.set")
               {
-                key="user:"+c[0]+":label.set"
-                if(value.length<=0)
-                {
-                  count++
-                  if(count==prop_list.length*test_user_list.length){
-                    done()
-                  }
-                }
-                else
-                {
-                  save_used_key(key)
-                  var zcount=0
-                  value.forEach(function(e){
-                      tair.hset(key,nm,e,1,function(err, data){
-                          should.not.exist(err);
-                          data.should.equal(true);
-                          ++zcount
-                          if(zcount==value.length)
-                          {
-                            count++ 
-                            if(count==prop_list.length*test_user_list.length){
-                              done()
-                            }
-                          }
+                exec(__dirname+'/get_user_id '+c[0]+' 2>>/dev/null | grep "user\'s id" | awk \'{print $4}\' ',function(err,stdout,stderr){
+                    sys.print('stdout:'+ stdout+'\n')
+                    sys.print('stderr:'+ stderr+'\n')
+                    console.log('get_user_id mac is '+c[0]+', user_id is '+stdout);
+                    console.log('error is '+err)
+                    should.not.exist(err)
+                    var user_id=parseInt(stdout)
+                    key="user:"+user_id+":label.set"
+                    if(value.length<=0)
+                    {
+                      count++
+                      if(count==prop_list.length*test_user_list.length){
+                        done()
+                      }
+                    }
+                    else
+                    {
+                      save_used_key(key)
+                      var zcount=0
+                      value.forEach(function(e){
+                          tair.hset(key,nm,e,1,function(err, data){
+                              should.not.exist(err);
+                              data.should.equal(true);
+                              ++zcount
+                              if(zcount==value.length)
+                              {
+                                count++ 
+                                if(count==prop_list.length*test_user_list.length){
+                                  done()
+                                }
+                              }
+                            })
                         })
-                    })
-                }
+                    }
+                  })
               }
               else
               {

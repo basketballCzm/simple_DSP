@@ -28,6 +28,7 @@ namespace user_map
     int max_duration_gap;// users' stay time gap
     const char * pg_server;
     const char * add_user_sql;
+    const char * query_user_id_sql;
     static const char * tb_log_file;
    
     void user_map_init()
@@ -49,6 +50,7 @@ namespace user_map
             tb_log_file=config.getString("user_map","log_file",NULL);
             max_duration_gap=config.getInt("user_map","max_duration_gap",30);
             add_user_sql=config.getString("user_map","add_user_sql",NULL);
+            query_user_id_sql=config.getString("user_map","query_user_id_sql",NULL);
             pg_server=config.getString("user_map","pg_server",NULL);
 
 
@@ -68,15 +70,15 @@ namespace user_map
 
     int user_query(UserPosition& pos, int mall_id)
     {
-        user_map_init();
-		tair::common::data_entry key;
-		get_data_entry(key,"location:",mall_id,":",pos.mac,":x");
-		pos.position.x = tair_get<float>(g_tair,tair_namespace,key,0);
-		get_data_entry(key,"location:",mall_id,":",pos.mac,":y");
-		pos.position.y = tair_get<float>(g_tair,tair_namespace,key,0);
-		get_data_entry(key,"location:",mall_id,":",pos.mac,":z");
-		pos.position.z = tair_get<int>(g_tair,tair_namespace,key,0);
-        return 0;
+      user_map_init();
+      tair::common::data_entry key;
+      get_data_entry(key,"location:",mall_id,":",pos.mac,":x");
+      pos.position.x = tair_get<float>(g_tair,tair_namespace,key,0);
+      get_data_entry(key,"location:",mall_id,":",pos.mac,":y");
+      pos.position.y = tair_get<float>(g_tair,tair_namespace,key,0);
+      get_data_entry(key,"location:",mall_id,":",pos.mac,":z");
+      pos.position.z = tair_get<int>(g_tair,tair_namespace,key,0);
+      return 0;
     }
 
     template <typename V_TYPE>
@@ -115,12 +117,12 @@ namespace user_map
         return tair_get(g_tair,tair_namespace,key,default_v);
     }
 
-    inline void user_duration_add(const unsigned long long mac,const int mall_id,
+    inline void user_duration_add(const int user_id,const int mall_id,
         const time_t t_pre_time,const time_t t_now)
     {
         const string & s_date=get_date_str(t_now);
         tair::common::data_entry key;
-        get_data_entry(key,"user:",s_date,":",mall_id,":",mac,":duration");
+        get_data_entry(key,"user:",s_date,":",mall_id,":",user_id,":duration");
         int new_duration;
         int delta=t_now-t_pre_time;
         if(delta>max_duration_gap)
@@ -194,20 +196,20 @@ namespace user_map
         
     }
 
-    bool is_mall_vip(const unsigned long long mac, const int mall_id)
+    bool is_mall_vip(const int user_id, const int mall_id)
     {
         tair::common::data_entry key;
-        get_data_entry(key,"user:",mall_id,":",mac,":is.mall.vip");
+        get_data_entry(key,"user:",mall_id,":",user_id,":is.mall.vip");
         return tair_get<int>(g_tair,tair_namespace,key,0);
     }
     
-    void vip_arrive_time_record(const unsigned long long mac,const int mall_id,time_t t_pre,time_t t_now)
+    void vip_arrive_time_record(const int user_id,const int mall_id,time_t t_pre,time_t t_now)
     {
-        if(t_now - t_pre> 60*60 && is_mall_vip(mac,mall_id))
+        if(t_now - t_pre> 60*60 && is_mall_vip(user_id,mall_id))
         {
             tair::common::data_entry key,value;
             get_data_entry(key,"user.vip:",mall_id,":arrive.time");
-            get_data_entry(value,mac);
+            get_data_entry(value,user_id);
             double score=t_now;
 
             g_tair.zadd(tair_namespace,key,score,value,0,0);     
@@ -249,8 +251,11 @@ namespace user_map
         fprintf(stderr, "user_add tair.zadd: %s\n",g_tair.get_error_msg(ret));
         
         user_location_log_add(mac,x,y,z,kafka_offset,mall_id,t_now);
-        user_duration_add(mac,mall_id,t_pre_time,t_now);
-        vip_arrive_time_record(mac,mall_id, t_pre_time, t_now);
+
+        int user_id=user_get_id(mac);
+
+        user_duration_add(user_id,mall_id,t_pre_time,t_now);
+        vip_arrive_time_record(user_id,mall_id, t_pre_time, t_now);
         mac_set_record(mac,mall_id,t_now);
 
         return 0;
@@ -307,7 +312,8 @@ namespace user_map
         syslog(LOG_INFO, "user_map::user_tag_update() enter");
         
         stringstream ss_key,ss_field,ss_value;
-        ss_key<<"user:"<<mac<<":label.set";
+        int user_id=user_get_id(mac);
+        ss_key<<"user:"<<user_id<<":label.set";
         ss_field<<user_tag;
         ss_value<<user_value;
         tair::common::data_entry key(ss_key.str().c_str(),ss_key.str().size()+1,true);
@@ -323,12 +329,36 @@ namespace user_map
 
     unsigned long long user_get_mac(const int user_id)
     {
+        user_map_init();
         tair::common::data_entry key;
         get_data_entry(key,"user:",user_id,":mac");
-        return tair_get<unsigned long long >(g_tair,tair_namespace,key,0);
+        unsigned long long mac = tair_get<unsigned long long >(g_tair,tair_namespace,key,0);
+        if(mac !=0)
+          return mac;
+        else
+        {
+          string cmd=str(boost::format(query_user_id_sql)%user_id%pg_server);
+          cout<<"cmd = "<< cmd<<endl;
+          const string & s_mac=exec(cmd.c_str());
+          if(!s_mac.empty())
+          {
+            mac = std::stoull(s_mac);
+            tair::common::data_entry key;
+            get_data_entry(key,"mac:",mac,":user.id");
+            tair_put<int >(g_tair,tair_namespace,key,user_id);
+            get_data_entry(key,"user:",user_id,":mac");
+            tair_put<unsigned long long >(g_tair,tair_namespace,key,mac);
+
+            return mac;
+          }
+          else
+            return 0;
+
+        }
     }
     int user_get_id(const unsigned long long mac)
     {
+        user_map_init();
         tair::common::data_entry key;
         get_data_entry(key,"mac:",mac,":user.id");
         int user_id=tair_get<int >(g_tair,tair_namespace,key,0);

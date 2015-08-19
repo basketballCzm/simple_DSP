@@ -94,7 +94,7 @@ namespace ad_map
     return;
   }
 
-  double get_eCPM(const int mall_id,const unsigned long long mac,const int ad_group_id, int &next_ad_id)
+  double get_eCPM(const int mall_id,const int ad_group_id, int &next_ad_id)
   {
     tair::common::data_entry key;
     vector<tair::common::data_entry*> ad_id_set;
@@ -183,7 +183,7 @@ namespace ad_map
 
   }
 
-  void bidding(Json::Value &ret, const UserPosition &pos, const int space_id, const int mall_id,const int n)
+  void bidding(Json::Value &ret, const UserPosition &pos, const int user_id, const int space_id, const int mall_id,const int n)
   {
     syslog(LOG_INFO, "enter ad_map::bidding() namespace=%d", tair_namespace);   
     int *highest_ad_group_list=new int[n]{};
@@ -205,7 +205,7 @@ namespace ad_map
     syslog(LOG_INFO,"ad_map::bidding() ad_group_list.size()=%d\n",ad_group_list.size());
 
 
-    get_data_entry(key,"user:",pos.mac,":label.set");
+    get_data_entry(key,"user:",user_id,":label.set");
     vector<string> user_label_set;
     tair_hgetall<string>(g_tair,tair_namespace,key,user_label_set);
 
@@ -226,7 +226,7 @@ namespace ad_map
         continue;
 
       int next_ad_id=-1;
-      double eCPM=get_eCPM(mall_id,pos.mac,*it,next_ad_id);
+      double eCPM=get_eCPM(mall_id,*it,next_ad_id);
       syslog(LOG_INFO,"ad_map::bidding() eCPM=%f\n",eCPM);
 
       for(int j=n-1;j>=0;--j)
@@ -326,7 +326,7 @@ namespace ad_map
     {
       TBSYS_LOG(DEBUG, "ad_op ad_request, user id :%d , location data not found!",pos.mac);   
     }
-    bidding(ret,pos,space_id,mall_id,n);	
+    bidding(ret,pos,user_id,space_id,mall_id,n);	
     return -1;
   }
 

@@ -26,7 +26,7 @@ namespace ad_map{
   void bidding(Json::Value &ret, const UserPosition &pos, const int space_id, const int mall_id);
   void get_ad_group_set_of_space(const int mall_id, const int space_id, std::vector< int> &ad_group_set);
   void get_ad_group_set_of_location(const int mall_id, const UserPosition &pos, std::vector<int> &ad_group_set);
-  double get_eCPM(const int mall_id,const unsigned long long mac,const int ad_group_id, int &next_ad_id);
+  double get_eCPM(const int mall_id,const int ad_group_id, int &next_ad_id);
   extern tair::tair_client_api g_tair;
 }
 class AdMapTest : public testing::Test
@@ -94,7 +94,7 @@ TEST_F(AdMapTest,GeteCPM)
 {
   int mac=12345678;
   int next_ad_id=-1;
-  double eCPM=get_eCPM(mall_id,mac,4,next_ad_id);
+  double eCPM=get_eCPM(mall_id,4,next_ad_id);
   EXPECT_EQ(double(84),eCPM);
   EXPECT_EQ(5,next_ad_id);
 }
@@ -118,7 +118,9 @@ TEST_F(AdMapTest,UserLabelSet)
 {
   tair::common::data_entry key;
   int mac=12345678;
-  get_data_entry(key,"user:",mac,":label.set");
+  int user_id=user_map::user_get_id(mac);
+  get_data_entry(key,"user:",user_id,":label.set");
+  cout<<"UserLabelSet key is "<<key.get_data()<<endl;
   vector<string> user_label_set;
   tair_hgetall<string>(ad_map::g_tair,nm,key,user_label_set);
   EXPECT_EQ(user_label_set.size(),3);
@@ -128,8 +130,9 @@ TEST_F(AdMapTest,AdRequest)
 {
   int space_id=23;
   unsigned long long mac=12345678;
+  int user_id=user_map::user_get_id(mac);
   Json::Value ret;
-  ad_request(ret,mac,0,space_id,mall_id,1);
+  ad_request(ret,mac,user_id,space_id,mall_id,1);
   
   Json::StyledWriter writer;
   const string output = writer.write(ret);
@@ -142,6 +145,7 @@ TEST_F(AdMapTest,AdClick)
 {
   int ad_id=4;
   unsigned long long mac=12345678;
+  int user_id=user_map::user_get_id(mac);
   Json::Value ret;
   
   tair::common::data_entry key;
@@ -149,7 +153,7 @@ TEST_F(AdMapTest,AdClick)
   string s_counter =tair_get<string>(ad_map::g_tair,nm,key,"");
   int counter1=std::atoi(s_counter.c_str());
   cout<<"counter1="<<counter1<<", key="<<key.get_data()<<endl;
-  ad_click(ret,ad_id,0,mall_id);
+  ad_click(ret,ad_id,user_id,mall_id);
   EXPECT_EQ(Json::Value("ok"),ret["result"]);
   s_counter =tair_get<string>(ad_map::g_tair,nm,key,"");
   int counter2=std::atoi(s_counter.c_str());
