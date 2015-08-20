@@ -30,6 +30,7 @@ namespace user_map
     const char * add_user_sql;
     const char * query_user_id_sql;
     static const char * tb_log_file;
+    int check_vip; 
    
     void user_map_init()
     {
@@ -46,6 +47,7 @@ namespace user_map
             group_name=config.getString("tair_rdb","group_name",NULL);            
             time_slice=config.getInt("tair_rdb","time_slice",10);
             tair_namespace=config.getInt("tair_rdb","namespace",0);
+            check_vip=config.getInt("tair_rdb","check_vip",1);
 
             tb_log_file=config.getString("user_map","log_file",NULL);
             max_duration_gap=config.getInt("user_map","max_duration_gap",30);
@@ -205,7 +207,7 @@ namespace user_map
     
     void vip_arrive_time_record(const int user_id,const int mall_id,time_t t_pre,time_t t_now)
     {
-        if(t_now - t_pre> 60*60 && is_mall_vip(user_id,mall_id))
+        if(t_now - t_pre> 60*60 && (check_vip ==0 || is_mall_vip(user_id,mall_id)))
         {
             tair::common::data_entry key,value;
             get_data_entry(key,"user.vip:",mall_id,":arrive.time");
