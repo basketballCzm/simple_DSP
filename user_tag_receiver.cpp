@@ -22,14 +22,17 @@ void msg_consume(RdKafka::Message* message, void* opaque) {
             break;
 
         case RdKafka::ERR_NO_ERROR:
+        {
             /* Real message */
             std::cout << "Read msg at offset " << message->offset() << std::endl;
             if (message->key()) {
                 std::cout << "Key: " << *message->key() << std::endl;
             }
-            /*printf("%.*s\n",
-                    static_cast<int>(message->len()),
-                    static_cast<const char *>(message->payload()));*/
+            
+            int len = static_cast<int>(message->len());
+            char* msg = static_cast<char *>(message->payload());
+            msg[len] = '\0';
+            
             union {
                 unsigned long long mac_number;
                 unsigned char mac_array[16];//LBF
@@ -43,7 +46,7 @@ void msg_consume(RdKafka::Message* message, void* opaque) {
             cout<<"mac number is "<<mac.mac_number<<endl;
             user_tag_update(mac.mac_number, usertag, 1.0);
             break;
-
+        }
         case RdKafka::ERR__PARTITION_EOF:
             /* Last message */
             if (exit_eof) {
