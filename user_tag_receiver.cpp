@@ -3,6 +3,7 @@
 #include "librdkafka/rdkafkacpp.h"
 #include "user_map.h"
 #include "limits.h"
+#include "string.h"
 
 using namespace std;
 using namespace user_map;
@@ -31,7 +32,10 @@ void msg_consume(RdKafka::Message* message, void* opaque) {
             
             int len = static_cast<int>(message->len());
             char* msg = static_cast<char *>(message->payload());
-            msg[len] = '\0';
+            //msg[len] = '\0';
+            char * restore_msg= new char[len+1];
+            strncpy(restore_msg,msg,len);
+            restore_msg[len]='\0';
             
             union {
                 unsigned long long mac_number;
@@ -39,7 +43,7 @@ void msg_consume(RdKafka::Message* message, void* opaque) {
             }mac;
             mac.mac_number=0;
             char usertag[40];
-            sscanf(static_cast<const char *>(message->payload()),"Mac %hhx:%hhx:%hhx:%hhx:%hhx:%hhx %s",
+            sscanf(restore_msg,"Mac %hhx:%hhx:%hhx:%hhx:%hhx:%hhx %s",
                     mac.mac_array+5,mac.mac_array+4,mac.mac_array+3,mac.mac_array+2,mac.mac_array+1,mac.mac_array,usertag);
             
             cout<<"user tag is "<<usertag<<endl;
@@ -116,7 +120,11 @@ int main ()
     while (run) {
         RdKafka::Message *msg = consumer->consume(topic, partition, 1000);
         msg_consume(msg, NULL);
-        delete msg;
+        if(msg)
+        {
+            delete msg;
+            msg=NULL;
+        }
         consumer->poll(0);
     }
 
