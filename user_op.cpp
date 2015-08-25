@@ -26,6 +26,7 @@
 
 using namespace std;
 using namespace user_map;
+const int mall_id=2;
 
 int parseQueryString(char *request_string ,UriParserStateA &state, UriQueryListA * &  queryList)
 {
@@ -98,7 +99,7 @@ void user_op(UriQueryListA * queryList, Json::Value & ret)
         }
         else
         {
-            user_add(mac,x,y,z,-1,2);
+            user_add(mac,x,y,z,-1,mall_id);
             ret["result"]="success";
         }
     }
@@ -111,7 +112,7 @@ void user_op(UriQueryListA * queryList, Json::Value & ret)
         }
         else
         {
-            user_remove(mac);
+            user_remove(mac,mall_id);
             ret["result"]="success";
         }
     }
@@ -124,7 +125,7 @@ void user_op(UriQueryListA * queryList, Json::Value & ret)
         }
         else
         {
-            user_update(mac,x,y,z);
+            user_update(mac,x,y,z,mall_id);
             ret["result"]="success";
         }
     }
@@ -149,7 +150,7 @@ void user_op(UriQueryListA * queryList, Json::Value & ret)
     else if(strcmp("list_all",action.c_str())==0)
     {
         syslog(LOG_INFO, "user_op: call user_list_all ");
-        user_list_all(ret,start,end);
+        user_list_all(ret,start,end,mall_id);
     }
     else
     {
