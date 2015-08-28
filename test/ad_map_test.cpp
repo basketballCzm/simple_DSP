@@ -6,6 +6,8 @@
 #include <data_entry.hpp>
 #include <json/json.h>
 #include <syslog.h>
+#include <tbsys.h>
+#include <tbnet.h>
 
 
 
@@ -42,7 +44,7 @@ protected:
         //user_map::close();
     }
     const int mall_id=2;
-    const int nm=3;
+    const int nm=2;
 };
 
 TEST_F(AdMapTest,getAdGroupSetOfSpace)

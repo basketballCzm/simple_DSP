@@ -9,6 +9,7 @@ using namespace user_map;
 namespace user_map{
     extern tair::tair_client_api g_tair;  
     extern const char * pg_server; 
+    extern int check_vip; 
     bool is_mall_vip(const int user_id, const int mall_id);
     int user_get_id(const unsigned long long mac);
     unsigned long long user_get_mac(const int id);
@@ -20,6 +21,7 @@ protected:
     virtual void SetUp()
     {
         user_map_init();
+        user_map::check_vip=1;
     }
     virtual void TearDown()
     {
@@ -29,7 +31,7 @@ protected:
     float y=2.718281828;
     int z=4;
     int mall_id=5;
-    int nm=3;
+    int nm=2;
     static vector<tair::common::data_entry> saved_keys;
 public:    
     static unsigned long long  mac;
