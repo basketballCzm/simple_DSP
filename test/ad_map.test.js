@@ -11,7 +11,7 @@ var exec = require('child_process').exec
 var deepcopy = require('deepcopy');
 
 var tair;
-var nm=3;
+var nm=2;
 var used_key={}
 var mall_id=2
 var mall_level=1
@@ -384,5 +384,4 @@ describe('ad_map.test.js', function () {
         })
       }
     })
-
 });

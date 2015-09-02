@@ -49,7 +49,7 @@ namespace user_map
             tair_namespace=config.getInt("tair_rdb","namespace",0);
             check_vip=config.getInt("tair_rdb","check_vip",1);
 
-            tb_log_file=config.getString("user_map","log_file",NULL);
+            tb_log_file=config.getString("tair_rdb","log_file",NULL);
             max_duration_gap=config.getInt("user_map","max_duration_gap",30);
             add_user_sql=config.getString("user_map","add_user_sql",NULL);
             query_user_id_sql=config.getString("user_map","query_user_id_sql",NULL);

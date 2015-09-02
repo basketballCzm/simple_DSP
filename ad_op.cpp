@@ -18,6 +18,7 @@
 
 #include "user_map.h"
 #include "ad_map.h"
+#include <tbsys.h>
 #include "math.h"
 
 using namespace std;
@@ -111,6 +112,7 @@ static void ad_op(UriQueryListA * queryList,Json::Value & ret)
         }
         syslog(LOG_INFO, "ad_op ad_request() mac=%ld, ad_space=%d, mall_id=%d, n=%d"
             ,mac,ad_space,mall_id,n);   
+        TBSYS_LOG(DEBUG,"ad_op ad_request() mac=%ld, ad_space=%d, mall_id=%d, n=%d",mac,ad_space,mall_id,n);
         ad_map::ad_request(ret,mac,user_id,ad_space,mall_id,n);
         return;
     }

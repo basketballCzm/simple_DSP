@@ -51,7 +51,7 @@ namespace ad_map
       time_slice=config.getInt("tair_rdb","time_slice",10);
       tair_namespace=config.getInt("tair_rdb","namespace",0);
 
-      tb_log_file=config.getString("ad_map","log_file",NULL);
+      tb_log_file=config.getString("tair_rdb","log_file",NULL);
 
       TBSYS_LOGGER.setFileName(tb_log_file,true);
       TBSYS_LOGGER.setLogLevel("DEBUG");
@@ -317,6 +317,7 @@ namespace ad_map
 
   int ad_request(Json::Value &ret, const unsigned long long mac,const int user_id, const int space_id, const int mall_id, const int n)
   {
+    TBSYS_LOG(DEBUG, "ad_map enter ad_request() , user id :%d, mac: %ld ",user_id,mac);
     ad_map_init();
 
     UserPosition pos;
