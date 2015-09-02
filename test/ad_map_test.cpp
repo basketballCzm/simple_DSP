@@ -161,5 +161,4 @@ TEST_F(AdMapTest,AdClick)
   int counter2=std::atoi(s_counter.c_str());
   cout<<"counter2="<<counter2;
   EXPECT_EQ(1,counter2-counter1);
-
 }

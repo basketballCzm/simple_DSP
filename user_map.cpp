@@ -27,6 +27,9 @@ namespace user_map
     int tair_namespace;
     int max_duration_gap;// users' stay time gap
     const char * pg_server;
+    const char * pg_user;
+    const char * pg_password;
+    const char * pg_database;
     const char * add_user_sql;
     const char * query_user_id_sql;
     static const char * tb_log_file;
@@ -54,6 +57,9 @@ namespace user_map
             add_user_sql=config.getString("user_map","add_user_sql",NULL);
             query_user_id_sql=config.getString("user_map","query_user_id_sql",NULL);
             pg_server=config.getString("user_map","pg_server",NULL);
+            pg_user=config.getString("user_map","pg_user",NULL);
+            pg_database=config.getString("user_map","pg_database",NULL);
+            pg_password=config.getString("user_map","pg_password",NULL);
 
 
             TBSYS_LOGGER.setFileName(tb_log_file,true);
@@ -339,7 +345,7 @@ namespace user_map
           return mac;
         else
         {
-          string cmd=str(boost::format(query_user_id_sql)%user_id%pg_server);
+          string cmd=str(boost::format(query_user_id_sql)%user_id%pg_password%pg_server%pg_user%pg_database);
           cout<<"cmd = "<< cmd<<endl;
           const string & s_mac=exec(cmd.c_str());
           if(!s_mac.empty())
@@ -367,7 +373,7 @@ namespace user_map
         if(user_id==0)
         {
             //get user id from pg db
-            string cmd=str(boost::format(add_user_sql)%mac%"guest"%mac%"guest"%mac%pg_server);
+            string cmd=str(boost::format(add_user_sql)%mac%"guest"%mac%"guest"%mac%pg_password%pg_server%pg_user%pg_database);
             string s_id;
             for (int i=0;i<10;++i)
             {

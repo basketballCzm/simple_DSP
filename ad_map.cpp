@@ -10,6 +10,7 @@
 #include "tair_common.h"
 #include "user_map.h"
 #include "cron_timing.h"
+#include <string>
 
 #define NONE_INT_DATA INT_MIN
 #define NEW_AD_MIN_SHOW_COUNT 100
@@ -116,10 +117,12 @@ namespace ad_map
 
       get_data_entry(key,"ad:",mall_id,":",ad_id,":show.counter");
       const string & s_show_counter=tair_get<string>(g_tair,tair_namespace,key,"0");
-      const int show_counter=std::stoi(s_show_counter);
+      TBSYS_LOG(DEBUG,"get_eCPM() s_show_counter=%s",s_show_counter.c_str());
+      const int show_counter=std::atoi(s_show_counter.c_str());
       get_data_entry(key,"ad:",mall_id,":",ad_id,":click.counter");
       const string & s_click_counter=tair_get<string>(g_tair,tair_namespace,key,"0");
-      const int click_counter=std::stoi(s_click_counter);
+      TBSYS_LOG(DEBUG,"get_eCPM() s_click_counter=%s",s_click_counter.c_str());
+      const int click_counter=atoi(s_click_counter.c_str());
       get_data_entry(key,"ad:",mall_id,":",ad_id,":weight");
       int weight=tair_get<int>(g_tair,tair_namespace,key,0);
       if(weight==0)
@@ -145,6 +148,7 @@ namespace ad_map
       delete (*it);
     }
     ad_id_set.clear();
+
     if(sum_weight==0)
       return 0;
     else

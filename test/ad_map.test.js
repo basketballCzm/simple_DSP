@@ -179,6 +179,7 @@ describe('ad_map.test.js', function () {
       var prop_list=["click.price","show.price",
         "space","valid","ad.set","target.label.set"
       ]
+
       var count=0
       test_entry_list.forEach(function(c){
           prop_list.forEach(function(d,j){
