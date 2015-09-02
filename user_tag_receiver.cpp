@@ -45,6 +45,7 @@ void msg_consume(RdKafka::Message* message, void* opaque) {
             char usertag[40];
             sscanf(restore_msg,"Mac %hhx:%hhx:%hhx:%hhx:%hhx:%hhx %s",
                     mac.mac_array+5,mac.mac_array+4,mac.mac_array+3,mac.mac_array+2,mac.mac_array+1,mac.mac_array,usertag);
+            delete restore_msg;
             
             cout<<"user tag is "<<usertag<<endl;
             cout<<"mac number is "<<mac.mac_number<<endl;
