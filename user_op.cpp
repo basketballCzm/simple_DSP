@@ -26,7 +26,6 @@
 
 using namespace std;
 using namespace user_map;
-const int mall_id=2;
 
 int parseQueryString(char *request_string ,UriParserStateA &state, UriQueryListA * &  queryList)
 {
@@ -70,6 +69,7 @@ void user_op(UriQueryListA * queryList, Json::Value & ret)
     int z=INT_MIN;
     double start=0;
     double end=std::numeric_limits<unsigned int>::max();
+    int mall_id=2;
 
     for(UriQueryListA *p_para=queryList ;p_para!=NULL;p_para=p_para->next)
     {
@@ -87,6 +87,8 @@ void user_op(UriQueryListA * queryList, Json::Value & ret)
             stringstream( p_para->value )>>start;
         else if (strcmp(p_para->key,"end")==0)
             stringstream( p_para->value )>>end;
+        else if (strcmp(p_para->key,"mall_id")==0)
+            stringstream( p_para->value )>>mall_id;
     }
 
 
