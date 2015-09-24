@@ -1,0 +1,11 @@
+before_script:
+  - ls 
+
+rspec:
+  script:
+    - ls 
+
+rubocop:
+  script:
+    - ls 
+
