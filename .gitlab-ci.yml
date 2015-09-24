@@ -1,11 +1,11 @@
 before_script:
-  - ls 
+  - autoconf
+  - automake
+  - ./configure
+  - make
+  - make install
 
-rspec:
+start_cgi:
   script:
-    - ls 
-
-rubocop:
-  script:
-    - ls 
+    - ./restart_fastcgi.sh
 
