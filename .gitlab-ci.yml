@@ -1,5 +1,10 @@
 before_script:
 
+stages:
+  - build
+  - test
+  - deploy
+  
 build_up:
   variables:
     TBLIB_ROOT: "/usr/local"
