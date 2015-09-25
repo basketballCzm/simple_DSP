@@ -1,13 +1,13 @@
-variables:
-  TBLIB_ROOT: "/usr/local"
 before_script:
-  - autoconf
-  - automake
-  - ./configure
-  - TBLIB_ROOT=/usr/local make
-  - TBLIB_ROOT=/usr/local make install
 
 start_cgi:
+  variables:
+    TBLIB_ROOT: "/usr/local"
   script:
+    - autoconf
+    - automake
+    - ./configure
+    - make
+    - make install
     - ./restart_fastcgi.sh
 
