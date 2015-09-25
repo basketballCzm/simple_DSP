@@ -3,8 +3,7 @@ before_script:
 build_up:
   variables:
     TBLIB_ROOT: "/usr/local"
-  stage: 
-    - build 
+  stage: build 
   script:
     - autoconf
     - automake
@@ -13,13 +12,13 @@ build_up:
     - TBLIB_ROOT=/usr/local make install
 
 test_user_map:
-  stage:
-    - test
+  stage: test
+  allow_failure: true
   script:
     - test/user_map_test
 
+
 open_cgi:
-  stage:
-    - deploy
+  stage: deploy
   script:
     - ./restart_fastcgi.sh
