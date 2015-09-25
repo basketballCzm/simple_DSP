@@ -1,29 +1,18 @@
 before_script:
-
-stages:
-  - build
-  - test
-  - deploy
-  
-build_up:
-  variables:
-    TBLIB_ROOT: "/usr/local"
-  stage: build 
-  script:
-    - autoconf
-    - automake
-    - ./configure
-    - TBLIB_ROOT=/usr/local make
-    - TBLIB_ROOT=/usr/local make install
+  - autoconf
+  - automake
+  - ./configure
+  - TBLIB_ROOT=/usr/local make
+  - TBLIB_ROOT=/usr/local make install
 
 test_user_map:
-  stage: test
+  type: test
   allow_failure: true
   script:
     - test/user_map_test
 
 
-open_cgi:
-  stage: deploy
+production:
+  type: deploy
   script:
     - ./restart_fastcgi.sh
