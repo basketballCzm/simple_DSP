@@ -4,8 +4,8 @@ before_script:
   - autoconf
   - automake
   - ./configure
-  - make
-  - make install
+  - TBLIB_ROOT=/usr/local make
+  - TBLIB_ROOT=/usr/local make install
 
 start_cgi:
   script:
