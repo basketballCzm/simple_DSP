@@ -1,13 +1,18 @@
 before_script:
+  - autoconf
+  - automake
+  - ./configure
+  - TBLIB_ROOT=/usr/local make
+  - TBLIB_ROOT=/usr/local make install
 
-start_cgi:
-  variables:
-    TBLIB_ROOT: "/usr/local"
+# test_user_map:
+#   type: test
+#   allow_failure: true
+#   script:
+#     - test/user_map_test
+
+
+production:
+  type: deploy
   script:
-    - autoconf
-    - automake
-    - ./configure
-    - TBLIB_ROOT=/usr/local make
-    - TBLIB_ROOT=/usr/local make install
     - ./restart_fastcgi.sh
-
