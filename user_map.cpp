@@ -31,6 +31,7 @@ namespace user_map
     const char * pg_password;
     const char * pg_database;
     const char * add_user_sql;
+    const char * add_user_location_sql;
     const char * query_user_id_sql;
     static const char * tb_log_file;
     int check_vip; 
@@ -55,6 +56,7 @@ namespace user_map
             tb_log_file=config.getString("tair_rdb","log_file",NULL);
             max_duration_gap=config.getInt("user_map","max_duration_gap",30);
             add_user_sql=config.getString("user_map","add_user_sql",NULL);
+            add_user_location_sql=config.getString("user_map", "add_user_location_sql",NULL);
             query_user_id_sql=config.getString("user_map","query_user_id_sql",NULL);
             pg_server=config.getString("user_map","pg_server",NULL);
             pg_user=config.getString("user_map","pg_user",NULL);
@@ -154,6 +156,16 @@ namespace user_map
         g_tair.incr(tair_namespace,key_counter,1,&log_id);
         TBSYS_LOG(DEBUG,"user_location_log_add() date_time=%s, log_id=%d",s_date_time.c_str(),log_id);
         
+        //save to pg
+        int zz = 0;
+        if (z != INT_MIN)
+            zz = z;
+
+        string cmd=str(boost::format(add_user_location_sql)%log_id%mac%x%y%zz%t_time%pg_password%pg_server%pg_user%pg_database);
+        cout << "PG_CMD:" << cmd << endl;
+        string res = exec(cmd.c_str());
+        cout << "PG_OUT:" << res << endl;
+
         //set data.time.set
         if(last_date_time_map[mall_id]!=s_date_time)
         {
