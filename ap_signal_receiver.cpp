@@ -42,7 +42,8 @@ void msg_consume(RdKafka::Message* message, void* opaque) {
             //cout<<"mac is "<<static_cast<int> (mac.mac_array[5])<<":"<<static_cast<int>(mac.mac_array[4])<<":"<<static_cast<int>(mac.mac_array[3])
             //    <<":"<<static_cast<int>(mac.mac_array[2])<<":"<<static_cast<int>(mac.mac_array[1])<<":"<<static_cast<int>(mac.mac_array[0])<<endl;
             //cout<<"x="<<x<<",y="<<y<<",width="<<width<<",height="<<height<<",mac_number is "<<mac.mac_number<<endl;
-            user_add(mac.mac_number,x+width/2.0,y+height/2.0,INT_MIN, static_cast<int>(message->len()),mall_id);
+            if ( mac.mac_number > 0 )
+                user_add(mac.mac_number,x+width/2.0,y+height/2.0,INT_MIN, static_cast<int>(message->len()),mall_id);
             break;
 
         case RdKafka::ERR__PARTITION_EOF:

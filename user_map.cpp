@@ -268,8 +268,8 @@ namespace user_map
         int ret=g_tair.zadd(tair_namespace,key,score,value,0,0);
         cout<<"zadd ns="<<tair_namespace<<",key="<<key.get_data()<<",size="
             <<key.get_size()<<",value="<<value.get_data()<<",score="<<setprecision(17)<<score<<endl;
-        fprintf(stderr, "user_add tair.zadd: %s\n",g_tair.get_error_msg(ret));
-        
+        fprintf(stderr, "user_add tair.zadd: %d, %s\n", ret, g_tair.get_error_msg(ret));
+
         user_location_log_add(mac,x,y,z,kafka_offset,mall_id,t_now);
 
         int user_id=user_get_id(mac);
