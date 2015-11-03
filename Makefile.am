@@ -4,7 +4,7 @@ AM_CPPFLAGS = -std=c++11  -I/opt/tair_rdb_bin/include \
 	-I${TBLIB_ROOT}/include/tbnet -I${TBLIB_ROOT}/include/tbsys \
 	-I/usr/include/jsoncpp
 
-bin_PROGRAMS=user_op ad_op
+bin_PROGRAMS=user_op ad_op ap_signal_receiver user_tag_receiver 
 
 
 user_op_SOURCES=user_op.cpp  user_map.cpp
@@ -13,7 +13,7 @@ user_op_LDADD=-lfcgi -luriparser -ljsoncpp -ljsoncpp -ltairclientapi $(TBLIB_ROO
 ad_op_SOURCES=ad_op.cpp  ad_map.cpp user_map.cpp cron_timing.cpp
 ad_op_LDADD=-lfcgi -luriparser -ljsoncpp -ljsoncpp -ltairclientapi $(TBLIB_ROOT)/lib/libtbnet.a $(TBLIB_ROOT)/lib/libtbsys.a
 
-noinst_PROGRAMS=robot_commander ap_signal_receiver user_tag_receiver #ap_signal_dock ap_signal_sender 
+noinst_PROGRAMS=robot_commander #ap_signal_dock ap_signal_sender 
 
 robot_commander_SOURCES=robot_commander.cpp user_map.cpp
 robot_commander_LDADD=-ljsoncpp -L/home/caster/tair_rdb_bin/lib -ltairclientapi $(TBLIB_ROOT)/lib/libtbnet.a $(TBLIB_ROOT)/lib/libtbsys.a
