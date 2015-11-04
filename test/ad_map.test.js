@@ -41,7 +41,7 @@ function save_used_key(keys)
 describe('ad_map.test.js', function () {
   before(function (done) {
     tair = new cli('group_1', [
-      {host: 'localhost', port: 5198}
+      {host: 'WUSHUU-TAIR-CS', port: 5198}
     ], {heartBeatInterval: 3000},
       function (err) {
         if (err) {
@@ -69,7 +69,7 @@ describe('ad_map.test.js', function () {
 
               if(d==="label.set")
               {
-                exec(__dirname+'/get_user_id '+c[0]+' 2>>/dev/null | grep "user\'s id" | awk \'{print $4}\' ',function(err,stdout,stderr){
+                exec(__dirname+'/test/get_user_id '+c[0]+' 2>>/dev/null | grep "user\'s id" | awk \'{print $4}\' ',function(err,stdout,stderr){
                     sys.print('stdout:'+ stdout+'\n')
                     sys.print('stderr:'+ stderr+'\n')
                     console.log('get_user_id mac is '+c[0]+', user_id is '+stdout);
