@@ -69,7 +69,7 @@ describe('ad_map.test.js', function () {
 
               if(d==="label.set")
               {
-                exec(__dirname+'/test/get_user_id '+c[0]+' 2>>/dev/null | grep "user\'s id" | awk \'{print $4}\' ',function(err,stdout,stderr){
+                exec(__dirname+'/get_user_id '+c[0]+' 2>>/dev/null | grep "user\'s id" | awk \'{print $4}\' ',function(err,stdout,stderr){
                     sys.print('stdout:'+ stdout+'\n')
                     sys.print('stderr:'+ stderr+'\n')
                     console.log('get_user_id mac is '+c[0]+', user_id is '+stdout);
@@ -122,6 +122,7 @@ describe('ad_map.test.js', function () {
     })
 
   it("ad_map insert test data ad.space should be ok!",function(done){
+      this.timeout(50000)
        var test_entry_list=[
         [23,"space No.23",1,[3,2,4]],
         [28,"space No.28",1,[1,5,6]],
