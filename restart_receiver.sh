@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
-pkill ap_signal_receiver
-pkill user_tag_receiver 
+ps -e | grep ap_signal_receiver | awk '{print $1}'|xargs kill -9 
+ps -e | grep user_tag_receiver | awk '{print $1}'|xargs kill -9 
 sleep 2
 
-/etc/nginx/simple_DSP_cgi/bin/ap_signal_receiver &
-/etc/nginx/simple_DSP_cgi/bin/user_tag_receiver &
+nohup /etc/nginx/simple_DSP_cgi/bin/ap_signal_receiver &
+nohup /etc/nginx/simple_DSP_cgi/bin/user_tag_receiver &
