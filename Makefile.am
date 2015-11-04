@@ -32,6 +32,8 @@ user_tag_receiver_LDADD= -lrdkafka -lrdkafka++ -lz -lpthread -lrt  -ltairclienta
 
 
 configdir = $(prefix)/bin
-config_DATA =  config.ini
+config_DATA =  config.ini  
+
+dist_bin_SCRIPTS =  restart_fastcgi.sh restart_receiver.sh
 
 SUBDIRS= test
