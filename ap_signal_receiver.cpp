@@ -15,7 +15,6 @@ static int64_t start_offset = RdKafka::Topic::OFFSET_STORED;
 static int32_t partition = 0; 
 
 static bool run = true;
-const int mall_id = 2;
 
 void msg_consume(RdKafka::Message* message, void* opaque) {
     switch (message->err()) {
@@ -37,8 +36,10 @@ void msg_consume(RdKafka::Message* message, void* opaque) {
             }mac;
             mac.mac_number=0;
             int x,y,width,height;
-            sscanf(static_cast<const char *>(message->payload()),"Mac:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx Rect:%d,%d,%d,%d",
-                    mac.mac_array+5,mac.mac_array+4,mac.mac_array+3,mac.mac_array+2,mac.mac_array+1,mac.mac_array,&x,&y,&width,&height);
+            int mall_id; 
+            mall_id=2;
+            sscanf(static_cast<const char *>(message->payload()),"Mac:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx Rect:%d,%d,%d,%d Groupid:%d",
+                    mac.mac_array+5,mac.mac_array+4,mac.mac_array+3,mac.mac_array+2,mac.mac_array+1,mac.mac_array,&x,&y,&width,&height,&mall_id);
             //cout<<"mac is "<<static_cast<int> (mac.mac_array[5])<<":"<<static_cast<int>(mac.mac_array[4])<<":"<<static_cast<int>(mac.mac_array[3])
             //    <<":"<<static_cast<int>(mac.mac_array[2])<<":"<<static_cast<int>(mac.mac_array[1])<<":"<<static_cast<int>(mac.mac_array[0])<<endl;
             //cout<<"x="<<x<<",y="<<y<<",width="<<width<<",height="<<height<<",mac_number is "<<mac.mac_number<<endl;
