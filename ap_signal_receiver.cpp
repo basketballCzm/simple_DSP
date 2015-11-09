@@ -38,7 +38,7 @@ void msg_consume(RdKafka::Message* message, void* opaque) {
             int x,y,width,height;
             int mall_id; 
             mall_id=2;
-            sscanf(static_cast<const char *>(message->payload()),"Mac:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx Rect:%d,%d,%d,%d Groupid:%d",
+            sscanf(static_cast<const char *>(message->payload()),"Mac:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx Rect:%d,%d,%d,%d Group:%d",
                     mac.mac_array+5,mac.mac_array+4,mac.mac_array+3,mac.mac_array+2,mac.mac_array+1,mac.mac_array,&x,&y,&width,&height,&mall_id);
             //cout<<"mac is "<<static_cast<int> (mac.mac_array[5])<<":"<<static_cast<int>(mac.mac_array[4])<<":"<<static_cast<int>(mac.mac_array[3])
             //    <<":"<<static_cast<int>(mac.mac_array[2])<<":"<<static_cast<int>(mac.mac_array[1])<<":"<<static_cast<int>(mac.mac_array[0])<<endl;
