@@ -154,6 +154,20 @@ void user_op(UriQueryListA * queryList, Json::Value & ret)
         syslog(LOG_INFO, "user_op: call user_list_all ");
         user_list_all(ret,start,end,mall_id);
     }
+    else if(strcmp("get_id",action.c_str())==0)
+    {
+        syslog(LOG_INFO, "user_op: call get_id ");
+        if(mac==INT_MIN)
+        {
+            syslog(LOG_INFO, "adstat user_op: %s uncompleted parameters !",action.c_str());
+            ret["result"]="fail";
+        }
+        else
+        {
+            ret["result"]="success";
+            ret["user_id"]=user_get_id(mac);
+        }
+    }
     else
     {
         ret["result"]="none";
