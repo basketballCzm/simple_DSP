@@ -63,7 +63,7 @@ static void penv(const char * const * envp)
 void user_op(UriQueryListA * queryList, Json::Value & ret)
 {
     string action;
-    int mac=INT_MIN;
+    unsigned long long mac=INT_MIN;
     float x=FLT_MAX;
     float y=FLT_MAX;
     int z=INT_MIN;

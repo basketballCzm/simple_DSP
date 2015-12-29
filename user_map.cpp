@@ -248,7 +248,8 @@ namespace user_map
     int user_add(const unsigned long long  mac,const float x,const float y,const int z,const int kafka_offset, int mall_id )
     {
         user_map_init();
-        syslog(LOG_INFO, "user_map::user_add() enter mac=%d,x=%f,y=%f,z=%f",mac,x,y,z);
+        syslog(LOG_INFO, "user_map::user_add() enter mac=%ld,x=%f,y=%f,z=%f",mac,x,y,z);
+        TBSYS_LOG(DEBUG, "user_map::user_add() enter mac=%ld,x=%f,y=%f,z=%f",mac,x,y,z); 
         //printf("user_map::user_add() enter mac=%d,x=%f,y=%f,z=%f",mac,x,y,z);
         time_t t_now=time(0);
         
@@ -291,7 +292,7 @@ namespace user_map
     {
         user_map_init(); 
 
-        TBSYS_LOG(INFO, "user_list_all() enter"); 
+        TBSYS_LOG(DEBUG, "user_list_all() enter"); 
         stringstream ss_key;
         ss_key<<"location.update.time:"<<mall_id;
         tair::common::data_entry key(ss_key.str().c_str(),ss_key.str().size()+1,true);
@@ -379,7 +380,6 @@ namespace user_map
     int user_get_id(const unsigned long long mac)
     {
         user_map_init();
-        TBSYS_LOG(INFO, "user_get_id() enter"); 
         tair::common::data_entry key;
         get_data_entry(key,"mac:",mac,":user.id");
         int user_id=tair_get<int >(g_tair,tair_namespace,key,0);
