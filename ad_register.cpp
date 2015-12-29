@@ -124,7 +124,7 @@ int print_ad_list(FCGX_Stream* out)
 
 int main()
 {
-	openlog("adstat", LOG_PID|LOG_CONS, LOG_LOCAL0 );
+	openlog("adstat", LOG_PID|LOG_PERROR, LOG_LOCAL0 );
 
     FCGX_Init();
     FCGX_Request request;

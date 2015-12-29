@@ -129,7 +129,7 @@ static void ad_op(UriQueryListA * queryList,Json::Value & ret)
 
 int main()
 {
-    openlog("ad_op", LOG_PID|LOG_CONS, LOG_LOCAL0 );
+    openlog("ad_op", LOG_PID|LOG_PERROR, LOG_LOCAL0 );
 
     FCGX_Init();
     FCGX_Request request;

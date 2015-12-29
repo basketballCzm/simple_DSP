@@ -36,7 +36,7 @@ class AdMapTest : public testing::Test
 protected:  
     virtual void SetUp()
     {
-      openlog("ad_map_test", LOG_PID|LOG_CONS, LOG_LOCAL0 );
+      openlog("ad_map_test", LOG_PID|LOG_PERROR, LOG_LOCAL0 );
       ad_map_init();
     }
     virtual void TearDown()
