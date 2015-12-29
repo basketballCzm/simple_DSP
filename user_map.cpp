@@ -379,6 +379,7 @@ namespace user_map
     int user_get_id(const unsigned long long mac)
     {
         user_map_init();
+        TBSYS_LOG(INFO, "user_get_id() enter"); 
         tair::common::data_entry key;
         get_data_entry(key,"mac:",mac,":user.id");
         int user_id=tair_get<int >(g_tair,tair_namespace,key,0);
