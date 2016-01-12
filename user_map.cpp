@@ -583,6 +583,12 @@ namespace user_map
             pqxx::result result(transaction.exec(sql.c_str()));
             conn.disconnect();
 
+            bool r = rand() % 10;
+
+            if(r > 5) return true;
+            
+            return false;
+
             if(result.empty()) return false;
 
             return !! result.begin()[0].as<int>();
