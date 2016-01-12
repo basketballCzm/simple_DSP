@@ -10,10 +10,11 @@
 #include <data_entry.hpp>
 #include "tair_common.h"
 #include "boost/format.hpp"
-#include "tbsys/config.h"
+#include "config.h"
+
+#include <pqxx/pqxx>        // pg c++ api
 
 using namespace std;
-
 
 namespace user_map
 {
@@ -414,4 +415,208 @@ namespace user_map
         return user_id;
         
     }
+
+    std::string uint64_to_str(unsigned long num) {
+
+        Mac mac;
+        mac.number = num;
+
+        char str[18];
+        unsigned char* bytes = mac.bytes;
+
+        sprintf(str, "%.2hhx:%.2hhx:%.2hhx:%.2hhx:%.2hhx:%.2hhx",
+            bytes[5], bytes[4], bytes[3], bytes[2], bytes[1], bytes[0]);
+
+        return std::string(str);
+
+    }
+
+    unsigned long str_to_uint64(const char* str) {
+
+        Mac mac;
+        unsigned char* bytes = mac.bytes;
+
+        sscanf(str, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
+            bytes + 5, bytes + 4, bytes + 3, bytes + 2, bytes + 1, bytes);
+
+        return mac.number;
+
+    }
+
+    void parse_apmac_msg(const char* msg) {
+
+        printf("---------------------\n");
+
+        int offset = 30;
+        int num_macs = (strlen(msg) - 29) / 19;
+        double time = (double)std::time(0);
+
+        for(int i = 0; i < num_macs; ++i, offset += 19) {
+
+            unsigned long mac = str_to_uint64(msg + offset);
+            save_mac(msg, mac, time);
+
+        }
+
+        unsigned long ap_mac = str_to_uint64(msg + 6);
+        int shopId = apmac_get_shopid(ap_mac);
+
+        if(shopId) {
+
+            printf("shopId: %d\n", shopId);
+
+            offset = 30;
+
+            for(int i = 0; i < num_macs; ++i, offset += 19) {
+
+                bool is_vip = mac_is_vip(msg + offset, shopId);
+
+                if(is_vip) printf("1\n");
+                else printf("0\n");
+
+            }
+
+        }
+
+        printf("---------------------\n");
+
+    }
+
+    void save_mac(const char* key_str, unsigned long mac, double time) {
+
+        tair::common::data_entry key(key_str, 24, true);
+        tair::common::data_entry value(uint64_to_str(mac).c_str(), 18, true);
+
+        int result = g_tair.zadd(tair_namespace, key, time, value, 0, 0);
+
+        if(result != 0) {
+
+             printf("save ap mac fialed : %d %s\n", result, g_tair.get_error_msg(result));
+
+        }
+
+    }
+
+    int apmac_get_shopid(unsigned long mac) {
+
+        try {
+
+            pqxx::connection conn(
+                "dbname=adsweb "
+                "user=postgres "
+                "password=123456 "
+                "hostaddr=192.168.2.201 "
+                "port=5432");
+
+            if(!conn.is_open()) {
+
+                printf("cannot open database: adsweb\n");
+                throw std::exception();
+            }
+
+            pqxx::nontransaction transaction(conn);
+            std::string sql
+                = "select \"shopId\" from ap_v2 where mac='"
+                + uint64_to_str(mac) + "'";
+
+            pqxx::result result(transaction.exec(sql.c_str()));
+            conn.disconnect();
+
+            if(result.empty()) return 0;
+
+            return result.begin()[0].as<int>();
+
+        } catch(std::exception& e) {
+
+            std::cerr << e.what() << std::endl;
+
+        }
+
+    }
+
+    std::string kafka_get_mac_str(const char* str) {
+
+        char mac_str[18];
+
+        for(int i = 0; i < 17; ++i) {
+
+            mac_str[i] = *(str + i);
+
+        }
+
+        mac_str[17] = '\0';
+
+        return std::string(mac_str);
+
+    }
+
+    bool mac_is_vip(const char* mac_str, int shopId) {
+
+        try {
+
+            pqxx::connection conn(
+                "dbname=adsweb "
+                "user=postgres "
+                "password=123456 "
+                "hostaddr=192.168.2.201 "
+                "port=5432");
+
+            if(!conn.is_open()) {
+
+                printf("cannot open database: adsweb\n");
+                throw std::exception();
+            }
+
+            pqxx::nontransaction transaction(conn);
+
+            std::stringstream ss;
+            ss << shopId;
+
+            std::string mac_string = kafka_get_mac_str(mac_str);
+            std::string sql
+                = "select type from shop_member where \"shopId\"="
+                + ss.str()
+                + " and mac='" + mac_string + "'";
+
+                printf("%s ", sql.c_str());
+
+            pqxx::result result(transaction.exec(sql.c_str()));
+            conn.disconnect();
+
+            if(result.empty()) return false;
+
+            return !! result.begin()[0].as<int>();
+
+        } catch (std::exception e) {
+
+            std::cerr << e.what() << std::endl;
+
+        }
+
+    }
+
+    void update_vip_arrive_time(int shopId, unsigned long vip_mac) {
+
+        printf("enter update vip arrive time\n");
+
+        int mall_id = 2;
+        double t = time(0);
+
+        std::stringstream ss;
+        ss << "user.vip:" << mall_id << ":" << shopId << ":arrive.time";
+        std::string key_str = ss.str();
+        
+        tair::common::data_entry key(key_str.c_str(), key_str.size() + 1, true);
+        tair::common::data_entry value(uint64_to_str(vip_mac).c_str(), 18, true);
+
+        int result = g_tair.zadd(tair_namespace, key, t, value, 0, 0);
+
+        if(result != 0) {
+
+             printf("update mac arrive time fialed : %d %s\n", result, g_tair.get_error_msg(result));
+
+        }
+
+    }
+
 }

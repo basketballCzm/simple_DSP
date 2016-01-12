@@ -18,34 +18,62 @@ static int32_t partition = 0;
 static bool run = true;
 
 void msg_consume(RdKafka::Message* message, void* opaque) {
+
+    union {
+        unsigned long long mac_number;
+        unsigned char mac_array[16];
+    } mac;
+
+    mac.mac_number = 0;
+
+    int x, y;
+    int width, height;
+    int mall_id = 2;
+
+    const char* msg;
+
     switch (message->err()) {
         case RdKafka::ERR__TIMED_OUT:
             break;
 
         case RdKafka::ERR_NO_ERROR:
+
             /* Real message */
+
             std::cout << "Read msg at offset " << message->offset() << std::endl;
+
             if (message->key()) {
+
                 std::cout << "Key: " << *message->key() << std::endl;
+
             }
-            /*printf("%.*s\n",
-                    static_cast<int>(message->len()),
-                    static_cast<const char *>(message->payload()));*/
-            union {
-                unsigned long long mac_number;
-                unsigned char mac_array[16];//LBF
-            }mac;
-            mac.mac_number=0;
-            int x,y,width,height;
-            int mall_id; 
-            mall_id=2;
-            sscanf(static_cast<const char *>(message->payload()),"Mac:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx Rect:%d,%d,%d,%d Group:%d",
-                    mac.mac_array+5,mac.mac_array+4,mac.mac_array+3,mac.mac_array+2,mac.mac_array+1,mac.mac_array,&x,&y,&width,&height,&mall_id);
-            //cout<<"mac is "<<static_cast<int> (mac.mac_array[5])<<":"<<static_cast<int>(mac.mac_array[4])<<":"<<static_cast<int>(mac.mac_array[3])
-            //    <<":"<<static_cast<int>(mac.mac_array[2])<<":"<<static_cast<int>(mac.mac_array[1])<<":"<<static_cast<int>(mac.mac_array[0])<<endl;
-            //cout<<"x="<<x<<",y="<<y<<",width="<<width<<",height="<<height<<",mac_number is "<<mac.mac_number<<endl;
-            if ( mac.mac_number > 0 )
+            
+            msg = (const char*)message->payload();
+            printf("%s\n", msg);
+
+            if(msg[0] == 'A') {
+
+                parse_apmac_msg(msg);
+
+            } else {
+
+                sscanf(msg, "Mac:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx Rect:%d,%d,%d,%d Group:%d",
+                    mac.mac_array + 5,
+                    mac.mac_array + 4,
+                    mac.mac_array + 3,
+                    mac.mac_array + 2,
+                    mac.mac_array + 1,
+                    mac.mac_array,
+                    &x, &y, &width, &height, &mall_id);
+
+            }
+
+            if ( mac.mac_number > 0 ) {
+
                 user_add(mac.mac_number,x+width/2.0,y+height/2.0,INT_MIN, static_cast<int>(message->len()),mall_id);
+
+            }
+
             break;
 
         case RdKafka::ERR__PARTITION_EOF:

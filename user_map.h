@@ -22,4 +22,48 @@ namespace user_map
     unsigned long long user_get_mac(int user_id);
     //get mac from user id, zero means not exist
     int user_get_id(const unsigned long long mac);
+
+    // add by gui
+
+    typedef union {
+        unsigned long number;
+        unsigned char bytes[8];
+    } Mac;
+
+    // convert uint64's low 48 bit to a mac address str
+    // a mac str looks like this : a0:b1:c2:d3:e4:f5
+
+    std::string uint64_to_str(unsigned long num);
+
+    // read a uint64 from kafka message stream
+    // whose low 48 bits store a mac address
+    // while high 12 bits uninitialized
+
+    unsigned long str_to_uint64(const char* str);
+
+    // parse a ap mac message
+    // store mac list into tair database
+
+    void parse_apmac_msg(const char* msg);
+
+    // store mac and arrive time into tair
+    // param key_str is a str start with ApMac:01:02:03:04:05:06
+
+    void save_mac(const char* key_str, unsigned long mac, double time);
+
+    // query pg database to find ap mac's shopid
+    // if cannot find return 0
+
+    int apmac_get_shopid(unsigned long mac);
+
+    // get a mac str form kafka message stream
+    // for exmaple stream 28:fa:a0:a1:fc:09, 24:05:0f:66:a1:41, ...
+    // will return string 28:fa:a0:a1:fc:09
+
+    std::string kafka_get_mac(const char* msg);
+
+    bool mac_is_vip(const char* mac_str, int shopId);
+
+    void update_vip_arrive_time(int shopId, unsigned long vip_mac);
+
 }

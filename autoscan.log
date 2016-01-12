@@ -1,0 +1,240 @@
+autoscan: warning: missing AC_CHECK_FUNCS([bzero]) wanted by: 
+	third-party/cron-3.0pl1.orig/popen.c:69
+autoscan: warning: missing AC_CHECK_FUNCS([dup2]) wanted by: 
+	third-party/cron-3.0pl1.orig/do_command.c:191
+	third-party/cron-3.0pl1.orig/do_command.c:192
+	third-party/cron-3.0pl1.orig/do_command.c:193
+	third-party/cron-3.0pl1.orig/popen.c:105
+	third-party/cron-3.0pl1.orig/popen.c:106
+	third-party/cron-3.0pl1.orig/popen.c:112
+autoscan: warning: missing AC_CHECK_FUNCS([endpwent]) wanted by: 
+	third-party/cron-3.0pl1.orig/crontab.c:191
+	third-party/cron-3.0pl1.orig/do_command.c:483
+	third-party/cron-3.0pl1.orig/database.c:127
+autoscan: warning: missing AC_CHECK_FUNCS([ftruncate]) wanted by: 
+	third-party/cron-3.0pl1.orig/misc.c:294
+	third-party/cron-3.0pl1.orig/crontab.c:520
+autoscan: warning: missing AC_CHECK_FUNCS([gethostname]) wanted by: 
+	third-party/cron-3.0pl1.orig/do_command.c:368
+autoscan: warning: missing AC_CHECK_FUNCS([gettimeofday]) wanted by: 
+	third-party/cron-3.0pl1.orig/crontab.c:610
+autoscan: warning: missing AC_CHECK_FUNCS([mkdir]) wanted by: 
+	third-party/cron-3.0pl1.orig/misc.c:199
+	third-party/cron-3.0pl1.orig/misc.c:223
+autoscan: warning: missing AC_CHECK_FUNCS([putenv]) wanted by: 
+	third-party/cron-3.0pl1.orig/compat.c:231
+autoscan: warning: missing AC_CHECK_FUNCS([setenv]) wanted by: 
+	third-party/cron-3.0pl1.orig/externs.h:140
+	third-party/cron-3.0pl1.orig/compat.c:216
+	third-party/cron-3.0pl1.orig/cron.c:82
+autoscan: warning: missing AC_CHECK_FUNCS([setlocale]) wanted by: 
+	third-party/cron-3.0pl1.orig/crontab.c:99
+autoscan: warning: missing AC_CHECK_FUNCS([strcasecmp]) wanted by: 
+	third-party/cron-3.0pl1.orig/externs.h:112
+	third-party/cron-3.0pl1.orig/entry.c:473
+	third-party/cron-3.0pl1.orig/compat.c:84
+autoscan: warning: missing AC_CHECK_FUNCS([strchr]) wanted by: 
+	third-party/cron-3.0pl1.orig/externs.h:56
+	third-party/cron-3.0pl1.orig/misc.c:344
+	third-party/cron-3.0pl1.orig/misc.c:570
+	third-party/cron-3.0pl1.orig/misc.c:575
+	third-party/cron-3.0pl1.orig/env.c:172
+	third-party/cron-3.0pl1.orig/do_command.c:492
+autoscan: warning: missing AC_CHECK_FUNCS([strdup]) wanted by: 
+	third-party/cron-3.0pl1.orig/externs.h:116
+	third-party/cron-3.0pl1.orig/entry.c:288
+	third-party/cron-3.0pl1.orig/env.c:59
+	third-party/cron-3.0pl1.orig/env.c:90
+	third-party/cron-3.0pl1.orig/env.c:102
+	third-party/cron-3.0pl1.orig/compat.c:51
+	third-party/cron-3.0pl1.orig/user.c:67
+autoscan: warning: missing AC_CHECK_FUNCS([strerror]) wanted by: 
+	third-party/cron-3.0pl1.orig/externs.h:120
+	third-party/cron-3.0pl1.orig/misc.c:271
+	third-party/cron-3.0pl1.orig/misc.c:282
+	third-party/cron-3.0pl1.orig/compat.c:65
+autoscan: warning: missing AC_CHECK_FUNCS([utime]) wanted by: 
+	third-party/cron-3.0pl1.orig/crontab.c:618
+autoscan: warning: missing AC_CHECK_HEADERS([fcntl.h]) wanted by: 
+	ad_request.cpp:10
+	ad_register.cpp:11
+	init_data.h:4
+	user_op.cpp:11
+	adstat.cpp:9
+	ad_op.cpp:10
+	third-party/cron-3.0pl1.orig/misc.c:37
+	third-party/cron-3.0pl1.orig/crontab.c:33
+	third-party/cron-3.0pl1.orig/database.c:27
+autoscan: warning: missing AC_CHECK_HEADERS([limits.h]) wanted by: 
+	user_op.cpp:24
+	ad_map.h:3
+	user_map.h:3
+	third-party/cron-3.0pl1.orig/compat.c:29
+autoscan: warning: missing AC_CHECK_HEADERS([locale.h]) wanted by: 
+	third-party/cron-3.0pl1.orig/crontab.c:43
+autoscan: warning: missing AC_CHECK_HEADERS([paths.h]) wanted by: 
+	third-party/cron-3.0pl1.orig/pathnames.h:23
+autoscan: warning: missing AC_CHECK_HEADERS([sys/file.h]) wanted by: 
+	third-party/cron-3.0pl1.orig/misc.c:33
+	third-party/cron-3.0pl1.orig/crontab.c:34
+	third-party/cron-3.0pl1.orig/database.c:29
+autoscan: warning: missing AC_CHECK_HEADERS([sys/ioctl.h]) wanted by: 
+	third-party/cron-3.0pl1.orig/compat.c:32
+autoscan: warning: missing AC_CHECK_HEADERS([sys/param.h]) wanted by: 
+	third-party/cron-3.0pl1.orig/cron.h:30
+autoscan: warning: missing AC_CHECK_HEADERS([sys/time.h]) wanted by: 
+	third-party/cron-3.0pl1.orig/misc.c:29
+	third-party/cron-3.0pl1.orig/crontab.c:37
+	third-party/cron-3.0pl1.orig/cron.c:29
+autoscan: warning: missing AC_CHECK_HEADERS([syslog.h]) wanted by: 
+	user_map.cpp:2
+	ad_request.cpp:7
+	ad_map.cpp:2
+	ad_register.cpp:8
+	init_data.h:10
+	user_op.cpp:8
+	adstat.cpp:6
+	ad_op.cpp:7
+	third-party/cron-3.0pl1.orig/misc.c:39
+	third-party/cron-3.0pl1.orig/do_command.c:29
+	test/ad_map_test.cpp:8
+autoscan: warning: missing AC_CHECK_HEADERS([utime.h]) wanted by: 
+	third-party/cron-3.0pl1.orig/crontab.c:40
+autoscan: warning: missing AC_CHECK_HEADER_STDBOOL wanted by: 
+	ap_signal_sender.cpp:32
+	ap_signal_sender.cpp:38
+	ap_signal_sender.cpp:56
+	user_map.cpp:41
+	user_map.cpp:219
+	ap_signal_dock.cpp:5
+	ap_signal_dock.cpp:11
+	cron_timing.h:42
+	ad_map.cpp:41
+	ad_map.cpp:158
+	ad_map.cpp:170
+	ap_signal_receiver.cpp:12
+	ap_signal_receiver.cpp:18
+	tair_common.h:201
+	cron_timing.cpp:2
+	user_tag_receiver.cpp:13
+	user_tag_receiver.cpp:18
+	test/ad_map_test.cpp:112
+	test/user_map_test.cpp:13
+	ap_signal_sender.cpp:69
+	ap_signal_sender.cpp:78
+	user_map.cpp:41
+	ad_map.cpp:41
+	ad_map.cpp:170
+	ad_map.cpp:220
+	ap_signal_receiver.cpp:12
+	ap_signal_receiver.cpp:54
+	ap_signal_receiver.cpp:61
+	tair_common.h:216
+	cron_timing.cpp:18
+	user_tag_receiver.cpp:13
+	user_tag_receiver.cpp:58
+	user_tag_receiver.cpp:65
+	test/ad_map_test.cpp:113
+	ap_signal_sender.cpp:56
+	user_map.cpp:67
+	user_map.cpp:72
+	user_map.cpp:154
+	user_map.cpp:174
+	user_map.cpp:175
+	user_map.cpp:194
+	user_map.cpp:195
+	user_map.cpp:204
+	user_map.cpp:205
+	user_map.cpp:266
+	user_map.cpp:267
+	user_map.cpp:298
+	user_map.cpp:340
+	user_map.cpp:341
+	user_map.cpp:342
+	ad_map.cpp:57
+	ad_map.cpp:63
+	ad_map.cpp:167
+	ad_map.cpp:178
+	ap_signal_receiver.cpp:18
+	ap_signal_receiver.cpp:116
+	tair_common.h:58
+	tair_common.h:96
+	tair_common.h:103
+	tair_common.h:110
+	tair_common.h:213
+	cron_timing.cpp:8
+	cron_timing.cpp:14
+	user_tag_receiver.cpp:18
+	user_tag_receiver.cpp:120
+	test/ad_map_test.cpp:116
+	test/user_map_test.cpp:153
+autoscan: warning: missing AC_C_INLINE wanted by: 
+	user_map.cpp:95
+	user_map.cpp:104
+	user_map.cpp:113
+	user_map.cpp:122
+	user_map.cpp:130
+	user_map.cpp:145
+	tair_common.h:16
+	tair_common.h:27
+	tair_common.h:41
+	tair_common.h:63
+	tair_common.h:69
+	tair_common.h:94
+	tair_common.h:101
+	tair_common.h:108
+	tair_common.h:118
+	tair_common.h:126
+	tair_common.h:138
+	tair_common.h:201
+autoscan: warning: missing AC_FUNC_CHOWN wanted by: 
+	third-party/cron-3.0pl1.orig/crontab.c:326
+	third-party/cron-3.0pl1.orig/crontab.c:563
+autoscan: warning: missing AC_FUNC_FORK wanted by: 
+	third-party/cron-3.0pl1.orig/compat.c:44
+	third-party/cron-3.0pl1.orig/crontab.c:393
+	third-party/cron-3.0pl1.orig/cron.c:94
+	third-party/cron-3.0pl1.orig/do_command.c:52
+	third-party/cron-3.0pl1.orig/do_command.c:266
+	third-party/cron-3.0pl1.orig/externs.h:144
+	third-party/cron-3.0pl1.orig/compat.c:43
+	third-party/cron-3.0pl1.orig/do_command.c:148
+	third-party/cron-3.0pl1.orig/popen.c:96
+autoscan: warning: missing AC_FUNC_MALLOC wanted by: 
+	bitstring.h:41
+	third-party/cron-3.0pl1.orig/externs.h:57
+	third-party/cron-3.0pl1.orig/misc.c:478
+	third-party/cron-3.0pl1.orig/misc.c:623
+	third-party/cron-3.0pl1.orig/env.c:29
+	third-party/cron-3.0pl1.orig/env.c:57
+	third-party/cron-3.0pl1.orig/compat.c:56
+	third-party/cron-3.0pl1.orig/compat.c:225
+	third-party/cron-3.0pl1.orig/job.c:48
+	third-party/cron-3.0pl1.orig/user.c:66
+	third-party/cron-3.0pl1.orig/popen.c:67
+	third-party/cron-3.0pl1.orig/bitstring.h:41
+autoscan: warning: missing AC_FUNC_MMAP wanted by: 
+	init_data.h:84
+	init_data.h:91
+autoscan: warning: missing AC_FUNC_REALLOC wanted by: 
+	third-party/cron-3.0pl1.orig/externs.h:57
+	third-party/cron-3.0pl1.orig/env.c:99
+autoscan: warning: missing AC_FUNC_WAIT3 wanted by: 
+	third-party/cron-3.0pl1.orig/cron.c:257
+autoscan: warning: missing AC_TYPE_INT32_T wanted by: 
+	ap_signal_receiver.cpp:16
+	user_tag_receiver.cpp:16
+autoscan: warning: missing AC_TYPE_INT64_T wanted by: 
+	ap_signal_receiver.cpp:13
+	ap_signal_receiver.cpp:14
+	ap_signal_receiver.cpp:15
+	user_tag_receiver.cpp:14
+	user_tag_receiver.cpp:15
+autoscan: warning: missing AC_TYPE_PID_T wanted by: 
+	third-party/cron-3.0pl1.orig/compat.c:105
+autoscan: warning: missing AC_TYPE_SSIZE_T wanted by: 
+	init_data.h:58
+	init_data.h:66
+autoscan: warning: missing AC_TYPE_UID_T wanted by: 
+	third-party/cron-3.0pl1.orig/cron.h:151
+	third-party/cron-3.0pl1.orig/cron.h:150

@@ -2,8 +2,8 @@
 #include <syslog.h>
 #include <tair_client_api.hpp>
 #include <data_entry.hpp>
-#include "tbsys/config.h"
-#include "tbsys/tblog.h"
+#include "config.h"
+#include "tblog.h"
 #include <vector>
 #include <unordered_map>
 #include <sstream>
