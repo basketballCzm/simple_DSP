@@ -471,8 +471,16 @@ namespace user_map
 
                 bool is_vip = mac_is_vip(msg + offset, shopId);
 
-                if(is_vip) printf("1\n");
-                else printf("0\n");
+                if(is_vip) {
+
+                    printf("1\n");
+                    update_vip_arrive_time(shopId, str_to_uint64(msg + offset));
+
+                } else {
+
+                    printf("0\n");
+
+                }
 
             }
 
