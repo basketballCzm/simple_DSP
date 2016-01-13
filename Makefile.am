@@ -1,6 +1,6 @@
 
-AUTOMAKE_OPTIONS = foreign subdir-objects
-TBLIB_ROOT = /opt/tbl
+AUTOMAKE_OPTIONS = foreign 
+TBLIB_ROOT = /usr/local
 AM_CPPFLAGS = -std=c++11  -I/opt/tair_rdb_bin/include \
 	-I${TBLIB_ROOT}/include/tbnet -I${TBLIB_ROOT}/include/tbsys \
 	-I/usr/include/jsoncpp
