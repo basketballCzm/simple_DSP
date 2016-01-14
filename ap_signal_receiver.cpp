@@ -1,5 +1,7 @@
 #include <iostream>
 #include <sstream>
+#include <cstring>
+#include <ctime>
 #include "librdkafka/rdkafkacpp.h"
 #include "user_map.h"
 #include "limits.h"
