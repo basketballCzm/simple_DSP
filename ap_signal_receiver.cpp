@@ -17,6 +17,52 @@ static int32_t partition = 0;
 
 static bool run = true;
 
+// parse a ap mac message
+// store mac list into tair database
+
+void parse_apmac_msg(const char* msg) {
+
+    int offset = 30;
+    int num_macs = (strlen(msg) - 29) / 19;
+    double time = (double)std::time(0);
+
+    for(int i = 0; i < num_macs; ++i, offset += 19) {
+
+        unsigned long mac = str_to_uint64(msg + offset);
+        save_mac(msg, mac, time);
+
+    }
+
+    unsigned long ap_mac = str_to_uint64(msg + 6);
+    int shopId = apmac_get_shopid(ap_mac);
+
+    if(shopId) {
+
+        printf("shopId: %d\n", shopId);
+
+        offset = 30;
+
+        for(int i = 0; i < num_macs; ++i, offset += 19) {
+
+            bool is_vip = mac_is_vip(msg + offset, shopId);
+
+            if(is_vip) {
+
+                printf("1\n");
+                update_vip_arrive_time(shopId, user_get_id(str_to_uint64(msg + offset)));
+
+            } else {
+
+                printf("0\n");
+
+            }
+
+        }
+
+    }
+
+}
+
 void msg_consume(RdKafka::Message* message, void* opaque) {
 
     union {

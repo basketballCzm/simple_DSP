@@ -13,6 +13,7 @@
 #include "config.h"
 
 #include <pqxx/pqxx>        // pg c++ api
+#include <memory>
 
 using namespace std;
 
@@ -20,21 +21,29 @@ namespace user_map
 {
     tair::tair_client_api g_tair;
     const char * config_file="config.ini";
+
     tbsys::CConfig config;
+
     const char * master_addr;
     const char * slave_addr;
     const char * group_name;
+
     int time_slice; // minutes
     int tair_namespace;
-    int max_duration_gap;// users' stay time gap
+    int max_duration_gap; // users' stay time gap
+
     const char * pg_server;
     const char * pg_user;
     const char * pg_password;
     const char * pg_database;
     const char * add_user_sql;
+
     const char * add_user_location_sql;
     const char * query_user_id_sql;
     static const char * tb_log_file;
+
+    std::shared_ptr<pqxx::connection> conn;
+
     int check_vip; 
    
     void user_map_init()
@@ -69,8 +78,25 @@ namespace user_map
             TBSYS_LOGGER.setLogLevel("DEBUG");
 
             g_tair.set_timeout(5000);
-            g_tair.startup(master_addr,slave_addr,group_name); 
-            b_started=true;
+            g_tair.startup(master_addr,slave_addr,group_name);
+
+            std::stringstream ss;
+            ss << "dbname=" << pg_database
+               << " user=" << pg_user
+               << " password=" << pg_password
+               << " hostaddr=192.168.2.201"
+               << " port=5432";
+
+            conn = std::make_shared<pqxx::connection>(ss.str());
+
+            if(!conn->is_open()) {
+
+                printf("cannot open database: %s\n", pg_database);
+                throw std::exception();
+
+            }
+
+            b_started = true;
         }
     }
 
@@ -443,54 +469,9 @@ namespace user_map
 
     }
 
-    void parse_apmac_msg(const char* msg) {
-
-        printf("---------------------\n");
-
-        int offset = 30;
-        int num_macs = (strlen(msg) - 29) / 19;
-        double time = (double)std::time(0);
-
-        for(int i = 0; i < num_macs; ++i, offset += 19) {
-
-            unsigned long mac = str_to_uint64(msg + offset);
-            save_mac(msg, mac, time);
-
-        }
-
-        unsigned long ap_mac = str_to_uint64(msg + 6);
-        int shopId = apmac_get_shopid(ap_mac);
-
-        if(shopId) {
-
-            printf("shopId: %d\n", shopId);
-
-            offset = 30;
-
-            for(int i = 0; i < num_macs; ++i, offset += 19) {
-
-                bool is_vip = mac_is_vip(msg + offset, shopId);
-
-                if(is_vip) {
-
-                    printf("1\n");
-                    update_vip_arrive_time(shopId, str_to_uint64(msg + offset));
-
-                } else {
-
-                    printf("0\n");
-
-                }
-
-            }
-
-        }
-
-        printf("---------------------\n");
-
-    }
-
     void save_mac(const char* key_str, unsigned long mac, double time) {
+
+        user_map_init();
 
         tair::common::data_entry key(key_str, 24, true);
         tair::common::data_entry value(uint64_to_str(mac).c_str(), 18, true);
@@ -507,28 +488,16 @@ namespace user_map
 
     int apmac_get_shopid(unsigned long mac) {
 
+        user_map_init();
+
         try {
 
-            pqxx::connection conn(
-                "dbname=adsweb "
-                "user=postgres "
-                "password=123456 "
-                "hostaddr=192.168.2.201 "
-                "port=5432");
-
-            if(!conn.is_open()) {
-
-                printf("cannot open database: adsweb\n");
-                throw std::exception();
-            }
-
-            pqxx::nontransaction transaction(conn);
+            pqxx::nontransaction transaction(*conn);
             std::string sql
                 = "select \"shopId\" from ap_v2 where mac='"
                 + uint64_to_str(mac) + "'";
 
             pqxx::result result(transaction.exec(sql.c_str()));
-            conn.disconnect();
 
             if(result.empty()) return 0;
 
@@ -560,22 +529,11 @@ namespace user_map
 
     bool mac_is_vip(const char* mac_str, int shopId) {
 
+        user_map_init();
+
         try {
 
-            pqxx::connection conn(
-                "dbname=adsweb "
-                "user=postgres "
-                "password=123456 "
-                "hostaddr=192.168.2.201 "
-                "port=5432");
-
-            if(!conn.is_open()) {
-
-                printf("cannot open database: adsweb\n");
-                throw std::exception();
-            }
-
-            pqxx::nontransaction transaction(conn);
+            pqxx::nontransaction transaction(*conn);
 
             std::stringstream ss;
             ss << shopId;
@@ -586,10 +544,9 @@ namespace user_map
                 + ss.str()
                 + " and mac='" + mac_string + "'";
 
-                printf("%s ", sql.c_str());
+            printf("%s ", sql.c_str());
 
             pqxx::result result(transaction.exec(sql.c_str()));
-            conn.disconnect();
 
             int r = rand() % 10;
 
@@ -609,7 +566,9 @@ namespace user_map
 
     }
 
-    void update_vip_arrive_time(int shopId, unsigned long vip_mac) {
+    void update_vip_arrive_time(int shopId, int userId) {
+
+        user_map_init();
 
         printf("enter update vip arrive time\n");
 
@@ -621,7 +580,8 @@ namespace user_map
         std::string key_str = ss.str();
         
         tair::common::data_entry key(key_str.c_str(), key_str.size() + 1, true);
-        tair::common::data_entry value(uint64_to_str(vip_mac).c_str(), 18, true);
+        tair::common::data_entry value;
+        get_data_entry(value, userId);
 
         int result = g_tair.zadd(tair_namespace, key, t, value, 0, 0);
 

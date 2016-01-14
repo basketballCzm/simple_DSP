@@ -41,11 +41,6 @@ namespace user_map
 
     unsigned long str_to_uint64(const char* str);
 
-    // parse a ap mac message
-    // store mac list into tair database
-
-    void parse_apmac_msg(const char* msg);
-
     // store mac and arrive time into tair
     // param key_str is a str start with ApMac:01:02:03:04:05:06
 
@@ -64,6 +59,6 @@ namespace user_map
 
     bool mac_is_vip(const char* mac_str, int shopId);
 
-    void update_vip_arrive_time(int shopId, unsigned long vip_mac);
+    void update_vip_arrive_time(int shopId, int userId);
 
 }
