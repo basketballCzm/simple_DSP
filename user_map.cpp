@@ -15,6 +15,10 @@
 #include <pqxx/pqxx>        // pg c++ api
 #include <memory>
 
+#include <string.h>         // headers for hostname translation
+#include <arpa/inet.h>
+#include <netdb.h>
+
 using namespace std;
 
 namespace user_map
@@ -84,7 +88,7 @@ namespace user_map
             ss << "dbname=" << pg_database
                << " user=" << pg_user
                << " password=" << pg_password
-               << " hostaddr=192.168.2.201"
+               << " hostaddr=" << hostname_to_ip(pg_server)
                << " port=5432";
 
             conn = std::make_shared<pqxx::connection>(ss.str());
@@ -442,6 +446,33 @@ namespace user_map
         
     }
 
+    std::string hostname_to_ip(const char* hostname) {
+
+        struct hostent* host;
+        struct in_addr** addr_list;
+        char ip[100];
+
+        if(host = gethostbyname(hostname)) {
+
+            addr_list = (struct in_addr**) host->h_addr_list;
+
+            for(int i = 0; addr_list[i] != nullptr; ++i) {
+
+                strcpy(ip, inet_ntoa(*addr_list[i]));
+
+            }
+
+        } else {
+
+            printf("cannot translate hostname\n");
+            throw std::exception();
+
+        }
+
+        return std::string(ip);
+
+    }
+
     std::string uint64_to_str(unsigned long num) {
 
         Mac mac;
@@ -566,17 +597,16 @@ namespace user_map
 
     }
 
-    void update_vip_arrive_time(int shopId, int userId) {
-
-        user_map_init();
+    void update_vip_arrive_time(int mallId, int shopId, int userId) {
 
         printf("enter update vip arrive time\n");
 
-        int mall_id = 2;
+        user_map_init();
+
         double t = time(0);
 
         std::stringstream ss;
-        ss << "user.vip:" << mall_id << ":" << shopId << ":arrive.time";
+        ss << "user.vip:" << mallId << ":" << shopId << ":arrive.time";
         std::string key_str = ss.str();
         
         tair::common::data_entry key(key_str.c_str(), key_str.size() + 1, true);
@@ -588,6 +618,33 @@ namespace user_map
         if(result != 0) {
 
              printf("update mac arrive time fialed : %d %s\n", result, g_tair.get_error_msg(result));
+
+        }
+
+    }
+
+    void update_user_arrive_time(int mallId, int shopId, unsigned long mac) {
+
+        user_map_init();
+
+        int userId = user_get_id(mac);
+
+        std::stringstream ss;
+        ss << "location:" << mallId
+           << ":" << shopId
+           << ":" << mac
+           << ":time";
+
+        std::string key_str = ss.str();
+        tair::common::data_entry key(key_str.c_str(), key_str.size() + 1, true);
+
+        std::time_t t = tair_get<std::time_t>(g_tair, tair_namespace, key, 0);
+        std::time_t now = std::time(0);
+
+        if(t == 0 || now - t > 30 * 60) {
+
+            tair::common::data_entry value((char*)&now, sizeof(std::time_t), true);
+            g_tair.zadd(tair_namespace, key, now, value, 0, 0);
 
         }
 

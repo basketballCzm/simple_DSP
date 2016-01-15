@@ -47,17 +47,21 @@ void parse_apmac_msg(const char* msg) {
         for(int i = 0; i < num_macs; ++i, offset += 19) {
 
             bool is_vip = mac_is_vip(msg + offset, shopId);
+            unsigned long mac = str_to_uint64(msg + offset);
+            int userId = user_get_id(mac);
 
             if(is_vip) {
 
                 printf("1\n");
-                update_vip_arrive_time(shopId, user_get_id(str_to_uint64(msg + offset)));
+                update_vip_arrive_time(2, shopId, userId);
 
             } else {
 
                 printf("0\n");
 
             }
+
+            update_user_arrive_time(2, shopId, mac);
 
         }
 

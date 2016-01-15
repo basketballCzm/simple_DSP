@@ -30,6 +30,8 @@ namespace user_map
         unsigned char bytes[8];
     } Mac;
 
+    std::string hostname_to_ip(const char* hostname);
+
     // convert uint64's low 48 bit to a mac address str
     // a mac str looks like this : a0:b1:c2:d3:e4:f5
 
@@ -59,6 +61,11 @@ namespace user_map
 
     bool mac_is_vip(const char* mac_str, int shopId);
 
-    void update_vip_arrive_time(int shopId, int userId);
+    void update_vip_arrive_time(int mallId, int shopId, int userId);
+
+    // update user's arrive time with current time
+    // if iterval is bigger than half an hour
+
+    void update_user_arrive_time(int mallId, int shopId, unsigned long mac);
 
 }
