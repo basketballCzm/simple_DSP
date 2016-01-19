@@ -85,10 +85,10 @@ namespace user_map
             g_tair.startup(master_addr,slave_addr,group_name);
 
             std::stringstream ss;
-            ss << "dbname=" << pg_database
-               << " user=" << pg_user
-               << " password=" << pg_password
-               << " hostaddr=" << hostname_to_ip(pg_server)
+            ss << "dbname="     << pg_database
+               << " user="      << pg_user
+               << " password="  << pg_password
+               << " hostaddr="  << hostname_to_ip(pg_server)
                << " port=5432";
 
             conn = std::make_shared<pqxx::connection>(ss.str());
@@ -542,22 +542,6 @@ namespace user_map
 
     }
 
-    std::string kafka_get_mac_str(const char* str) {
-
-        char mac_str[18];
-
-        for(int i = 0; i < 17; ++i) {
-
-            mac_str[i] = *(str + i);
-
-        }
-
-        mac_str[17] = '\0';
-
-        return std::string(mac_str);
-
-    }
-
     bool mac_is_vip(const char* mac_str, int shopId) {
 
         user_map_init();
@@ -569,7 +553,7 @@ namespace user_map
             std::stringstream ss;
             ss << shopId;
 
-            std::string mac_string = kafka_get_mac_str(mac_str);
+            std::string mac_string = std::string(mac_str, 17);
             std::string sql
                 = "select type from shop_member where \"shopId\"="
                 + ss.str()

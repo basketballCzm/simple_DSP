@@ -53,12 +53,6 @@ namespace user_map
 
     int apmac_get_shopid(unsigned long mac);
 
-    // get a mac str form kafka message stream
-    // for exmaple stream 28:fa:a0:a1:fc:09, 24:05:0f:66:a1:41, ...
-    // will return string 28:fa:a0:a1:fc:09
-
-    std::string kafka_get_mac(const char* msg);
-
     bool mac_is_vip(const char* mac_str, int shopId);
 
     void update_vip_arrive_time(int mallId, int shopId, int userId);
