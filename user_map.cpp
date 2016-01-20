@@ -626,19 +626,30 @@ namespace user_map
         std::time_t t = tair_get<std::time_t>(g_tair, tair_namespace, key, 0);
         std::time_t now = std::time(0);
 
-        printf("%s\n", ss.str().c_str());
-        printf("last: %d\n", t);
-        printf("now: %d\n", now);
-
         if(t == 0 || now - t > 30 * 60) {
 
             tair::common::data_entry value((char*)&now, sizeof(std::time_t), true);
             g_tair.put(tair_namespace, key, value, 0, 0);
 
-            now = tair_get<std::time_t>(g_tair, tair_namespace, key, 0);
-            printf("stored: %d\n", now);  getchar();
-
         }
+
+    }
+
+    void update_user_last_arrive_time(int mallId, int shopId, unsigned long mac) {
+
+        user_map_init();
+
+        int userId = user_get_id(mac);
+        double now = (double)std::time(0);
+
+        std::stringstream ss;
+        ss << "user:" << mallId << ":" << shopId << ":arrive.time";
+        std::string str = ss.str();
+
+        tair::common::data_entry key(str.c_str(), str.size() + 1, true);
+        tair::common::data_entry value((char*)&userId, sizeof(int), true);
+
+        g_tair.zadd(tair_namespace, key, now, value, 0, 0);
 
     }
 

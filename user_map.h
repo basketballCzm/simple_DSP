@@ -62,4 +62,8 @@ namespace user_map
 
     void update_user_arrive_time(int mallId, int shopId, unsigned long mac);
 
+    // update user's last arrive time
+
+    void update_user_last_arrive_time(int mallId, int shopId, unsigned long mac);
+
 }
