@@ -564,7 +564,7 @@ namespace user_map
 
     }
 
-    void update_vip_arrive_time(int mallId, int shopId, int userId, unsigned long mac, double now) {
+    void update_vip_arrive_time(int mallId, int shopId, int userId, unsigned long mac, std::time_t now) {
 
         user_map_init();
 
@@ -592,18 +592,18 @@ namespace user_map
 
     }
 
-    void update_user_location_time(int mallId, int shopId, int userId, unsigned long mac) {
+    void update_user_location_time(int mallId, int shopId, int userId, unsigned long mac, std::time_t now) {
 
         user_map_init();
 
         tair::common::data_entry key;
         get_data_entry(key, "location:", mallId, ":", shopId, ":", mac, ":time");
 
-        tair_put<std::time_t>(g_tair, tair_namespace, key, std::time(0));
+        tair_put<std::time_t>(g_tair, tair_namespace, key, now);
 
     }
 
-    void update_user_arrive_time(int mallId, int shopId, int userId, double now) {
+    void update_user_arrive_time(int mallId, int shopId, int userId, std::time_t now) {
 
         user_map_init();
 
@@ -613,7 +613,7 @@ namespace user_map
         tair::common::data_entry value;
         get_data_entry(value, userId);
 
-        int ret = g_tair.zadd(tair_namespace, key, now, value, 0, 0);
+        int ret = g_tair.zadd(tair_namespace, key, (double)now, value, 0, 0);
 
         if(ret != 0) {
 

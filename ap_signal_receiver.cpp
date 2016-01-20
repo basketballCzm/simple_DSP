@@ -37,7 +37,7 @@ void parse_apmac_msg(const char* msg) {
             bool is_vip = mac_is_vip(msg + offset, shopId);
             unsigned long mac = str_to_uint64(msg + offset);
             int userId = user_get_id(mac);
-            double time = std::time(0);
+            std::time_t time = std::time(0);
 
             if(is_vip) {
 
@@ -51,7 +51,7 @@ void parse_apmac_msg(const char* msg) {
             }
 
             update_user_arrive_time(2, shopId, userId, time);
-            update_user_location_time(2, shopId, userId, mac);
+            update_user_location_time(2, shopId, userId, mac, time);
 
         }
 
