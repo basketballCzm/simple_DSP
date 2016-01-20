@@ -61,8 +61,8 @@ void parse_apmac_msg(const char* msg) {
 
             }
 
-            update_user_arrive_time(2, shopId, mac);
-            update_user_last_arrive_time(2, shopId, mac);
+            update_user_arrive_time(2, shopId, userId, mac);
+            update_user_last_arrive_time(2, shopId, userId);
 
         }
 

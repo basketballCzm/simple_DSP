@@ -60,10 +60,10 @@ namespace user_map
     // update user's arrive time with current time
     // if iterval is bigger than half an hour
 
-    void update_user_arrive_time(int mallId, int shopId, unsigned long mac);
+    void update_user_arrive_time(int mallId, int shopId, int userId, unsigned long mac);
 
     // update user's last arrive time
 
-    void update_user_last_arrive_time(int mallId, int shopId, unsigned long mac);
+    void update_user_last_arrive_time(int mallId, int shopId, int userId);
 
 }
