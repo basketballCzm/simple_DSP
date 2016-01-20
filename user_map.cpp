@@ -603,7 +603,7 @@ namespace user_map
 
             if(result != 0) {
 
-                 printf("update mac arrive time fialed : %d %s\n", result, g_tair.get_error_msg(result));
+                 printf("update vip arrive time fialed : %d %s\n", result, g_tair.get_error_msg(result));
 
             }
 
@@ -618,7 +618,13 @@ namespace user_map
         tair::common::data_entry key;
         get_data_entry(key, "location:", mallId, ":", shopId, ":", mac, ":time");
 
-        tair_put<std::time_t>(g_tair, tair_namespace, key, (double)std::time(0));
+        int ret = tair_put<std::time_t>(g_tair, tair_namespace, key, (double)std::time(0));
+
+        if(!ret) {
+
+            printf("update user location time fialed : %d %s\n", ret, g_tair.get_error_msg(ret));
+
+        }
 
     }
 
@@ -638,7 +644,7 @@ namespace user_map
 
         if(ret != 0) {
 
-             printf("update user last arrive time fialed : %d %s\n", ret, g_tair.get_error_msg(ret));
+             printf("update user arrive time fialed : %d %s\n", ret, g_tair.get_error_msg(ret));
 
         }
 
