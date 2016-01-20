@@ -500,14 +500,14 @@ namespace user_map
 
     }
 
-    void save_mac(const char* key_str, unsigned long mac, double time) {
+    void save_mac(const char* key_str, unsigned long mac) {
 
         user_map_init();
 
         tair::common::data_entry key(key_str, 24, true);
         tair::common::data_entry value(uint64_to_str(mac).c_str(), 18, true);
 
-        int result = g_tair.zadd(tair_namespace, key, time, value, 0, 0);
+        int result = g_tair.zadd(tair_namespace, key, (double)std::time(0), value, 0, 0);
 
         if(result != 0) {
 
@@ -581,7 +581,7 @@ namespace user_map
 
     }
 
-    void update_vip_arrive_time(int mallId, int shopId, int userId) {
+    void update_vip_arrive_time(int mallId, int shopId, int userId, unsigned long mac) {
 
         user_map_init();
 
@@ -591,13 +591,15 @@ namespace user_map
         tair::common::data_entry value;
         get_data_entry(value, userId);
 
-        int result;
-        std::time_t now = time(0);
-        std::time_t last = tair_get<std::time_t>(g_tair, tair_namespace, key, 0);
+        std::time_t now = std::time(0);
 
-        if(now == 0 || now - last) {
+        tair::common::data_entry time_key;
+        get_data_entry(time_key, "location:", mallId, ":", shopId, ":", mac, ":time");
+        std::time_t last = tair_get<std::time_t>(g_tair, tair_namespace, time_key, 0);
 
-            result = g_tair.zadd(tair_namespace, key, now, value, 0, 0);
+        if(now - last > 30 * 60) {
+
+            int result = g_tair.zadd(tair_namespace, key, (double)now, value, 0, 0);
 
             if(result != 0) {
 
@@ -609,29 +611,18 @@ namespace user_map
 
     }
 
-    void update_user_arrive_time(int mallId, int shopId, int userId, unsigned long mac) {
+    void update_user_location_time(int mallId, int shopId, int userId, unsigned long mac) {
 
         user_map_init();
-
-        std::time_t now = std::time(0);
 
         tair::common::data_entry key;
         get_data_entry(key, "location:", mallId, ":", shopId, ":", mac, ":time");
 
-        tair::common::data_entry value;
-        get_data_entry(value, now);
-
-        int ret = g_tair.put(tair_namespace, key, value, 0, 0);
-
-        if(ret != 0) {
-
-             printf("update user arrive time fialed : %d %s\n", ret, g_tair.get_error_msg(ret));
-
-        }
+        tair_put<std::time_t>(g_tair, tair_namespace, key, (double)std::time(0));
 
     }
 
-    void update_user_last_arrive_time(int mallId, int shopId, int userId) {
+    void update_user_arrive_time(int mallId, int shopId, int userId) {
 
         user_map_init();
 

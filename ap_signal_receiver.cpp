@@ -26,12 +26,11 @@ void parse_apmac_msg(const char* msg) {
 
     int offset = 30;
     int num_macs = (strlen(msg) - 29) / 19;
-    double time = (double)std::time(0);
 
     for(int i = 0; i < num_macs; ++i, offset += 19) {
 
         unsigned long mac = str_to_uint64(msg + offset);
-        save_mac(msg, mac, time);
+        save_mac(msg, mac);
 
     }
 
@@ -39,8 +38,6 @@ void parse_apmac_msg(const char* msg) {
     int shopId = apmac_get_shopid(ap_mac);
 
     if(shopId) {
-
-        printf("shopId: %d\n", shopId);
 
         offset = 30;
 
@@ -53,7 +50,7 @@ void parse_apmac_msg(const char* msg) {
             if(is_vip) {
 
                 printf("1\n");
-                update_vip_arrive_time(2, shopId, userId);
+                update_vip_arrive_time(2, shopId, userId, mac);
 
             } else {
 
@@ -61,8 +58,8 @@ void parse_apmac_msg(const char* msg) {
 
             }
 
-            update_user_arrive_time(2, shopId, userId, mac);
-            update_user_last_arrive_time(2, shopId, userId);
+            update_user_arrive_time(2, shopId, userId);
+            update_user_location_time(2, shopId, userId, mac);
 
         }
 
