@@ -500,23 +500,6 @@ namespace user_map
 
     }
 
-    void save_mac(const char* key_str, unsigned long mac) {
-
-        user_map_init();
-
-        tair::common::data_entry key(key_str, 24, true);
-        tair::common::data_entry value(uint64_to_str(mac).c_str(), 18, true);
-
-        int result = g_tair.zadd(tair_namespace, key, (double)std::time(0), value, 0, 0);
-
-        if(result != 0) {
-
-             printf("save ap mac fialed : %d %s\n", result, g_tair.get_error_msg(result));
-
-        }
-
-    }
-
     int apmac_get_shopid(unsigned long mac) {
 
         user_map_init();
@@ -581,7 +564,7 @@ namespace user_map
 
     }
 
-    void update_vip_arrive_time(int mallId, int shopId, int userId, unsigned long mac) {
+    void update_vip_arrive_time(int mallId, int shopId, int userId, unsigned long mac, double now) {
 
         user_map_init();
 
@@ -590,8 +573,6 @@ namespace user_map
 
         tair::common::data_entry value;
         get_data_entry(value, userId);
-
-        std::time_t now = std::time(0);
 
         tair::common::data_entry time_key;
         get_data_entry(time_key, "location:", mallId, ":", shopId, ":", mac, ":time");
@@ -618,21 +599,13 @@ namespace user_map
         tair::common::data_entry key;
         get_data_entry(key, "location:", mallId, ":", shopId, ":", mac, ":time");
 
-        int ret = tair_put<std::time_t>(g_tair, tair_namespace, key, (double)std::time(0));
-
-        if(!ret) {
-
-            printf("update user location time fialed : %d %s\n", ret, g_tair.get_error_msg(ret));
-
-        }
+        tair_put<std::time_t>(g_tair, tair_namespace, key, std::time(0));
 
     }
 
-    void update_user_arrive_time(int mallId, int shopId, int userId) {
+    void update_user_arrive_time(int mallId, int shopId, int userId, double now) {
 
         user_map_init();
-
-        double now = (double)std::time(0);
 
         tair::common::data_entry key;
         get_data_entry(key, "user:", mallId, ":", shopId, ":arrive.time");

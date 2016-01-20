@@ -43,11 +43,6 @@ namespace user_map
 
     unsigned long str_to_uint64(const char* str);
 
-    // store mac and arrive time into tair
-    // param key_str is a str start with ApMac:01:02:03:04:05:06
-
-    void save_mac(const char* key_str, unsigned long mac);
-
     // query pg database to find ap mac's shopid
     // if cannot find return 0
 
@@ -55,7 +50,7 @@ namespace user_map
 
     bool mac_is_vip(const char* mac_str, int shopId);
 
-    void update_vip_arrive_time(int mallId, int shopId, int userId, unsigned long mac);
+    void update_vip_arrive_time(int mallId, int shopId, int userId, unsigned long mac, double now);
 
     // update user's arrive time with current time
     // if iterval is bigger than half an hour
@@ -64,6 +59,6 @@ namespace user_map
 
     // update user's last arrive time
 
-    void update_user_arrive_time(int mallId, int shopId, int userId);
+    void update_user_arrive_time(int mallId, int shopId, int userId, double now);
 
 }
