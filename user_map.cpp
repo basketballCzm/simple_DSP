@@ -369,16 +369,16 @@ namespace user_map
 
         g_tair.zrangebyscore(tair_namespace, key, start, end, values, times, 0, 0);
 
-        // int i = 0;
-        // list[0] = Json::Value();
-        // auto & users = list[0];
+        int i = 0;
+        list[0] = Json::Value();
+        auto & users = list[0];
 
-        // for(auto itr = values.begin(), end = values.end(); itr != end; ++itr, ++i) {
+        for(auto itr = values.begin(), end = values.end(); itr != end; ++itr, ++i) {
 
-        //     users[i] = (*itr)->get_data();
-        //     delete *itr;
+            users[i] = (*itr)->get_data();
+            delete *itr;
 
-        // }
+        }
 
         list["size"] = (int)values.size();
 
