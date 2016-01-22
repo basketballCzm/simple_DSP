@@ -330,8 +330,7 @@ namespace user_map
         
         vector <tair::common::data_entry *> vals;
         vector <double> scores;
-        g_tair.zrangebyscore(tair_namespace, key, start, end,
-            vals,scores,0,0);
+        g_tair.zrangebyscore(tair_namespace, key, start, end, vals,scores,0,0);
 
         int number=0;
         for(vector<tair::common::data_entry *>::iterator it=vals.begin();it!=vals.end();it++)
@@ -356,6 +355,33 @@ namespace user_map
         }
         vals.clear();
         user_list["size"]=number;
+    }
+
+    void user_list(Json::Value& list, double start, double end, int mall_id, int shop_id) {
+
+        user_map_init();
+
+        tair::common::data_entry key;
+        get_data_entry(key, "user:", mall_id, ":", shop_id, "arrive:time");
+        
+        std::vector<tair::common::data_entry*> values;
+        std::vector<double> times;
+
+        g_tair.zrangebyscore(tair_namespace, key, start, end, values, times, 0, 0);
+
+        int i = 0;
+        list[0] = Json::Value();
+        auto users = list[0];
+
+        for(auto itr = values.begin(), end = values.end(); itr != end; ++itr, ++i) {
+
+            users[i] = (*itr)->get_data();
+            delete *itr;
+
+        }
+
+        list["size"] = (int)values.size();
+
     }
 
     int user_tag_update(const unsigned long long mac, const char* user_tag, const float user_value)
