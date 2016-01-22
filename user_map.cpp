@@ -363,7 +363,7 @@ namespace user_map
 
         tair::common::data_entry key;
         get_data_entry(key, "user:", mall_id, ":", shop_id, "arrive:time");
-        
+
         std::vector<tair::common::data_entry*> values;
         std::vector<double> times;
 
@@ -371,7 +371,7 @@ namespace user_map
 
         int i = 0;
         list[0] = Json::Value();
-        auto users = list[0];
+        auto & users = list[0];
 
         for(auto itr = values.begin(), end = values.end(); itr != end; ++itr, ++i) {
 
