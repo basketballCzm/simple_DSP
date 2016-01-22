@@ -362,7 +362,7 @@ namespace user_map
         user_map_init();
 
         tair::common::data_entry key;
-        get_data_entry(key, "user:", mall_id, ":", shop_id, "arrive:time");
+        get_data_entry(key, "user:", mall_id, ":", shop_id, ":arrive.time");
 
         std::vector<tair::common::data_entry*> values;
         std::vector<double> times;
