@@ -90,7 +90,7 @@ void user_op(UriQueryListA * queryList, Json::Value & ret)
             stringstream( p_para->value )>>end;
         else if (strcmp(p_para->key,"mall_id")==0)
             stringstream( p_para->value )>>mall_id;
-        else if(strcmp(p_para->key, "shop_id"))
+        else if(strcmp(p_para->key, "shop_id") == 0)
             stringstream(p_para->value) >> shop_id;
     }
 
