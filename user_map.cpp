@@ -646,6 +646,10 @@ namespace user_map
         }
 
         list["size"] = (unsigned int)users.size();
+        list["mall_id"] = mallId;
+        list["shop_id"] = shopId;
+        list["start"] = start;
+        list["end"] = end;
 
     }
 
