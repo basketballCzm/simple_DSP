@@ -357,33 +357,6 @@ namespace user_map
         user_list["size"]=number;
     }
 
-    void user_list(Json::Value& list, double start, double end, int mall_id, int shop_id) {
-
-        user_map_init();
-
-        tair::common::data_entry key;
-        get_data_entry(key, "user:", mall_id, ":", shop_id, ":arrive.time");
-
-        std::vector<tair::common::data_entry*> values;
-        std::vector<double> times;
-
-        g_tair.zrangebyscore(tair_namespace, key, start, end, values, times, 0, 0);
-
-        int i = 0;
-        list["users"] = Json::arrayValue;
-        Json::Value& users = list["users"];
-
-        for(auto itr = values.begin(), end = values.end(); itr != end; ++itr, ++i) {
-
-            users[i] = (*itr)->get_data();
-            delete *itr;
-
-        }
-
-        list["size"] = (unsigned int)values.size();
-
-    }
-
     int user_tag_update(const unsigned long long mac, const char* user_tag, const float user_value)
     {
         user_map_init();
@@ -610,7 +583,7 @@ namespace user_map
 
             if(result != 0) {
 
-                 printf("update vip arrive time fialed : %d %s\n", result, g_tair.get_error_msg(result));
+                 printf("update vip arrive time failed : %d %s\n", result, g_tair.get_error_msg(result));
 
             }
 
@@ -643,9 +616,36 @@ namespace user_map
 
         if(ret != 0) {
 
-             printf("update user arrive time fialed : %d %s\n", ret, g_tair.get_error_msg(ret));
+             printf("update user arrive time failed : %d %s\n", ret, g_tair.get_error_msg(ret));
 
         }
+
+    }
+
+    void user_list(Json::Value& list, double start, double end, int mallId, int shopId) {
+
+        user_map_init();
+
+        tair::common::data_entry key;
+        get_data_entry(key, "user:", mallId, ":", shopId, ":arrive.time");
+
+        std::vector<std::string> users;
+        tair_zrangebyscore(g_tair, tair_namespace, key, start, end, users);
+
+        int i = 0;
+        list["users"] = Json::arrayValue;
+        auto & array = list["users"];
+
+        for(auto & id : users) {
+
+            int tmp;
+            sscanf(id.c_str(), "%d", &tmp);
+
+            array[i++] = tmp;
+
+        }
+
+        list["size"] = (unsigned int)users.size();
 
     }
 
