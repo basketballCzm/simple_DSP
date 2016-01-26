@@ -19,7 +19,7 @@ namespace user_map
     void user_list(Json::Value& list, double start, double end, int mall_id, int shop_id);
 
     //user tag
-    int user_tag_update(const unsigned long long mac, const char* user_tag, const float user_value);
+    int user_tag_update(const unsigned long mac, const char* user_tag, const float user_value);
     //get user id from mac, zero means not exist 
     unsigned long long user_get_mac(int user_id);
     //get mac from user id, zero means not exist

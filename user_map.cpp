@@ -49,34 +49,43 @@ namespace user_map
     std::shared_ptr<pqxx::connection> conn;
 
     int check_vip;
+    bool user_tag_save_on_tair;
    
-    void user_map_init()
-    {
-        static bool b_started=false;
-        if(!b_started)
-        {
+    void user_map_init() {
+
+        static bool b_started = false;
+
+        if(!b_started) {
+
             if(config.load(config_file) == EXIT_FAILURE) {
+
                 syslog(LOG_INFO,"load config file %s error", config_file);
                 return;
+
             }
+
             syslog(LOG_INFO,"user_map_init() load config ok!");
-            master_addr=config.getString("tair_rdb","master_addr",NULL);
-            slave_addr=config.getString("tair_rdb","slave_addr",NULL);            
-            group_name=config.getString("tair_rdb","group_name",NULL);            
-            time_slice=config.getInt("tair_rdb","time_slice",10);
-            tair_namespace=config.getInt("tair_rdb","namespace",0);
-            check_vip=config.getInt("tair_rdb","check_vip",1);
 
-            tb_log_file=config.getString("tair_rdb","log_file",NULL);
-            max_duration_gap=config.getInt("user_map","max_duration_gap",30);
-            add_user_sql=config.getString("user_map","add_user_sql",NULL);
-            add_user_location_sql=config.getString("user_map", "add_user_location_sql",NULL);
-            query_user_id_sql=config.getString("user_map","query_user_id_sql",NULL);
-            pg_server=config.getString("user_map","pg_server",NULL);
-            pg_user=config.getString("user_map","pg_user",NULL);
-            pg_database=config.getString("user_map","pg_database",NULL);
-            pg_password=config.getString("user_map","pg_password",NULL);
+            master_addr     = config.getString("tair_rdb", "master_addr", NULL);
+            slave_addr      = config.getString("tair_rdb", "slave_addr", NULL);            
+            group_name      = config.getString("tair_rdb", "group_name", NULL);            
+            time_slice      = config.getInt("tair_rdb", "time_slice", 10);
+            tair_namespace  = config.getInt("tair_rdb", "namespace", 0);
 
+            tb_log_file      = config.getString("tair_rdb", "log_file", NULL);
+            max_duration_gap = config.getInt("user_map", "max_duration_gap", 30);
+
+            pg_server   = config.getString("user_map", "pg_server", NULL);
+            pg_user     = config.getString("user_map", "pg_user", NULL);
+            pg_database = config.getString("user_map", "pg_database", NULL);
+            pg_password = config.getString("user_map", "pg_password", NULL);
+
+            add_user_sql            = config.getString("user_map", "add_user_sql", NULL);
+            add_user_location_sql   = config.getString("user_map", "add_user_location_sql", NULL);
+            query_user_id_sql       = config.getString("user_map", "query_user_id_sql", NULL);
+
+            check_vip = config.getInt("tair_rdb", "check_vip", 1);
+            user_tag_save_on_tair = config.getInt("tair_rdb", "user_tag_save_on_tair", true);
 
             TBSYS_LOGGER.setFileName(tb_log_file,true);
             TBSYS_LOGGER.setLogLevel("DEBUG");
@@ -357,25 +366,43 @@ namespace user_map
         user_list["size"]=number;
     }
 
-    int user_tag_update(const unsigned long long mac, const char* user_tag, const float user_value)
-    {
+    int user_tag_update(const unsigned long mac, const char* user_tag, const float user_value) {
+
         user_map_init();
+
         syslog(LOG_INFO, "user_map::user_tag_update() enter");
-        
-        stringstream ss_key,ss_field,ss_value;
-        int user_id=user_get_id(mac);
-        ss_key<<"user:"<<user_id<<":label.set";
-        ss_field<<user_tag;
-        ss_value<<user_value;
-        tair::common::data_entry key(ss_key.str().c_str(),ss_key.str().size()+1,true);
-        tair::common::data_entry field(ss_field.str().c_str(),ss_field.str().size()+1,true);
-        tair::common::data_entry value(ss_value.str().c_str(),ss_value.str().size()+1,true);
-        
-        int ret=g_tair.hset(tair_namespace,key,field,value,0,0);
-        cout<<"hset ns="<<tair_namespace<<",key="<<key.get_data()<<",size="
-            <<key.get_size()<<",field="<<field.get_data()<<",size="<<field.get_size()<<",value="<<value.get_data()<<endl;
-        fprintf(stderr, "user_tag_update tair.hset: %s\n",g_tair.get_error_msg(ret));
-        return 0;
+
+        if(user_tag_save_on_tair) {
+
+            tair::common::data_entry key;
+            get_data_entry(key, "user:", user_get_id(mac), ":label.set");
+
+            tair::common::data_entry field;
+            get_data_entry(field, user_tag);
+
+            tair::common::data_entry value;
+            get_data_entry(value, user_value);
+
+            int ret = g_tair.hset(tair_namespace, key, field, value, 0, 0);
+
+            if(ret != 0) {
+
+                fprintf(stderr, "user_tag_update tair.hset: %s\n", g_tair.get_error_msg(ret));
+                return 1;
+
+            }
+
+            cout << "hset ns="  << tair_namespace
+                 << ",key="     << key.get_data()
+                 << ",size="    << key.get_size()
+                 << ",field="   << field.get_data()
+                 << ",size="    << field.get_size()
+                 << ",value="   << value.get_data() << endl;
+
+            return 0;
+
+        }
+
     }
 
     unsigned long long user_get_mac(const int user_id)
@@ -646,10 +673,6 @@ namespace user_map
         }
 
         list["size"] = (unsigned int)users.size();
-        list["mall_id"] = mallId;
-        list["shop_id"] = shopId;
-        list["start"] = start;
-        list["end"] = end;
 
     }
 
