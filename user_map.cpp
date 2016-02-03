@@ -10,66 +10,106 @@
 #include <data_entry.hpp>
 #include "tair_common.h"
 #include "boost/format.hpp"
-#include "tbsys/config.h"
+#include "config.h"
+
+#include <pqxx/pqxx>        // pg c++ api
+#include <memory>
+
+#include <string.h>         // headers for hostname translation
+#include <arpa/inet.h>
+#include <netdb.h>
 
 using namespace std;
-
 
 namespace user_map
 {
     tair::tair_client_api g_tair;
     const char * config_file="config.ini";
+
     tbsys::CConfig config;
+
     const char * master_addr;
     const char * slave_addr;
     const char * group_name;
+
     int time_slice; // minutes
     int tair_namespace;
-    int max_duration_gap;// users' stay time gap
+    int max_duration_gap; // users' stay time gap
+
     const char * pg_server;
     const char * pg_user;
     const char * pg_password;
     const char * pg_database;
     const char * add_user_sql;
+
     const char * add_user_location_sql;
     const char * query_user_id_sql;
     static const char * tb_log_file;
-    int check_vip; 
+
+    std::shared_ptr<pqxx::connection> conn;
+
+    int check_vip;
+    bool user_tag_save_on_tair;
    
-    void user_map_init()
-    {
-        static bool b_started=false;
-        if(!b_started)
-        {
+    void user_map_init() {
+
+        static bool b_started = false;
+
+        if(!b_started) {
+
             if(config.load(config_file) == EXIT_FAILURE) {
+
                 syslog(LOG_INFO,"load config file %s error", config_file);
                 return;
+
             }
+
             syslog(LOG_INFO,"user_map_init() load config ok!");
-            master_addr=config.getString("tair_rdb","master_addr",NULL);
-            slave_addr=config.getString("tair_rdb","slave_addr",NULL);            
-            group_name=config.getString("tair_rdb","group_name",NULL);            
-            time_slice=config.getInt("tair_rdb","time_slice",10);
-            tair_namespace=config.getInt("tair_rdb","namespace",0);
-            check_vip=config.getInt("tair_rdb","check_vip",1);
 
-            tb_log_file=config.getString("tair_rdb","log_file",NULL);
-            max_duration_gap=config.getInt("user_map","max_duration_gap",30);
-            add_user_sql=config.getString("user_map","add_user_sql",NULL);
-            add_user_location_sql=config.getString("user_map", "add_user_location_sql",NULL);
-            query_user_id_sql=config.getString("user_map","query_user_id_sql",NULL);
-            pg_server=config.getString("user_map","pg_server",NULL);
-            pg_user=config.getString("user_map","pg_user",NULL);
-            pg_database=config.getString("user_map","pg_database",NULL);
-            pg_password=config.getString("user_map","pg_password",NULL);
+            master_addr     = config.getString("tair_rdb", "master_addr", NULL);
+            slave_addr      = config.getString("tair_rdb", "slave_addr", NULL);            
+            group_name      = config.getString("tair_rdb", "group_name", NULL);            
+            time_slice      = config.getInt("tair_rdb", "time_slice", 10);
+            tair_namespace  = config.getInt("tair_rdb", "namespace", 0);
 
+            tb_log_file      = config.getString("tair_rdb", "log_file", NULL);
+            max_duration_gap = config.getInt("user_map", "max_duration_gap", 30);
+
+            pg_server   = config.getString("user_map", "pg_server", NULL);
+            pg_user     = config.getString("user_map", "pg_user", NULL);
+            pg_database = config.getString("user_map", "pg_database", NULL);
+            pg_password = config.getString("user_map", "pg_password", NULL);
+
+            add_user_sql            = config.getString("user_map", "add_user_sql", NULL);
+            add_user_location_sql   = config.getString("user_map", "add_user_location_sql", NULL);
+            query_user_id_sql       = config.getString("user_map", "query_user_id_sql", NULL);
+
+            check_vip = config.getInt("tair_rdb", "check_vip", 1);
+            user_tag_save_on_tair = config.getInt("tair_rdb", "user_tag_save_on_tair", true);
 
             TBSYS_LOGGER.setFileName(tb_log_file,true);
             TBSYS_LOGGER.setLogLevel("DEBUG");
 
             g_tair.set_timeout(5000);
-            g_tair.startup(master_addr,slave_addr,group_name); 
-            b_started=true;
+            g_tair.startup(master_addr,slave_addr,group_name);
+
+            std::stringstream ss;
+            ss << "dbname="     << pg_database
+               << " user="      << pg_user
+               << " password="  << pg_password
+               << " hostaddr="  << hostname_to_ip(pg_server)
+               << " port=5432";
+
+            conn = std::make_shared<pqxx::connection>(ss.str());
+
+            if(!conn->is_open()) {
+
+                printf("cannot open database: %s\n", pg_database);
+                throw std::exception();
+
+            }
+
+            b_started = true;
         }
     }
 
@@ -300,8 +340,7 @@ namespace user_map
         
         vector <tair::common::data_entry *> vals;
         vector <double> scores;
-        g_tair.zrangebyscore(tair_namespace, key, start, end,
-            vals,scores,0,0);
+        g_tair.zrangebyscore(tair_namespace, key, start, end, vals,scores,0,0);
 
         int number=0;
         for(vector<tair::common::data_entry *>::iterator it=vals.begin();it!=vals.end();it++)
@@ -328,25 +367,43 @@ namespace user_map
         user_list["size"]=number;
     }
 
-    int user_tag_update(const unsigned long long mac, const char* user_tag, const float user_value)
-    {
+    int user_tag_update(const unsigned long mac, const char* user_tag, const float user_value) {
+
         user_map_init();
+
         syslog(LOG_INFO, "user_map::user_tag_update() enter");
-        
-        stringstream ss_key,ss_field,ss_value;
-        int user_id=user_get_id(mac);
-        ss_key<<"user:"<<user_id<<":label.set";
-        ss_field<<user_tag;
-        ss_value<<user_value;
-        tair::common::data_entry key(ss_key.str().c_str(),ss_key.str().size()+1,true);
-        tair::common::data_entry field(ss_field.str().c_str(),ss_field.str().size()+1,true);
-        tair::common::data_entry value(ss_value.str().c_str(),ss_value.str().size()+1,true);
-        
-        int ret=g_tair.hset(tair_namespace,key,field,value,0,0);
-        cout<<"hset ns="<<tair_namespace<<",key="<<key.get_data()<<",size="
-            <<key.get_size()<<",field="<<field.get_data()<<",size="<<field.get_size()<<",value="<<value.get_data()<<endl;
-        fprintf(stderr, "user_tag_update tair.hset: %s\n",g_tair.get_error_msg(ret));
-        return 0;
+
+        if(user_tag_save_on_tair) {
+
+            tair::common::data_entry key;
+            get_data_entry(key, "user:", user_get_id(mac), ":label.set");
+
+            tair::common::data_entry field;
+            get_data_entry(field, user_tag);
+
+            tair::common::data_entry value;
+            get_data_entry(value, user_value);
+
+            int ret = g_tair.hset(tair_namespace, key, field, value, 0, 0);
+
+            if(ret != 0) {
+
+                fprintf(stderr, "user_tag_update tair.hset: %s\n", g_tair.get_error_msg(ret));
+                return 1;
+
+            }
+
+            cout << "hset ns="  << tair_namespace
+                 << ",key="     << key.get_data()
+                 << ",size="    << key.get_size()
+                 << ",field="   << field.get_data()
+                 << ",size="    << field.get_size()
+                 << ",value="   << value.get_data() << endl;
+
+            return 0;
+
+        }
+
     }
 
     unsigned long long user_get_mac(const int user_id)
@@ -415,4 +472,209 @@ namespace user_map
         return user_id;
         
     }
+
+    std::string hostname_to_ip(const char* hostname) {
+
+        struct hostent* host;
+        struct in_addr** addr_list;
+        char ip[100];
+
+        if(host = gethostbyname(hostname)) {
+
+            addr_list = (struct in_addr**) host->h_addr_list;
+
+            for(int i = 0; addr_list[i] != nullptr; ++i) {
+
+                strcpy(ip, inet_ntoa(*addr_list[i]));
+
+            }
+
+        } else {
+
+            printf("cannot translate hostname\n");
+            throw std::exception();
+
+        }
+
+        return std::string(ip);
+
+    }
+
+    std::string uint64_to_str(unsigned long num) {
+
+        Mac mac;
+        mac.number = num;
+
+        char str[18];
+        unsigned char* bytes = mac.bytes;
+
+        sprintf(str, "%.2hhx:%.2hhx:%.2hhx:%.2hhx:%.2hhx:%.2hhx",
+            bytes[5], bytes[4], bytes[3], bytes[2], bytes[1], bytes[0]);
+
+        return std::string(str);
+
+    }
+
+    unsigned long str_to_uint64(const char* str) {
+
+        Mac mac;
+        unsigned char* bytes = mac.bytes;
+
+        sscanf(str, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
+            bytes + 5, bytes + 4, bytes + 3, bytes + 2, bytes + 1, bytes);
+
+        return mac.number;
+
+    }
+
+    int apmac_get_shopid(unsigned long mac) {
+
+        user_map_init();
+
+        try {
+
+            pqxx::nontransaction transaction(*conn);
+            std::string sql
+                = "select \"shopId\" from ap_v2 where mac='"
+                + uint64_to_str(mac) + "'";
+
+            pqxx::result result(transaction.exec(sql.c_str()));
+
+            if(result.empty()) return 0;
+
+            return result.begin()[0].as<int>();
+
+        } catch(std::exception& e) {
+
+            std::cerr << e.what() << std::endl;
+
+        }
+
+    }
+
+    bool mac_is_vip(const char* mac_str, int shopId) {
+
+        user_map_init();
+
+        try {
+
+            pqxx::nontransaction transaction(*conn);
+
+            std::stringstream ss;
+            ss << shopId;
+
+            std::string mac_string = std::string(mac_str, 17);
+            std::string sql
+                = "select type from shop_member where \"shopId\"="
+                + ss.str()
+                + " and mac='" + mac_string + "'";
+
+            printf("%s ", sql.c_str());
+
+            pqxx::result result(transaction.exec(sql.c_str()));
+
+            int r = rand() % 10;
+
+            if(r > 5) return true;
+            
+            return false;
+
+            if(result.empty()) return false;
+
+            return !! result.begin()[0].as<int>();
+
+        } catch (std::exception e) {
+
+            std::cerr << e.what() << std::endl;
+
+        }
+
+    }
+
+    void update_vip_arrive_time(int mallId, int shopId, int userId, unsigned long mac, std::time_t now) {
+
+        user_map_init();
+
+        tair::common::data_entry key;
+        get_data_entry(key, "user.vip:", mallId, ":", shopId, ":arrive.time");
+
+        tair::common::data_entry value;
+        get_data_entry(value, userId);
+
+        tair::common::data_entry time_key;
+        get_data_entry(time_key, "location:", mallId, ":", shopId, ":", mac, ":time");
+        std::time_t last = tair_get<std::time_t>(g_tair, tair_namespace, time_key, 0);
+
+        if(now - last > 30 * 60) {
+
+            int result = g_tair.zadd(tair_namespace, key, (double)now, value, 0, 0);
+
+            if(result != 0) {
+
+                 printf("update vip arrive time failed : %d %s\n", result, g_tair.get_error_msg(result));
+
+            }
+
+        }
+
+    }
+
+    void update_user_location_time(int mallId, int shopId, int userId, unsigned long mac, std::time_t now) {
+
+        user_map_init();
+
+        tair::common::data_entry key;
+        get_data_entry(key, "location:", mallId, ":", shopId, ":", mac, ":time");
+
+        tair_put<std::time_t>(g_tair, tair_namespace, key, now);
+
+    }
+
+    void update_user_arrive_time(int mallId, int shopId, int userId, std::time_t now) {
+
+        user_map_init();
+
+        tair::common::data_entry key;
+        get_data_entry(key, "user:", mallId, ":", shopId, ":arrive.time");
+
+        tair::common::data_entry value;
+        get_data_entry(value, userId);
+
+        int ret = g_tair.zadd(tair_namespace, key, (double)now, value, 0, 0);
+
+        if(ret != 0) {
+
+             printf("update user arrive time failed : %d %s\n", ret, g_tair.get_error_msg(ret));
+
+        }
+
+    }
+
+    void user_list(Json::Value& list, double start, double end, int mallId, int shopId) {
+
+        user_map_init();
+
+        tair::common::data_entry key;
+        get_data_entry(key, "user:", mallId, ":", shopId, ":arrive.time");
+
+        std::vector<std::string> users;
+        tair_zrangebyscore(g_tair, tair_namespace, key, start, end, users);
+
+        int i = 0;
+        list["users"] = Json::arrayValue;
+        auto & array = list["users"];
+
+        for(auto & id : users) {
+
+            int tmp;
+            sscanf(id.c_str(), "%d", &tmp);
+
+            array[i++] = tmp;
+
+        }
+
+        list["size"] = (unsigned int)users.size();
+
+    }
+
 }

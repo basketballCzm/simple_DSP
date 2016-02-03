@@ -8,7 +8,7 @@
 using namespace std;
 using namespace user_map;
 
-static const string s_topic="user-tag";
+static const string s_topic = "user-tag";
 static const string brokers = "WUSHUU-KAFKA";
 static bool exit_eof = false;
 //static int64_t start_offset = RdKafka::Topic::OFFSET_BEGINNING; 
@@ -18,45 +18,53 @@ static int32_t partition = 0;
 static bool run = true;
 
 void msg_consume(RdKafka::Message* message, void* opaque) {
+
     switch (message->err()) {
-        case RdKafka::ERR__TIMED_OUT:
+
+        case RdKafka::ERR__TIMED_OUT: break;
+
+        case RdKafka::ERR_NO_ERROR:  {
+
+            std::cout << "Read msg at offset " << message->offset() << std::endl;
+
+            if (message->key()) {
+
+                std::cout << "Key: " << *message->key() << std::endl;
+
+            }
+            
+            char* msg = static_cast<char *>(message->payload());
+
+            Mac mac;
+            char usertag[40];
+
+            sscanf(msg,"Mac %hhx:%hhx:%hhx:%hhx:%hhx:%hhx %s",
+                mac.bytes + 5,
+                mac.bytes + 4,
+                mac.bytes + 3,
+                mac.bytes + 2,
+                mac.bytes + 1,
+                mac.bytes,
+                usertag);
+            
+            cout << "user tag is " << usertag << endl;
+            cout << "mac number is " << mac.number << endl;
+
+            user_tag_update(mac.number, usertag, 1.0);
+
             break;
 
-        case RdKafka::ERR_NO_ERROR:
-        {
-            /* Real message */
-            std::cout << "Read msg at offset " << message->offset() << std::endl;
-            if (message->key()) {
-                std::cout << "Key: " << *message->key() << std::endl;
-            }
-            
-            int len = static_cast<int>(message->len());
-            char* msg = static_cast<char *>(message->payload());
-            //msg[len] = '\0';
-            char * restore_msg= new char[len+1];
-            strncpy(restore_msg,msg,len);
-            restore_msg[len]='\0';
-            
-            union {
-                unsigned long long mac_number;
-                unsigned char mac_array[16];//LBF
-            }mac;
-            mac.mac_number=0;
-            char usertag[40];
-            sscanf(restore_msg,"Mac %hhx:%hhx:%hhx:%hhx:%hhx:%hhx %s",
-                    mac.mac_array+5,mac.mac_array+4,mac.mac_array+3,mac.mac_array+2,mac.mac_array+1,mac.mac_array,usertag);
-            delete restore_msg;
-            
-            cout<<"user tag is "<<usertag<<endl;
-            cout<<"mac number is "<<mac.mac_number<<endl;
-            user_tag_update(mac.mac_number, usertag, 1.0);
-            break;
         }
+
         case RdKafka::ERR__PARTITION_EOF:
+
             /* Last message */
             if (exit_eof) {
+
                 run = false;
+
             }
+
             break;
 
         default:
@@ -64,6 +72,7 @@ void msg_consume(RdKafka::Message* message, void* opaque) {
             std::cerr << "Consume failed: " << message->errstr() << std::endl;
             run = false;
     }
+
 }
 
 class TairConsumeCb : public RdKafka::ConsumeCb {

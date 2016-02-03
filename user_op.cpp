@@ -71,6 +71,7 @@ void user_op(UriQueryListA * queryList, Json::Value & ret)
     double end=std::numeric_limits<unsigned int>::max();
     int mall_id=2;
     string phone;
+    int shop_id = 0;
 
     for(UriQueryListA *p_para=queryList ;p_para!=NULL;p_para=p_para->next)
     {
@@ -92,6 +93,8 @@ void user_op(UriQueryListA * queryList, Json::Value & ret)
             stringstream( p_para->value )>>mall_id;
         else if (strcmp(p_para->key,"phone")==0)
             phone = p_para->value;
+        else if(strcmp(p_para->key, "shop_id") == 0)
+            stringstream(p_para->value) >> shop_id;
     }
 
 
@@ -156,6 +159,12 @@ void user_op(UriQueryListA * queryList, Json::Value & ret)
     {
         syslog(LOG_INFO, "user_op: call user_list_all ");
         user_list_all(ret,start,end,mall_id);
+    }
+    else if(strcmp("list", action.c_str()) == 0) {
+
+        syslog(LOG_INFO, "user_op: call user_list");
+        user_list(ret, start, end, mall_id, shop_id);
+
     }
     else if(strcmp("get_id",action.c_str())==0)
     {

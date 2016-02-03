@@ -1,5 +1,7 @@
 #include <iostream>
 #include <sstream>
+#include <cstring>
+#include <ctime>
 #include "librdkafka/rdkafkacpp.h"
 #include "user_map.h"
 #include "limits.h"
@@ -17,35 +19,103 @@ static int32_t partition = 0;
 
 static bool run = true;
 
+// parse a ap mac message
+// store mac list into tair database
+
+void parse_apmac_msg(const char* msg) {
+
+    int offset = 30;
+    int num_macs = (strlen(msg) - 29) / 19;
+
+    auto ap_mac = str_to_uint64(msg + 6);
+    auto shopId = apmac_get_shopid(ap_mac);
+
+    if(shopId) {
+
+        for(int i = 0; i < num_macs; ++i, offset += 19) {
+
+            bool is_vip = mac_is_vip(msg + offset, shopId);
+            unsigned long mac = str_to_uint64(msg + offset);
+            int userId = user_get_id(mac);
+            std::time_t time = std::time(0);
+
+            if(is_vip) {
+
+                printf("1\n");
+                update_vip_arrive_time(2, shopId, userId, mac, time);
+
+            } else {
+
+                printf("0\n");
+
+            }
+
+            update_user_arrive_time(2, shopId, userId, time);
+            update_user_location_time(2, shopId, userId, mac, time);
+
+        }
+
+    }
+
+}
+
 void msg_consume(RdKafka::Message* message, void* opaque) {
+
+    union {
+        unsigned long long mac_number;
+        unsigned char mac_array[16];
+    } mac;
+
+    mac.mac_number = 0;
+
+    int x, y;
+    int width, height;
+    int mall_id = 2;
+
+    const char* msg;
+
     switch (message->err()) {
         case RdKafka::ERR__TIMED_OUT:
             break;
 
         case RdKafka::ERR_NO_ERROR:
+
             /* Real message */
+
             std::cout << "Read msg at offset " << message->offset() << std::endl;
+
             if (message->key()) {
+
                 std::cout << "Key: " << *message->key() << std::endl;
+
             }
-            /*printf("%.*s\n",
-                    static_cast<int>(message->len()),
-                    static_cast<const char *>(message->payload()));*/
-            union {
-                unsigned long long mac_number;
-                unsigned char mac_array[16];//LBF
-            }mac;
-            mac.mac_number=0;
-            int x,y,width,height;
-            int mall_id; 
-            mall_id=2;
-            sscanf(static_cast<const char *>(message->payload()),"Mac:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx Rect:%d,%d,%d,%d Group:%d",
-                    mac.mac_array+5,mac.mac_array+4,mac.mac_array+3,mac.mac_array+2,mac.mac_array+1,mac.mac_array,&x,&y,&width,&height,&mall_id);
-            //cout<<"mac is "<<static_cast<int> (mac.mac_array[5])<<":"<<static_cast<int>(mac.mac_array[4])<<":"<<static_cast<int>(mac.mac_array[3])
-            //    <<":"<<static_cast<int>(mac.mac_array[2])<<":"<<static_cast<int>(mac.mac_array[1])<<":"<<static_cast<int>(mac.mac_array[0])<<endl;
-            //cout<<"x="<<x<<",y="<<y<<",width="<<width<<",height="<<height<<",mac_number is "<<mac.mac_number<<endl;
-            if ( mac.mac_number > 0 )
+            
+            msg = (const char*)message->payload();
+            printf("%s\n", msg);
+
+            if(msg[0] == 'A') {
+
+                parse_apmac_msg(msg);
+
+            } else {
+
+                sscanf(msg, "Mac:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx Rect:%d,%d,%d,%d Group:%d",
+                    mac.mac_array + 5,
+                    mac.mac_array + 4,
+                    mac.mac_array + 3,
+                    mac.mac_array + 2,
+                    mac.mac_array + 1,
+                    mac.mac_array,
+                    &x, &y, &width, &height, &mall_id);
+
+            }
+
+            if ( mac.mac_number > 0 ) {
+
                 user_add(mac.mac_number,x+width/2.0,y+height/2.0,INT_MIN, static_cast<int>(message->len()),mall_id);
+
+            }
+
             break;
 
         case RdKafka::ERR__PARTITION_EOF:
