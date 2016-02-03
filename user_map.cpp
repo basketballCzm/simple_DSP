@@ -283,9 +283,10 @@ namespace user_map
     }
 
 
-    int user_update(const unsigned long long mac,const float x,const float y,const int z,const int kafka_offset, int mall_id )
+    int user_update(const unsigned long long mac,const string phone )
     {
-        return -1;
+        //TODO update table user's phone field
+        return 0;
     }
 
     void user_list_all(Json::Value & user_list,double start,double end, int mall_id)

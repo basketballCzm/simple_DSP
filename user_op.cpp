@@ -70,6 +70,7 @@ void user_op(UriQueryListA * queryList, Json::Value & ret)
     double start=0;
     double end=std::numeric_limits<unsigned int>::max();
     int mall_id=2;
+    string phone;
 
     for(UriQueryListA *p_para=queryList ;p_para!=NULL;p_para=p_para->next)
     {
@@ -89,6 +90,8 @@ void user_op(UriQueryListA * queryList, Json::Value & ret)
             stringstream( p_para->value )>>end;
         else if (strcmp(p_para->key,"mall_id")==0)
             stringstream( p_para->value )>>mall_id;
+        else if (strcmp(p_para->key,"phone")==0)
+            phone = p_para->value;
     }
 
 
@@ -127,7 +130,7 @@ void user_op(UriQueryListA * queryList, Json::Value & ret)
         }
         else
         {
-            user_update(mac,x,y,z,mall_id);
+            user_update(mac,phone);
             ret["result"]="success";
         }
     }
