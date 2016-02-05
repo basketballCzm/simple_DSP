@@ -325,8 +325,24 @@ namespace user_map
 
     int user_update(const unsigned long long mac,const string phone )
     {
-        //TODO update table user's phone field
-        return 0;
+        int user_id = user_get_id(mac);
+
+        try {
+            pqxx::nontransaction transaction(*conn);
+            auto escaped_phone=transaction.esc(phone);
+            std::string sql
+                = "update users set phone = '"+escaped_phone+"' where id="
+                + to_string(user_id) + ";";
+            cout<<"user_update() sql="<<sql<<endl;
+            pqxx::result result(transaction.exec(sql.c_str()));
+
+            return 0;
+
+        } catch(std::exception& e) {
+
+            std::cerr << e.what() << std::endl;
+            return -1;
+        }
     }
 
     void user_list_all(Json::Value & user_list,double start,double end, int mall_id)

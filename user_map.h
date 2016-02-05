@@ -3,6 +3,9 @@
 #include <limits.h>
 #include <limits>
 #include <ctime>
+#include <string>
+
+using namespace std;
 
 //mac is the mac address
 namespace user_map

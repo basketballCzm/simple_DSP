@@ -1,11 +1,10 @@
-
 AUTOMAKE_OPTIONS = foreign 
 TBLIB_ROOT = /usr/local
 AM_CPPFLAGS = -std=c++11  -I/opt/tair_rdb_bin/include \
 	-I${TBLIB_ROOT}/include/tbnet -I${TBLIB_ROOT}/include/tbsys \
 	-I/usr/include/jsoncpp
 
-bin_PROGRAMS=user_op ad_op ap_signal_receiver user_tag_receiver 
+bin_PROGRAMS=user_op ad_op ap_signal_receiver user_tag_receiver user_phone_receiver
 
 
 user_op_SOURCES=user_op.cpp  user_map.cpp
@@ -24,6 +23,9 @@ ap_signal_receiver_LDADD= -lz -lpthread -lrdkafka++ -lrdkafka -lrt  -L/opt/tair_
 
 user_tag_receiver_SOURCES=user_tag_receiver.cpp user_map.cpp
 user_tag_receiver_LDADD= -lz -lpthread  -lrdkafka++ -lrdkafka -lrt  -L/opt/tair_rdb_bin/lib -ltairclientapi $(TBLIB_ROOT)/lib/libtbnet.a $(TBLIB_ROOT)/lib/libtbsys.a -ljsoncpp -lpthread -lpqxx -lpq
+
+user_phone_receiver_SOURCES=user_phone_receiver.cpp user_map.cpp
+user_phone_receiver_LDADD= -lz -lpthread  -lrdkafka++ -lrdkafka -lrt  -L/opt/tair_rdb_bin/lib -ltairclientapi $(TBLIB_ROOT)/lib/libtbnet.a $(TBLIB_ROOT)/lib/libtbsys.a -ljsoncpp -lpthread -lpqxx -lpq
 
 #ap_signal_dock_SOURCES=ap_signal_dock.cpp 
 #ap_signal_dock_LDADD=-lc++ -lzmq
