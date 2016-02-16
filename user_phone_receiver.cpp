@@ -65,7 +65,7 @@ void msg_consume(RdKafka::Message* message, void* opaque) {
             p_msg[message->len()]=0;
             printf("%s\n", p_msg);
             //TODO HH or hh
-            sscanf(p_msg, "%hhX:%hhX:%hhX:%hhX:%hhX:%hhX|",
+            sscanf(p_msg, "%hhX-%hhX-%hhX-%hhX-%hhX-%hhX|",
                 mac.mac_array + 5,
                 mac.mac_array + 4,
                 mac.mac_array + 3,
