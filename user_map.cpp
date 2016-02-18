@@ -24,7 +24,7 @@ using namespace std;
 namespace user_map
 {
     tair::tair_client_api g_tair;
-    const char * config_file="config.ini";
+    const char * config_file="etc/config.ini";
 
     tbsys::CConfig config;
 

@@ -11,7 +11,7 @@ AC_CONFIG_HEADERS([config.h])
 #AC_DEFINE([USER_MAP_FILE],["/tmp/user_map.data"],[users map file path])
 
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
-AC_PREFIX_DEFAULT([/opt/simple_DSP])
+AC_PREFIX_DEFAULT([${HOME}/simple_DSP])
 # Checks for programs.
 AC_PROG_CXX([g++])
 AC_PROG_CC([gcc])

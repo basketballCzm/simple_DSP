@@ -22,7 +22,7 @@ using namespace std;
 namespace ad_map
 {
   tair::tair_client_api g_tair;
-  const char * config_file="config.ini";
+  const char * config_file="etc/config.ini";
   tbsys::CConfig config;
   const char * master_addr;
   const char * slave_addr;

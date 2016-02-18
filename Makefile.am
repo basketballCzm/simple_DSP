@@ -34,9 +34,9 @@ user_phone_receiver_LDADD= -lz -lpthread  -lrdkafka++ -lrdkafka -lrt  -L/opt/tai
 #ap_signal_sender_LDADD=-lc++ -lzmq
 
 
-configdir = $(prefix)/bin
+configdir = $(prefix)/etc
 config_DATA =  config.ini  
-
-dist_bin_SCRIPTS =  restart_fastcgi.sh restart_receiver.sh
+rootdir=$(prefix)
+dist_root_SCRIPTS =  restart_fastcgi.sh restart_receiver.sh
 
 SUBDIRS= test
