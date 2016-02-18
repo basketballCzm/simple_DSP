@@ -7,11 +7,11 @@ AC_CONFIG_SRCDIR([adstat.cpp])
 AC_CONFIG_HEADERS([config.h])
 
 
-AC_DEFINE([AD_DATA_FILE], ["/tmp/advertisement.data"], [ad data file path])
-AC_DEFINE([USER_MAP_FILE],["/tmp/user_map.data"],[users map file path])
+#AC_DEFINE([AD_DATA_FILE], ["/tmp/advertisement.data"], [ad data file path])
+#AC_DEFINE([USER_MAP_FILE],["/tmp/user_map.data"],[users map file path])
 
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
-AC_PREFIX_DEFAULT([/etc/nginx/simple_DSP_cgi])
+AC_PREFIX_DEFAULT([/opt/simple_DSP])
 # Checks for programs.
 AC_PROG_CXX([g++])
 AC_PROG_CC([gcc])

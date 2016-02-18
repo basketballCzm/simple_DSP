@@ -10,6 +10,11 @@ namespace user_map{
     extern tair::tair_client_api g_tair;  
     extern const char * pg_server; 
     extern int check_vip; 
+    extern const char * common_sql;
+    extern const char * pg_server;
+    extern const char * pg_user;
+    extern const char * pg_password;
+    extern const char * pg_database;
     bool is_mall_vip(const int user_id, const int mall_id);
     int user_get_id(const unsigned long long mac);
     unsigned long long user_get_mac(const int id);
@@ -171,11 +176,27 @@ TEST_F(UserMapTest,MacSetDaily)
     EXPECT_STREQ(values[1].c_str(),"1234567891");
 }
 
+TEST_F(UserMapTest,MacIsShopVip)
+{
+    int shopId=60;
+    char mac[]="18:f6:43:b3:66:2f";  
+    int type =1;
+    string sql=str(boost::format("insert into shop_member (\\\"shopId\\\",type,mac,mall_id) values (%d,%d,'%s',2)")%shopId%type%mac);
+    string cmd=str(boost::format(common_sql)%sql%pg_password%pg_server%pg_user%pg_database);
+    cout<<"command="<<cmd<<endl;
+    cout<<"sql executed:"<<exec(cmd.c_str())<<endl;
+    EXPECT_EQ(mac_is_vip("18:f6:43:b3:66:2f",60),true);
+    EXPECT_EQ(mac_is_vip("11:22:44:44:44:2f",12),false);
+    sql=str(boost::format("delete from shop_member where \\\"shopId\\\"=%d and type=%d and mac='%s' and mall_id=2")%shopId%type%mac);
+    cmd=str(boost::format(common_sql)%sql%pg_password%pg_server%pg_user%pg_database);
+    cout<<"command="<<cmd<<endl;
+    cout<<"sql executed:"<<exec(cmd.c_str())<<endl;
+}
+
 TEST_F(UserMapTest,RemoveKeys)
 {
-    const char * remove_user_sql="echo  \"delete from users where id=%s \"\
-    | psql -h%s  -U postgres -w -d adsweb ";
-    string cmd=str(boost::format(remove_user_sql)%user_id%pg_server);
+    string sql=str(boost::format("delete from users where id=%d")%user_id);
+    string cmd=str(boost::format(common_sql)%sql%pg_password%pg_server%pg_user%pg_database);
     cout<<"command="<<cmd<<endl;
     cout<<"sql executed:"<<exec(cmd.c_str())<<endl;
 

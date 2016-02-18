@@ -44,6 +44,7 @@ namespace user_map
 
     const char * add_user_location_sql;
     const char * query_user_id_sql;
+    const char * common_sql;
     static const char * tb_log_file;
 
     std::shared_ptr<pqxx::connection> conn;
@@ -83,6 +84,7 @@ namespace user_map
             add_user_sql            = config.getString("user_map", "add_user_sql", NULL);
             add_user_location_sql   = config.getString("user_map", "add_user_location_sql", NULL);
             query_user_id_sql       = config.getString("user_map", "query_user_id_sql", NULL);
+            common_sql       = config.getString("user_map", "common_sql", NULL);
 
             check_vip = config.getInt("tair_rdb", "check_vip", 1);
             user_tag_save_on_tair = config.getInt("tair_rdb", "user_tag_save_on_tair", true);
@@ -585,24 +587,24 @@ namespace user_map
                 + ss.str()
                 + " and mac='" + mac_string + "'";
 
-            printf("%s ", sql.c_str());
+            printf("mac_is_vip() sql=%s\n", sql.c_str());
 
             pqxx::result result(transaction.exec(sql.c_str()));
 
-            int r = rand() % 10;
+            /*int r = rand() % 10;
 
             if(r > 5) return true;
             
-            return false;
+            return false;*/
 
             if(result.empty()) return false;
 
-            return !! result.begin()[0].as<int>();
+            return result.begin()[0].as<int>()>0;
 
         } catch (std::exception e) {
 
             std::cerr << e.what() << std::endl;
-
+            return false;
         }
 
     }

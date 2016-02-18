@@ -40,19 +40,11 @@ void parse_apmac_msg(const char* msg) {
             std::time_t time = std::time(0);
 
             if(is_vip) {
-
-                printf("1\n");
                 update_vip_arrive_time(2, shopId, userId, mac, time);
-
-            } else {
-
-                printf("0\n");
-
             }
 
             update_user_arrive_time(2, shopId, userId, time);
             update_user_location_time(2, shopId, userId, mac, time);
-
         }
 
     }
