@@ -35,7 +35,7 @@ user_phone_receiver_LDADD= -lz -lpthread  -lrdkafka++ -lrdkafka -lrt  -L/opt/tai
 
 
 configdir = $(prefix)/etc
-config_DATA =  config.ini  
+config_DATA =  etc/config.ini  
 rootdir=$(prefix)
 dist_root_SCRIPTS =  restart_fastcgi.sh restart_receiver.sh
 
