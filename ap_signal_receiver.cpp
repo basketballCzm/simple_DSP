@@ -22,6 +22,18 @@ static bool run = true;
 // parse a ap mac message
 // store mac list into tair database
 
+bool msg_start_with(const char* msg, const char* prefix)
+{
+    int len = (int)strlen(prefix);
+
+    for(int i = 0; i < len; ++i)
+    {
+        if(msg[i] != prefix[i]) return false;
+    }
+
+    return true;
+}
+
 void parse_apmac_msg(const char* msg)
 {
     int offset = 30;
@@ -80,14 +92,10 @@ void parse_apmac_closer_msg(const char* msg)
     }
 }
 
-void msg_consume(RdKafka::Message* message, void* opaque) {
-
-    union {
-        unsigned long long mac_number;
-        unsigned char mac_array[16];
-    } mac;
-
-    mac.mac_number = 0;
+void msg_consume(RdKafka::Message* message, void* opaque)
+{
+    Mac mac;
+    mac.number = 0;
 
     int x, y;
     int width, height;
@@ -95,9 +103,9 @@ void msg_consume(RdKafka::Message* message, void* opaque) {
 
     const char* msg;
 
-    switch (message->err()) {
-        case RdKafka::ERR__TIMED_OUT:
-            break;
+    switch (message->err())
+    {
+        case RdKafka::ERR__TIMED_OUT:  break;
 
         case RdKafka::ERR_NO_ERROR:
 
@@ -105,45 +113,48 @@ void msg_consume(RdKafka::Message* message, void* opaque) {
 
             std::cout << "Read msg at offset " << message->offset() << std::endl;
 
-            if (message->key()) {
-
+            if (message->key())
+            {
                 std::cout << "Key: " << *message->key() << std::endl;
-
             }
             
             msg = (const char*)message->payload();
             printf("%s\n", msg);
 
-            if(msg[0] == 'A') {
-
-                parse_apmac_msg(msg);
-
-            } else {
-
+            if(msg_start_with(msg, "Mac:"))
+            {
                 sscanf(msg, "Mac:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx Rect:%d,%d,%d,%d Group:%d",
-                    mac.mac_array + 5,
-                    mac.mac_array + 4,
-                    mac.mac_array + 3,
-                    mac.mac_array + 2,
-                    mac.mac_array + 1,
-                    mac.mac_array,
+                    mac.bytes + 5,
+                    mac.bytes + 4,
+                    mac.bytes + 3,
+                    mac.bytes + 2,
+                    mac.bytes + 1,
+                    mac.bytes,
                     &x, &y, &width, &height, &mall_id);
-
+            }
+            else if(msg_start_with(msg, "ApMac:"))
+            {
+                parse_apmac_msg(msg);
+            }
+            else if(msg_start_with(msg, "ApMac-Closer:"))
+            {
+                parse_apmac_closer_msg(msg);
             }
 
-            if ( mac.mac_number > 0 ) {
-
-                user_add(mac.mac_number,x+width/2.0,y+height/2.0,INT_MIN, static_cast<int>(message->len()),mall_id);
-
+            if (mac.number > 0)
+            {
+                user_add(mac.number,x+width/2.0,y+height/2.0,INT_MIN, static_cast<int>(message->len()),mall_id);
             }
 
             break;
 
         case RdKafka::ERR__PARTITION_EOF:
-            /* Last message */
-            if (exit_eof) {
+
+            if (exit_eof)
+            {
                 run = false;
             }
+
             break;
 
         default:
@@ -153,11 +164,12 @@ void msg_consume(RdKafka::Message* message, void* opaque) {
     }
 }
 
-class TairConsumeCb : public RdKafka::ConsumeCb {
-    public:
-        void consume_cb (RdKafka::Message &msg, void *opaque) {
-            msg_consume(&msg, opaque);
-        }
+class TairConsumeCb : public RdKafka::ConsumeCb
+{
+public:
+    void consume_cb (RdKafka::Message &msg, void *opaque) {
+        msg_consume(&msg, opaque);
+    }
 };
 
 int main ()
@@ -172,7 +184,9 @@ int main ()
     conf->set("metadata.broker.list", brokers, errstr);
     conf->set("group.id","tair-rdb-group1", errstr);
     RdKafka::Consumer *consumer = RdKafka::Consumer::create(conf, errstr);
-    if (!consumer) {
+
+    if (!consumer)
+    {
         std::cerr << "Failed to create consumer: " << errstr << std::endl;
         exit(1);
     }
@@ -184,7 +198,9 @@ int main ()
      *           */
     RdKafka::Topic *topic = RdKafka::Topic::create(consumer, s_topic,
             tconf, errstr);
-    if (!topic) {
+
+    if (!topic)
+    {
         std::cerr << "Failed to create topic: " << errstr << std::endl;
         exit(1);
     }
@@ -193,7 +209,9 @@ int main ()
      * Start consumer for topic+partition at start offset
      */
     RdKafka::ErrorCode resp = consumer->start(topic, partition, start_offset);
-    if (resp != RdKafka::ERR_NO_ERROR) {
+
+    if (resp != RdKafka::ERR_NO_ERROR)
+    {
         std::cerr << "Failed to start consumer: " <<
             RdKafka::err2str(resp) << std::endl;
         exit(1);
@@ -205,7 +223,8 @@ int main ()
      * Consume messages
      */
     run=true;
-    while (run) {
+    while (run)
+    {
         RdKafka::Message *msg = consumer->consume(topic, partition, 1000);
         msg_consume(msg, NULL);
         delete msg;
@@ -221,7 +240,6 @@ int main ()
 
     delete topic;
     delete consumer;
-
 
     return 0;
 }
