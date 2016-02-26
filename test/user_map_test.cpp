@@ -179,7 +179,7 @@ TEST_F(UserMapTest,MacSetDaily)
 
     for(auto& mac_str : values)
     {
-        printf("%s\n", mac_str.c_str());
+        printf("%s\n", uint64_to_str(std::stoul(mac_str)).c_str());
     }
 
     ASSERT_EQ(values.size(),2);
