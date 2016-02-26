@@ -176,6 +176,12 @@ TEST_F(UserMapTest,MacSetDaily)
     saved_keys.push_back(key);
     vector<string> values;
     tair_smembers(user_map::g_tair, nm, key, values);
+
+    for(auto& mac_str : values)
+    {
+        printf("%s\n", mac_str.c_str());
+    }
+
     ASSERT_EQ(values.size(),2);
     EXPECT_STREQ(values[0].c_str(),"1234567890");
     EXPECT_STREQ(values[1].c_str(),"1234567891");
