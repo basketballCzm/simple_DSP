@@ -98,6 +98,19 @@ TEST_F(UserMapTest,UserGetIdGetMac)
 
 TEST_F(UserMapTest,UserAdd)
 {
+    tair::common::data_entry key;
+    get_data_entry(key, "mac.set:", get_date_str(time(0)), ":", mall_id, ":daily");
+
+    vector<string> values;
+    tair_smembers(user_map::g_tair, nm, key, values);
+
+    printf("-------------------------------------------\n");
+    for(auto& mac_str : values)
+    {
+        printf("%s\n", uint64_to_str(std::stoul(mac_str)).c_str());
+    }
+    printf("-------------------------------------------\n");
+
     int ret = user_add(mac,x,y,z,-1,mall_id);
     EXPECT_EQ(0,ret);
     ret = user_add(mac+1,x+1,y+1,z+1,-1,mall_id);
