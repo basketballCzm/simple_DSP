@@ -166,7 +166,7 @@ TEST_F(UserMapTest,VipArriveTime)
 TEST_F(UserMapTest,MacSetDaily)
 {
     tair::common::data_entry key;
-    const string & s_date =  get_date_str(time(0));
+    const string s_date =  get_date_str(time(0));
     get_data_entry(key,"mac.set:",s_date,":",mall_id,":daily");
     saved_keys.push_back(key);
     vector<string> values;
