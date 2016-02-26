@@ -34,7 +34,8 @@ protected:
 
     virtual void TearDown()
     {
-        //user_map::close();
+        
+        user_map::g_tair.remove(nm, mac_daily_test_key);
     }
 
 
@@ -217,7 +218,5 @@ TEST_F(UserMapTest,RemoveKeys)
         cout<<"remove key:"<<it->get_data()<<endl;
         user_map::g_tair.remove(nm,*it);
     }
-
-    user_map::g_tair.remove(nm, mac_daily_test_key);
 }
 
