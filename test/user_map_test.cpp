@@ -27,17 +27,12 @@ protected:
     {
         user_map_init();
         user_map::check_vip=1;
-
-        const string s_date = get_date_str(time(0));
-        get_data_entry(mac_daily_test_key, "mac.set:", s_date, ":", mall_id, ":daily");
     }
 
     virtual void TearDown()
     {
-        
-        user_map::g_tair.remove(nm, mac_daily_test_key);
+     
     }
-
 
 public:    
     static unsigned long long  mac;
@@ -49,7 +44,6 @@ protected:
     int z = 4;
     int mall_id = 5;
     int nm = 2;
-    tair::common::data_entry mac_daily_test_key;
     static vector<tair::common::data_entry> saved_keys;
 };
 
@@ -175,10 +169,13 @@ TEST_F(UserMapTest,VipArriveTime)
 
 TEST_F(UserMapTest,MacSetDaily)
 {
-    saved_keys.push_back(mac_daily_test_key);
-    vector<string> values;
-    tair_smembers(user_map::g_tair, nm, mac_daily_test_key, values);
 
+    tair::common::data_entry key;
+    get_data_entry(key, "mac.set:", get_date_str(time(0)), ":", mall_id, ":daily");
+
+    saved_keys.push_back(key);
+    vector<string> values;
+    tair_smembers(user_map::g_tair, nm, key, values);
     ASSERT_EQ(values.size(),2);
     EXPECT_STREQ(values[0].c_str(),"1234567890");
     EXPECT_STREQ(values[1].c_str(),"1234567891");
@@ -213,6 +210,7 @@ TEST_F(UserMapTest,RemoveKeys)
     saved_keys.push_back(key);
     get_data_entry(key,"location:",mall_id,":",mac,":time");
     saved_keys.push_back(key);
+
     for(vector<tair::common::data_entry>::iterator it= saved_keys.begin(); it != saved_keys.end(); ++it)
     {
         cout<<"remove key:"<<it->get_data()<<endl;
