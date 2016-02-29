@@ -131,6 +131,11 @@ void msg_consume(RdKafka::Message* message, void* opaque)
                     mac.bytes + 1,
                     mac.bytes,
                     &x, &y, &width, &height, &mall_id);
+                
+                if (mac.number > 0)
+                {
+                    user_add(mac.number,x+width/2.0,y+height/2.0,INT_MIN, static_cast<int>(message->len()),mall_id);
+                }
             }
             else if(msg_start_with(msg, "ApMac:"))
             {
@@ -140,11 +145,6 @@ void msg_consume(RdKafka::Message* message, void* opaque)
             {
                 parse_apmac_closer_msg(msg);
             }
-
-            // if (mac.number > 0)
-            // {
-            //     user_add(mac.number,x+width/2.0,y+height/2.0,INT_MIN, static_cast<int>(message->len()),mall_id);
-            // }
 
             break;
 
