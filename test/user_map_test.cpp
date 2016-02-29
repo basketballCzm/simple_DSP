@@ -53,6 +53,20 @@ int UserMapTest::user_id = 0;
 unsigned long long  UserMapTest::mac = 1234567890;
 vector<tair::common::data_entry> UserMapTest::saved_keys;
 
+bool contain_str(const std::vector<std::string>& v, const std::string str)
+{
+
+    for(auto& e : v)
+    {
+        // warnning cannot use string's operator==
+        // because e looks like "abc\0\0"
+        if(strcmp(e.c_str(), str.c_str()) == 0) return true;
+    }
+
+    return false;
+}
+
+
 void* user_get_id_func(void *ptr)
 {
     *(int *) ptr = user_get_id(UserMapTest::mac);
@@ -109,13 +123,6 @@ TEST_F(UserMapTest, UserAdd)
 
     vector<string> values;
     tair_smembers(user_map::g_tair, nm, key, values);
-
-    printf("-------------------------------------------\n");
-    for(auto& mac_str : values)
-    {
-        printf("%s\n", uint64_to_str(std::stoul(mac_str)).c_str());
-    }
-    printf("-------------------------------------------\n");
 
     int ret = user_add(mac, x, y, z, -1, mall_id);
     EXPECT_EQ(0, ret);
@@ -191,20 +198,13 @@ TEST_F(UserMapTest, MacSetDaily)
 
     tair::common::data_entry key;
     get_data_entry(key, "mac.set:", get_date_str(time(0)), ":", mall_id, ":daily");
-
-    saved_keys.push_back(key);
     vector<string> values;
     tair_smembers(user_map::g_tair, nm, key, values);
 
-    for(auto& mac_str : values)
-    {
-        printf("%s\t", uint64_to_str(std::stoul(mac_str)).c_str());
-        printf("%lu\n", std::stoul(mac_str));
-    }
+    saved_keys.push_back(key);
 
-    ASSERT_EQ(values.size(),2);
-    EXPECT_STREQ(values[0].c_str(),"1234567890");
-    EXPECT_STREQ(values[1].c_str(),"1234567891");
+    EXPECT_TRUE(contain_str(values, "1234567890"));
+    EXPECT_TRUE(contain_str(values, "1234567891"));
 }
 
 TEST_F(UserMapTest, MacIsShopVip)
