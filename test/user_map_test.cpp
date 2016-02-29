@@ -49,8 +49,6 @@ protected:
     static vector<tair::common::data_entry> saved_keys;
 };
 
-int add_user_count = 0;
-
 int UserMapTest::user_id = 0;
 unsigned long long  UserMapTest::mac = 1234567890;
 vector<tair::common::data_entry> UserMapTest::saved_keys;
@@ -126,9 +124,9 @@ TEST_F(UserMapTest, UserAdd)
     vector<string> values;
     tair_smembers(user_map::g_tair, nm, key, values);
 
-    int ret = user_add(mac, x, y, z, -1, mall_id); ++add_user_count;
+    int ret = user_add(mac, x, y, z, -1, mall_id);
     EXPECT_EQ(0, ret);
-    ret = user_add(mac + 1, x + 1, y + 1, z + 1, -1, mall_id); ++add_user_count;
+    ret = user_add(mac + 1, x + 1, y + 1, z + 1, -1, mall_id);
     EXPECT_EQ(0, ret);
 }
 
@@ -143,7 +141,7 @@ TEST_F(UserMapTest, UserDuration)
     EXPECT_STREQ("30",duration.c_str());
 
     sleep(1);
-    int ret = user_add(mac,x+2,y+4,z,-1,mall_id); ++add_user_count;
+    int ret = user_add(mac,x+2,y+4,z,-1,mall_id);
     EXPECT_EQ(0,ret);
 
     duration=tair_get<string>(user_map::g_tair,nm,key,"");
@@ -183,7 +181,7 @@ TEST_F(UserMapTest, VipArriveTime)
     saved_keys.push_back(is_vip_key);
     tair_put<int>(g_tair,nm,is_vip_key,1);
     user_map::g_tair.remove(nm,user_location_time_key);
-    int ret = user_add(mac,x+2,y+4,z,-1,mall_id); ++add_user_count;
+    int ret = user_add(mac,x+2,y+4,z,-1,mall_id);
     EXPECT_EQ(0,ret);
     
 
@@ -205,7 +203,6 @@ TEST_F(UserMapTest, MacSetDaily)
 
     saved_keys.push_back(key);
 
-printf("%d\n", add_user_count);
     EXPECT_EQ(values.size(), 2);
     EXPECT_TRUE(contain_str(values, "1234567890"));
     EXPECT_TRUE(contain_str(values, "1234567891"));

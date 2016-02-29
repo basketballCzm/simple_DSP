@@ -277,11 +277,14 @@ namespace user_map
 
     void mac_set_record(const unsigned long long mac, const int mall_id, time_t t_now)
     {  
+        static int count = 0;
+
         const string & s_date =  get_date_str(t_now);
         tair::common::data_entry key,value;
         get_data_entry(key,"mac.set:",s_date,":",mall_id,":daily");
         get_data_entry(value,mac);
         g_tair.sadd(tair_namespace,key,value,0,0);
+        printf("-----------------------\n%d\n", ++count);
     }
 
     int user_add(const unsigned long long  mac,const float x,const float y,const int z,const int kafka_offset, int mall_id )
