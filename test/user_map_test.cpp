@@ -130,26 +130,26 @@ TEST_F(UserMapTest, UserAdd)
     EXPECT_EQ(0, ret);
 }
 
-TEST_F(UserMapTest, UserDuration)
-{
-    tair::common::data_entry key;
-    const string & s_date=get_date_str(time(0));
-    int user_id=user_get_id(mac);
-    get_data_entry(key,"user:",s_date,":",mall_id,":",user_id,":duration");
-    saved_keys.push_back(key);
-    string duration=tair_get<string>(user_map::g_tair,nm,key,"");
-    EXPECT_STREQ("30",duration.c_str());
+// TEST_F(UserMapTest, UserDuration)
+// {
+//     tair::common::data_entry key;
+//     const string & s_date=get_date_str(time(0));
+//     int user_id=user_get_id(mac);
+//     get_data_entry(key,"user:",s_date,":",mall_id,":",user_id,":duration");
+//     saved_keys.push_back(key);
+//     string duration=tair_get<string>(user_map::g_tair,nm,key,"");
+//     EXPECT_STREQ("30",duration.c_str());
 
-    sleep(1);
-    int ret = user_add(mac,x+2,y+4,z,-1,mall_id);
-    EXPECT_EQ(0,ret);
+//     sleep(1);
+//     int ret = user_add(mac,x+2,y+4,z,-1,mall_id);
+//     EXPECT_EQ(0,ret);
 
-    duration=tair_get<string>(user_map::g_tair,nm,key,"");
-    cout<<"key is "<<key.get_data()<<endl;
-    cout<<"value is "<<duration<<endl;
-    int i_duration = std::stoi( duration );
-    EXPECT_LE(30,i_duration);
-}
+//     duration=tair_get<string>(user_map::g_tair,nm,key,"");
+//     cout<<"key is "<<key.get_data()<<endl;
+//     cout<<"value is "<<duration<<endl;
+//     int i_duration = std::stoi( duration );
+//     EXPECT_LE(30,i_duration);
+// }
 
 
 TEST_F(UserMapTest, UserQuery)
@@ -162,36 +162,36 @@ TEST_F(UserMapTest, UserQuery)
     EXPECT_EQ(pos.position.z,z);
 }
 
-TEST_F(UserMapTest, VipArriveTime)
-{
-    tair::common::data_entry key,is_vip_key, user_location_time_key;
-    int user_id=user_get_id(mac);
-    get_data_entry(key,"user.vip:",mall_id,":arrive.time");
-    saved_keys.push_back(key);
-    get_data_entry(user_location_time_key,"location:",mall_id,":",mac,":time");
-    saved_keys.push_back(user_location_time_key);
-    cout<<"key is "<<key.get_data()<<endl;
-    time_t t_now=time(0);
+// TEST_F(UserMapTest, VipArriveTime)
+// {
+//     tair::common::data_entry key,is_vip_key, user_location_time_key;
+//     int user_id=user_get_id(mac);
+//     get_data_entry(key,"user.vip:",mall_id,":arrive.time");
+//     saved_keys.push_back(key);
+//     get_data_entry(user_location_time_key,"location:",mall_id,":",mac,":time");
+//     saved_keys.push_back(user_location_time_key);
+//     cout<<"key is "<<key.get_data()<<endl;
+//     time_t t_now=time(0);
     
-    vector<string> user_list;
-    tair_zrangebyscore<string>(g_tair,nm,key,double(t_now-20),double(t_now),user_list);
-    ASSERT_EQ(user_list.size(),0);
+//     vector<string> user_list;
+//     tair_zrangebyscore<string>(g_tair,nm,key,double(t_now-20),double(t_now),user_list);
+//     ASSERT_EQ(user_list.size(),0);
 
-    get_data_entry(is_vip_key,"user:",mall_id,":",user_id,":is.mall.vip");
-    saved_keys.push_back(is_vip_key);
-    tair_put<int>(g_tair,nm,is_vip_key,1);
-    user_map::g_tair.remove(nm,user_location_time_key);
-    int ret = user_add(mac,x+2,y+4,z,-1,mall_id);
-    EXPECT_EQ(0,ret);
+//     get_data_entry(is_vip_key,"user:",mall_id,":",user_id,":is.mall.vip");
+//     saved_keys.push_back(is_vip_key);
+//     tair_put<int>(g_tair,nm,is_vip_key,1);
+//     user_map::g_tair.remove(nm,user_location_time_key);
+//     int ret = user_add(mac,x+2,y+4,z,-1,mall_id);
+//     EXPECT_EQ(0,ret);
     
 
-    EXPECT_EQ(true,is_mall_vip(user_id,mall_id));
+//     EXPECT_EQ(true,is_mall_vip(user_id,mall_id));
 
-    t_now=time(0);
-    tair_zrangebyscore<string>(g_tair,nm,key,double(t_now-20),double(t_now),user_list);
-    ASSERT_GE(user_list.size(),1);
-    EXPECT_STREQ(user_list[0].c_str(),to_string(user_id).c_str());
-}
+//     t_now=time(0);
+//     tair_zrangebyscore<string>(g_tair,nm,key,double(t_now-20),double(t_now),user_list);
+//     ASSERT_GE(user_list.size(),1);
+//     EXPECT_STREQ(user_list[0].c_str(),to_string(user_id).c_str());
+// }
 
 TEST_F(UserMapTest, MacSetDaily)
 {
@@ -203,6 +203,7 @@ TEST_F(UserMapTest, MacSetDaily)
 
     saved_keys.push_back(key);
 
+    EXPECT_EQ(values.size(), 2);
     EXPECT_TRUE(contain_str(values, "1234567890"));
     EXPECT_TRUE(contain_str(values, "1234567891"));
 }
