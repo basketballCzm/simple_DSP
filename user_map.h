@@ -23,13 +23,14 @@ namespace user_map
 
     //user tag
     int user_tag_update(const unsigned long mac, const char* user_tag, const float user_value);
+
     //get user id from mac, zero means not exist 
     unsigned long long user_get_mac(int user_id);
+    
     //get mac from user id, zero means not exist
     int user_get_id(const unsigned long long mac);
 
     // add by gui
-
     typedef union {
         unsigned long number;
         unsigned char bytes[8];
@@ -39,18 +40,15 @@ namespace user_map
 
     // convert uint64's low 48 bit to a mac address str
     // a mac str looks like this : a0:b1:c2:d3:e4:f5
-
     std::string uint64_to_str(unsigned long num);
 
     // read a uint64 from kafka message stream
     // whose low 48 bits store a mac address
     // while high 12 bits uninitialized
-
     unsigned long str_to_uint64(const char* str);
 
     // query pg database to find ap mac's shopid
     // if cannot find return 0
-
     int apmac_get_shopid(unsigned long mac);
 
     bool mac_is_vip(const char* mac_str, int shop_id);
@@ -59,21 +57,17 @@ namespace user_map
 
     // update user's arrive time with current time
     // if iterval is bigger than half an hour
-
     void update_user_location_time(int mallId, int shop_id, int user_id, unsigned long mac, std::time_t);
 
     // update user's last arrive time
-
     void update_user_arrive_time(int mallId, int shop_id, int user_id, std::time_t now);
 
     // get user's last location time
     // use this time we can determine wheather customer is still in the shop
     // kind of heart beat
-
     std::time_t get_user_location_time(int mall_id, int shop_id, unsigned long mac);
 
     // return string like 20160603
-
     std::string datetime_str(std::time_t time);
 
     void update_user_duration(int mall_id, int shop_id, int user_id, std::string& datetime, double interval);
