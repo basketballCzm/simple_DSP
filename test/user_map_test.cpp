@@ -102,26 +102,26 @@ void* user_get_id_func(void *ptr)
 //     saved_keys.push_back(key_mac);
 // }
 
-// TEST_F(UserMapTest, UserAdd)
-// {
-//     tair::common::data_entry key;
-//     get_data_entry(key, "mac.set:", get_date_str(time(0)), ":", mall_id, ":daily");
+TEST_F(UserMapTest, UserAdd)
+{
+    tair::common::data_entry key;
+    get_data_entry(key, "mac.set:", get_date_str(time(0)), ":", mall_id, ":daily");
 
-//     vector<string> values;
-//     tair_smembers(user_map::g_tair, nm, key, values);
+    vector<string> values;
+    tair_smembers(user_map::g_tair, nm, key, values);
 
-//     printf("-------------------------------------------\n");
-//     for(auto& mac_str : values)
-//     {
-//         printf("%s\n", uint64_to_str(std::stoul(mac_str)).c_str());
-//     }
-//     printf("-------------------------------------------\n");
+    printf("-------------------------------------------\n");
+    for(auto& mac_str : values)
+    {
+        printf("%s\n", uint64_to_str(std::stoul(mac_str)).c_str());
+    }
+    printf("-------------------------------------------\n");
 
-//     int ret = user_add(mac,x,y,z,-1,mall_id);
-//     EXPECT_EQ(0,ret);
-//     ret = user_add(mac+1,x+1,y+1,z+1,-1,mall_id);
-//     EXPECT_EQ(0,ret);
-// }
+    int ret = user_add(mac, x, y, z, -1, mall_id);
+    EXPECT_EQ(0, ret);
+    ret = user_add(mac + 1, x + 1, y + 1, z + 1, -1, mall_id);
+    EXPECT_EQ(0, ret);
+}
 
 // TEST_F(UserMapTest, UserDuration)
 // {
@@ -198,7 +198,8 @@ TEST_F(UserMapTest, MacSetDaily)
 
     for(auto& mac_str : values)
     {
-        printf("%s\n", uint64_to_str(std::stoul(mac_str)).c_str());
+        printf("%s\t", uint64_to_str(std::stoul(mac_str)).c_str());
+        printf("%lu\n", std::stoul(mac_str));
     }
 
     ASSERT_EQ(values.size(),2);
@@ -223,23 +224,23 @@ TEST_F(UserMapTest, MacSetDaily)
 //     cout<<"sql executed:"<<exec(cmd.c_str())<<endl;
 // }
 
-// TEST_F(UserMapTest, RemoveKeys)
-// {
-//     string sql=str(boost::format("delete from users where id=%d")%user_id);
-//     string cmd=str(boost::format(common_sql)%sql%pg_password%pg_server%pg_user%pg_database);
-//     cout<<"command="<<cmd<<endl;
-//     cout<<"sql executed:"<<exec(cmd.c_str())<<endl;
+TEST_F(UserMapTest, RemoveKeys)
+{
+    string sql=str(boost::format("delete from users where id=%d")%user_id);
+    string cmd=str(boost::format(common_sql)%sql%pg_password%pg_server%pg_user%pg_database);
+    cout<<"command="<<cmd<<endl;
+    cout<<"sql executed:"<<exec(cmd.c_str())<<endl;
 
-//     tair::common::data_entry key;
-//     get_data_entry(key,"location.update.time:",mall_id);
-//     saved_keys.push_back(key);
-//     get_data_entry(key,"location:",mall_id,":",mac,":time");
-//     saved_keys.push_back(key);
+    tair::common::data_entry key;
+    get_data_entry(key,"location.update.time:",mall_id);
+    saved_keys.push_back(key);
+    get_data_entry(key,"location:",mall_id,":",mac,":time");
+    saved_keys.push_back(key);
 
-//     for(vector<tair::common::data_entry>::iterator it= saved_keys.begin(); it != saved_keys.end(); ++it)
-//     {
-//         cout<<"remove key:"<<it->get_data()<<endl;
-//         user_map::g_tair.remove(nm,*it);
-//     }
-// }
+    for(vector<tair::common::data_entry>::iterator it= saved_keys.begin(); it != saved_keys.end(); ++it)
+    {
+        cout<<"remove key:"<<it->get_data()<<endl;
+        user_map::g_tair.remove(nm,*it);
+    }
+}
 

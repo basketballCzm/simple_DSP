@@ -312,11 +312,11 @@ namespace user_map
 
         user_location_log_add(mac,x,y,z,kafka_offset,mall_id,t_now);
 
-        int user_id=user_get_id(mac);
+        int user_id = user_get_id(mac);
 
-        user_duration_add(user_id,mall_id,t_pre_time,t_now);
-        vip_arrive_time_record(user_id,mall_id, t_pre_time, t_now);
-        mac_set_record(mac,mall_id,t_now);
+        user_duration_add(user_id, mall_id, t_pre_time, t_now);
+        vip_arrive_time_record(user_id, mall_id,  t_pre_time,  t_now);
+        mac_set_record(mac, mall_id, t_now);
 
         return 0;
     }

@@ -141,10 +141,10 @@ void msg_consume(RdKafka::Message* message, void* opaque)
                 parse_apmac_closer_msg(msg);
             }
 
-            if (mac.number > 0)
-            {
-                user_add(mac.number,x+width/2.0,y+height/2.0,INT_MIN, static_cast<int>(message->len()),mall_id);
-            }
+            // if (mac.number > 0)
+            // {
+            //     user_add(mac.number,x+width/2.0,y+height/2.0,INT_MIN, static_cast<int>(message->len()),mall_id);
+            // }
 
             break;
 
