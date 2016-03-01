@@ -22,6 +22,8 @@ namespace user_map
     unsigned long long user_get_mac(const int id);
 }
 
+bool mac_daily_cleared = false;
+
 class UserMapTest : public testing::Test
 {
 protected:
@@ -29,6 +31,16 @@ protected:
     {
         user_map_init();
         user_map::check_vip=1;
+
+        if(!mac_daily_cleared)
+        {
+            printf("-----------------------clear mac daily---------------\n");
+            tair::common::data_entry key;
+            get_data_entry(key, "mac.set:", get_date_str(time(0)), ":", mall_id, ":daily");
+            user_map::g_tair.remove(nm, key);
+
+            mac_daily_cleared = true;
+        }
     }
 
     virtual void TearDown()
@@ -55,7 +67,6 @@ vector<tair::common::data_entry> UserMapTest::saved_keys;
 
 bool contain_str(const std::vector<std::string>& v, const std::string str)
 {
-
     for(auto& e : v)
     {
         // warnning cannot use string's operator==
