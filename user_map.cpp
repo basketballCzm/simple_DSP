@@ -52,17 +52,16 @@ namespace user_map
     int check_vip;
     bool user_tag_save_on_tair;
    
-    void user_map_init() {
-
+    void user_map_init()
+    {
         static bool b_started = false;
 
-        if(!b_started) {
-
-            if(config.load(config_file) == EXIT_FAILURE) {
-
+        if(!b_started)
+        {
+            if(config.load(config_file) == EXIT_FAILURE)
+            {
                 syslog(LOG_INFO,"load config file %s error", config_file);
                 return;
-
             }
 
             syslog(LOG_INFO,"user_map_init() load config ok!");
@@ -104,11 +103,10 @@ namespace user_map
 
             conn = std::make_shared<pqxx::connection>(ss.str());
 
-            if(!conn->is_open()) {
-
+            if(!conn->is_open())
+            {
                 printf("cannot open database: %s\n", pg_database);
                 throw std::exception();
-
             }
 
             b_started = true;
@@ -139,7 +137,6 @@ namespace user_map
         stringstream ss_key;
         ss_key<<"location:"<<mall_id<<":"<<mac<<":"<<prop;
         tair_put(g_tair,tair_namespace,ss_key.str(),value);
-
     }
 
     template <typename V_TYPE>
@@ -280,11 +277,14 @@ namespace user_map
 
     void mac_set_record(const unsigned long long mac, const int mall_id, time_t t_now)
     {  
+        static int count = 0;
+
         const string & s_date =  get_date_str(t_now);
         tair::common::data_entry key,value;
         get_data_entry(key,"mac.set:",s_date,":",mall_id,":daily");
         get_data_entry(value,mac);
         g_tair.sadd(tair_namespace,key,value,0,0);
+        printf("-----------------------\n%d\n", ++count);
     }
 
     int user_add(const unsigned long long  mac,const float x,const float y,const int z,const int kafka_offset, int mall_id )
@@ -315,11 +315,11 @@ namespace user_map
 
         user_location_log_add(mac,x,y,z,kafka_offset,mall_id,t_now);
 
-        int user_id=user_get_id(mac);
+        int user_id = user_get_id(mac);
 
-        user_duration_add(user_id,mall_id,t_pre_time,t_now);
-        vip_arrive_time_record(user_id,mall_id, t_pre_time, t_now);
-        mac_set_record(mac,mall_id,t_now);
+        user_duration_add(user_id, mall_id, t_pre_time, t_now);
+        vip_arrive_time_record(user_id, mall_id,  t_pre_time,  t_now);
+        mac_set_record(mac, mall_id, t_now);
 
         return 0;
     }
@@ -329,7 +329,8 @@ namespace user_map
     {
         int user_id = user_get_id(mac);
 
-        try {
+        try
+        {
             pqxx::nontransaction transaction(*conn);
             auto escaped_phone=transaction.esc(phone);
             std::string sql
@@ -340,8 +341,9 @@ namespace user_map
 
             return 0;
 
-        } catch(std::exception& e) {
-
+        }
+        catch(std::exception& e)
+        {
             std::cerr << e.what() << std::endl;
             return -1;
         }
@@ -351,7 +353,7 @@ namespace user_map
     {
         user_map_init(); 
 
-        TBSYS_LOG(DEBUG, "user_list_all() enter"); 
+        TBSYS_LOG(DEBUG, "user_list_all() enter");
         stringstream ss_key;
         ss_key<<"location.update.time:"<<mall_id;
         tair::common::data_entry key(ss_key.str().c_str(),ss_key.str().size()+1,true);
@@ -391,8 +393,8 @@ namespace user_map
 
         syslog(LOG_INFO, "user_map::user_tag_update() enter");
 
-        if(user_tag_save_on_tair) {
-
+        if(user_tag_save_on_tair)
+        {
             tair::common::data_entry key;
             get_data_entry(key, "user:", user_get_id(mac), ":label.set");
 
@@ -404,11 +406,10 @@ namespace user_map
 
             int ret = g_tair.hset(tair_namespace, key, field, value, 0, 0);
 
-            if(ret != 0) {
-
+            if(ret != 0)
+            {
                 fprintf(stderr, "user_tag_update tair.hset: %s\n", g_tair.get_error_msg(ret));
                 return 1;
-
             }
 
             cout << "hset ns="  << tair_namespace
@@ -419,9 +420,7 @@ namespace user_map
                  << ",value="   << value.get_data() << endl;
 
             return 0;
-
         }
-
     }
 
     unsigned long long user_get_mac(const int user_id)
@@ -453,6 +452,7 @@ namespace user_map
 
         }
     }
+    
     int user_get_id(const unsigned long long mac)
     {
         user_map_init();
@@ -497,21 +497,19 @@ namespace user_map
         struct in_addr** addr_list;
         char ip[100];
 
-        if(host = gethostbyname(hostname)) {
-
+        if(host = gethostbyname(hostname))
+        {
             addr_list = (struct in_addr**) host->h_addr_list;
 
-            for(int i = 0; addr_list[i] != nullptr; ++i) {
-
+            for(int i = 0; addr_list[i] != nullptr; ++i)
+            {
                 strcpy(ip, inet_ntoa(*addr_list[i]));
-
             }
-
-        } else {
-
+        }
+        else
+        {
             printf("cannot translate hostname\n");
             throw std::exception();
-
         }
 
         return std::string(ip);
@@ -549,8 +547,8 @@ namespace user_map
 
         user_map_init();
 
-        try {
-
+        try
+        {
             pqxx::nontransaction transaction(*conn);
             std::string sql
                 = "select \"shopId\" from ap_v2 where mac='"
@@ -559,121 +557,100 @@ namespace user_map
             pqxx::result result(transaction.exec(sql.c_str()));
 
             if(result.empty()) return 0;
-
             return result.begin()[0].as<int>();
 
-        } catch(std::exception& e) {
-
-            std::cerr << e.what() << std::endl;
-
         }
-
+        catch(std::exception& e)
+        {
+            std::cerr << e.what() << std::endl;
+        }
     }
 
-    bool mac_is_vip(const char* mac_str, int shopId) {
-
+    bool mac_is_vip(const char* mac_str, int shop_id)
+    {
         user_map_init();
 
-        try {
-
+        try
+        {
             pqxx::nontransaction transaction(*conn);
-
-            std::stringstream ss;
-            ss << shopId;
 
             std::string mac_string = std::string(mac_str, 17);
             std::string sql
                 = "select type from shop_member where \"shopId\"="
-                + ss.str()
+                + std::to_string(shop_id)
                 + " and mac='" + mac_string + "'";
 
-            printf("mac_is_vip() sql=%s\n", sql.c_str());
-
             pqxx::result result(transaction.exec(sql.c_str()));
-
-            /*int r = rand() % 10;
-
-            if(r > 5) return true;
-            
-            return false;*/
 
             if(result.empty()) return false;
 
             return result.begin()[0].as<int>()>0;
 
-        } catch (std::exception e) {
-
+        }
+        catch (std::exception e)
+        {
             std::cerr << e.what() << std::endl;
             return false;
         }
-
     }
 
-    void update_vip_arrive_time(int mallId, int shopId, int userId, unsigned long mac, std::time_t now) {
-
+    void update_vip_arrive_time(int mall_id, int shop_id, int user_id, unsigned long mac, std::time_t now)
+    {
         user_map_init();
 
         tair::common::data_entry key;
-        get_data_entry(key, "user.vip:", mallId, ":", shopId, ":arrive.time");
+        get_data_entry(key, "user.vip:", mall_id, ":", shop_id, ":arrive.time");
 
         tair::common::data_entry value;
-        get_data_entry(value, userId);
+        get_data_entry(value, user_id);
 
-        tair::common::data_entry time_key;
-        get_data_entry(time_key, "location:", mallId, ":", shopId, ":", mac, ":time");
-        std::time_t last = tair_get<std::time_t>(g_tair, tair_namespace, time_key, 0);
+        std::time_t last = get_user_location_time(mall_id, shop_id, mac);
 
-        if(now - last > 30 * 60) {
-
+        if(now - last > 30 * 60)
+        {
             int result = g_tair.zadd(tair_namespace, key, (double)now, value, 0, 0);
 
-            if(result != 0) {
-
+            if(result != 0)
+            {
                  printf("update vip arrive time failed : %d %s\n", result, g_tair.get_error_msg(result));
-
             }
-
         }
-
     }
 
-    void update_user_location_time(int mallId, int shopId, int userId, unsigned long mac, std::time_t now) {
-
+    void update_user_location_time(int mall_id, int shop_id, int user_id, unsigned long mac, std::time_t now)
+    {
         user_map_init();
 
         tair::common::data_entry key;
-        get_data_entry(key, "location:", mallId, ":", shopId, ":", mac, ":time");
+        get_data_entry(key, "location:", mall_id, ":", shop_id, ":", mac, ":time");
 
         tair_put<std::time_t>(g_tair, tair_namespace, key, now);
-
     }
 
-    void update_user_arrive_time(int mallId, int shopId, int userId, std::time_t now) {
-
+    void update_user_arrive_time(int mall_id, int shop_id, int user_id, std::time_t now)
+    {
         user_map_init();
 
         tair::common::data_entry key;
-        get_data_entry(key, "user:", mallId, ":", shopId, ":arrive.time");
+        get_data_entry(key, "user:", mall_id, ":", shop_id, ":arrive.time");
 
         tair::common::data_entry value;
-        get_data_entry(value, userId);
+        get_data_entry(value, user_id);
 
         int ret = g_tair.zadd(tair_namespace, key, (double)now, value, 0, 0);
 
-        if(ret != 0) {
-
+        if(ret != 0)
+        {
              printf("update user arrive time failed : %d %s\n", ret, g_tair.get_error_msg(ret));
-
         }
-
     }
 
-    void user_list(Json::Value& list, double start, double end, int mallId, int shopId) {
-
+    void user_list(Json::Value& list, double start, double end, int mall_id, int shop_id)
+    {
         user_map_init();
 
         tair::common::data_entry key;
-        get_data_entry(key, "user:", mallId, ":", shopId, ":arrive.time");
+        get_data_entry(key, "user:", mall_id, ":", shop_id, ":arrive.time");
 
         std::vector<std::string> users;
         tair_zrangebyscore(g_tair, tair_namespace, key, start, end, users);
@@ -682,17 +659,43 @@ namespace user_map
         list["users"] = Json::arrayValue;
         auto & array = list["users"];
 
-        for(auto & id : users) {
-
+        for(auto & id : users)
+        {
             int tmp;
             sscanf(id.c_str(), "%d", &tmp);
 
             array[i++] = tmp;
-
         }
 
         list["size"] = (unsigned int)users.size();
-
     }
 
+    std::time_t get_user_location_time(int mall_id, int shop_id, unsigned long mac)
+    {
+        user_map_init();
+
+        tair::common::data_entry time_key;
+        get_data_entry(time_key, "location:", mall_id, ":", shop_id, ":", mac, ":time");
+        
+        return tair_get<std::time_t>(g_tair, tair_namespace, time_key, 0);
+    }
+
+    std::string datetime_str(std::time_t time)
+    {
+        auto now = localtime(&time);
+        stringstream str;
+        str << (now->tm_year + 1900)
+            << setfill('0') << setw(2) << (now->tm_mon + 1)
+            << setfill('0') << setw(2) << now->tm_mday;
+
+        return str.str();
+    }
+
+    void update_user_duration(int mall_id, int shop_id, int user_id, std::string& datetime, double interval)
+    {
+        tair::common::data_entry key;
+        get_data_entry(key, "user:", datetime, mall_id, shop_id, user_id, ":duration");
+        std::time_t duration = tair_get<std::time_t>(g_tair, tair_namespace, key, 0);
+        tair_put<std::time_t>(g_tair, tair_namespace, key, duration + duration);
+    }
 }

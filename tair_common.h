@@ -55,7 +55,7 @@ void get_data_entry(tair::common::data_entry &entry,Args... args)
 	stringstream ss_entry;
 	get_data_entry_sstream(ss_entry,args...);
 	string s_entry=ss_entry.str();
-	entry.set_data(s_entry.c_str(),s_entry.size()+1,true);
+	entry.set_data(s_entry.c_str(), s_entry.size() + 1, true);
 	return;
 }
 
