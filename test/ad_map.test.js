@@ -4,7 +4,7 @@
  * Author: kate.sf <kate.sf@taobao.com>
  */
 
-var cli = require('tair');
+var cli = require('node-tair-rdb');
 var should = require('should');
 var sys = require('sys')
 var exec = require('child_process').exec
