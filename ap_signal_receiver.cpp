@@ -39,35 +39,22 @@ void parse_apmac_msg(const char* msg)
     int offset = 30;
     int num_macs = (strlen(msg) - 29) / 19;
 
-    auto ap_mac = str_to_uint64(msg + 6);
-    auto shopId = apmac_get_shopid(ap_mac);
+    unsigned long ap_mac = str_to_uint64(msg + 6);
+    int shop_id = apmac_get_shopid(ap_mac);
 
-    if(shopId)
+    for(int i = 0; i < num_macs; ++i, offset += 19)
     {
-        for(int i = 0; i < num_macs; ++i, offset += 19)
-        {
-            bool is_vip = mac_is_vip(msg + offset, shopId);
-            unsigned long mac = str_to_uint64(msg + offset);
-            int userId = user_get_id(mac);
-            std::time_t time = std::time(0);
+        unsigned long mac = str_to_uint64(msg + offset);
+        std::time_t now = std::time(0);
 
-            if(is_vip)
-            {
-                update_vip_arrive_time(2, shopId, userId, mac, time);
-            }
-
-            update_user_arrive_time(2, shopId, userId, time);
-            update_user_location_time(2, shopId, userId, mac, time);
-
-            update_mac_location_time(2, mac, time);
-            update_location_update_time(2, mac, time);
-        }
+        update_mac_location_time(2, mac, now);
+        update_location_update_time(2, mac, now);
     }
 }
 
 void parse_apmac_closer_msg(const char* msg)
 {
-    std::size_t offset = strlen("ApMac-Closer:");
+    int offset = strlen("ApMac-Closer:");
     unsigned long ap_mac = str_to_uint64(msg + offset);
     int shop_id = apmac_get_shopid(ap_mac);
 
@@ -80,9 +67,21 @@ void parse_apmac_closer_msg(const char* msg)
     for(int i = 0; i < num_macs; ++i, offset += 19)
     {
         unsigned long mac = str_to_uint64(msg + offset);
+        bool is_vip = mac_is_vip(msg + offset, shop_id);
         int user_id = user_get_id(mac);
 
-         std::time_t last_time = get_user_location_time(2, shop_id, mac);
+        if(shop_id)
+        {
+            if(is_vip)
+            {
+                update_vip_arrive_time(2, shop_id, user_id, mac, now);
+            }
+            
+            update_user_arrive_time(2, shop_id, user_id, now);
+            update_user_location_time(2, shop_id, user_id, mac, now);
+        }
+
+        std::time_t last_time = get_user_location_time(2, shop_id, mac);
 
         // if interval is less than 10 minutes
         // we think the customer still in the shop
