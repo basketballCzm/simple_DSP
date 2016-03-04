@@ -42,7 +42,12 @@ namespace user_map
         unsigned char bytes[8];
     } Mac;
 
+    // just another version of tair_get_user_prop
+    // because tair_get_user_prop can only use in user_map.cpp
+    // now i need call it add app_signal_receiver.cpp
+
     std::time_t tair_get_user_time(int mall_id, const char* mac, string prop);
+
     void vip_arrive_time_record(int user_id, int mall_id, time_t t_pre, time_t t_now);
 
     std::string hostname_to_ip(const char* hostname);
