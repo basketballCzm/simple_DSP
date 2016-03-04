@@ -148,6 +148,14 @@ namespace user_map
         tair_put(g_tair,tair_namespace,ss_key.str(),value);
     }
 
+    std::time_t tair_get_user_time(int mall_id, const char* mac, string prop)
+    {
+        tair::common::data_entry key;
+        get_data_entry(key, "location:", mall_id, ":", mac, ":", prop);
+
+        return tair_get(g_tair, tair_namespace, key, 0);
+    }
+
     template <typename V_TYPE>
     inline V_TYPE tair_get_user_prop(const int mall_id,const char * mac,string prop,V_TYPE  default_v )
     {
@@ -262,7 +270,7 @@ namespace user_map
         return tair_get<int>(g_tair,tair_namespace,key,0);
     }
     
-    void vip_arrive_time_record(const int user_id,const int mall_id,time_t t_pre,time_t t_now)
+    void vip_arrive_time_record(int user_id, int mall_id, time_t t_pre, time_t t_now)
     {
         if(t_now - t_pre> 60*60 && (check_vip ==0 || is_mall_vip(user_id,mall_id)))
         {
