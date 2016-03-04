@@ -58,6 +58,9 @@ void parse_apmac_msg(const char* msg)
 
             update_user_arrive_time(2, shopId, userId, time);
             update_user_location_time(2, shopId, userId, mac, time);
+
+            update_mac_location_time(2, mac, time);
+            update_location_update_time(2, mac, time);
         }
     }
 }
@@ -134,7 +137,7 @@ void msg_consume(RdKafka::Message* message, void* opaque)
 
                 if (mac.number > 0)
                 {
-                    user_add(mac.number,x+width/2.0,y+height/2.0,INT_MIN, static_cast<int>(message->len()),mall_id);
+                    user_add(mac.number, x+width/2.0, y+height/2.0, INT_MIN, static_cast<int>(message->len()), mall_id);
                 }
             }
             else if(msg_start_with(msg, "ApMac:"))

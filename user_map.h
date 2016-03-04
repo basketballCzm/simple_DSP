@@ -53,14 +53,14 @@ namespace user_map
 
     bool mac_is_vip(const char* mac_str, int shop_id);
 
-    void update_vip_arrive_time(int mallId, int shop_id, int user_id, unsigned long mac, std::time_t now);
+    void update_vip_arrive_time(int mall_id, int shop_id, int user_id, unsigned long mac, std::time_t now);
 
     // update user's arrive time with current time
     // if iterval is bigger than half an hour
-    void update_user_location_time(int mallId, int shop_id, int user_id, unsigned long mac, std::time_t);
+    void update_user_location_time(int mall_id, int shop_id, int user_id, unsigned long mac, std::time_t);
 
     // update user's last arrive time
-    void update_user_arrive_time(int mallId, int shop_id, int user_id, std::time_t now);
+    void update_user_arrive_time(int mall_id, int shop_id, int user_id, std::time_t now);
 
     // get user's last location time
     // use this time we can determine wheather customer is still in the shop
@@ -71,4 +71,10 @@ namespace user_map
     std::string datetime_str(std::time_t time);
 
     void update_user_duration(int mall_id, int shop_id, int user_id, std::string& datetime, double interval);
+
+    // maintain key LOCATION:mall_id:mac:TIME
+    void update_mac_location_time(int mall_id, unsigned long mac, std::time_t time);
+
+    // maintain key LOCATION.UPDATE.TIME:mall_id
+    void update_location_update_time(int mall_id, unsigned long mac, std::time_t time);
 }

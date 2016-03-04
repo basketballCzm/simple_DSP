@@ -277,14 +277,11 @@ namespace user_map
 
     void mac_set_record(const unsigned long long mac, const int mall_id, time_t t_now)
     {  
-        static int count = 0;
-
         const string & s_date =  get_date_str(t_now);
         tair::common::data_entry key,value;
         get_data_entry(key,"mac.set:",s_date,":",mall_id,":daily");
         get_data_entry(value,mac);
         g_tair.sadd(tair_namespace,key,value,0,0);
-        printf("-----------------------\n%d\n", ++count);
     }
 
     int user_add(const unsigned long long  mac,const float x,const float y,const int z,const int kafka_offset, int mall_id )
@@ -606,7 +603,7 @@ namespace user_map
 
         std::time_t last = get_user_location_time(mall_id, shop_id, mac);
 
-        if(now - last > 30 * 60)
+        if(now - last > 10 * 60)
         {
             int result = g_tair.zadd(tair_namespace, key, (double)now, value, 0, 0);
 
@@ -641,7 +638,7 @@ namespace user_map
 
         if(ret != 0)
         {
-             printf("update user arrive time failed : %d %s\n", ret, g_tair.get_error_msg(ret));
+            printf("update user arrive time failed : %d %s\n", ret, g_tair.get_error_msg(ret));
         }
     }
 
@@ -697,5 +694,22 @@ namespace user_map
         get_data_entry(key, "user:", datetime, mall_id, shop_id, user_id, ":duration");
         std::time_t duration = tair_get<std::time_t>(g_tair, tair_namespace, key, 0);
         tair_put<std::time_t>(g_tair, tair_namespace, key, duration + duration);
+    }
+
+    void update_mac_location_time(int mall_id, unsigned long mac, std::time_t time)
+    {
+        tair::common::data_entry key;
+        get_data_entry(key, "location:", mall_id, ":", mac, ":time");
+        tair_put<std::time_t>(g_tair, tair_namespace, key, time);
+    }
+
+    void update_location_update_time(int mall_id, unsigned long mac, std::time_t time)
+    {
+        tair::common::data_entry key;
+        get_data_entry(key, "location.update.time:", mall_id);
+        tair::common::data_entry value;
+        get_data_entry(value, mac);
+
+        g_tair.zadd(tair_namespace, key, (double)time, value, 0, 0);
     }
 }
