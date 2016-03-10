@@ -75,24 +75,21 @@ void parse_apmac_closer_msg(const char* msg)
 
         if(shop_id)
         {
+            std::time_t last_time = get_user_location_time(2, shop_id, mac);
+            update_user_location_time(2, shop_id, user_id, mac, now);
+
+            if(last_time != 0 && now - last_time < 10 * 60)
+            {
+                update_user_duration(2, shop_id, user_id, datetime, now - last_time);
+            }
+
             if(!check_vip || is_vip)
             {
                 update_vip_arrive_time(2, shop_id, user_id, mac, now);
             }
             
+            // i don't know this line do what
             update_user_arrive_time(2, shop_id, user_id, now);
-            update_user_location_time(2, shop_id, user_id, mac, now);
-        }
-
-        std::time_t last_time = get_user_location_time(2, shop_id, mac);
-
-        // if interval is less than 10 minutes
-        // we think the customer still in the shop
-        // so add the time gap into duration
-
-        if(now - last_time < 10 * 60)
-        {
-            update_user_duration(2, shop_id, user_id, datetime, now - last_time);
         }
     }
 }

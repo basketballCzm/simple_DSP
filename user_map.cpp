@@ -589,7 +589,7 @@ namespace user_map
 
             if(result.empty()) return false;
 
-            return result.begin()[0].as<int>()>0;
+            return result.begin()[0].as<int>() > 0;
 
         }
         catch (std::exception e)
@@ -617,7 +617,7 @@ namespace user_map
 
             if(result != 0)
             {
-                 printf("update vip arrive time failed : %d %s\n", result, g_tair.get_error_msg(result));
+                printf("update vip arrive time failed : %d %s\n", result, g_tair.get_error_msg(result));
             }
         }
     }
@@ -681,7 +681,7 @@ namespace user_map
 
         tair::common::data_entry time_key;
         get_data_entry(time_key, "location:", mall_id, ":", shop_id, ":", mac, ":time");
-        
+
         return tair_get<std::time_t>(g_tair, tair_namespace, time_key, 0);
     }
 
@@ -701,7 +701,7 @@ namespace user_map
         tair::common::data_entry key;
         get_data_entry(key, "user:", datetime, ":", mall_id, ":", shop_id, ":", user_id, ":duration");
         std::time_t duration = tair_get<std::time_t>(g_tair, tair_namespace, key, 0);
-        tair_put<std::time_t>(g_tair, tair_namespace, key, duration + duration);
+        tair_put<std::time_t>(g_tair, tair_namespace, key, duration + interval);
     }
 
     void update_mac_location_time(int mall_id, unsigned long mac, std::time_t time)
