@@ -179,7 +179,7 @@ int main ()
     string errstr;
     RdKafka::Conf *conf = RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL);
     RdKafka::Conf *tconf = RdKafka::Conf::create(RdKafka::Conf::CONF_TOPIC);
-    conf->set("client.id","tair-rdb-client-cq", errstr);
+    conf->set("client.id", uuid().c_str(), errstr);
     tconf->set("auto.commit.enable","true", errstr);
     tconf->set("auto.commit.interval.ms","200", errstr);
 

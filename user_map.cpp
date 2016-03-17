@@ -521,6 +521,30 @@ namespace user_map
 
     }
 
+    std::string uuid()
+    {
+        static const char chars[] =
+        {
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
+            'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+            'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd',
+            'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+            'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'
+        };
+
+        unsigned char factor = 0;
+        std::stringstream stream;
+
+        for(int i = 0; i < 20; ++i)
+        {
+            factor ^= rand() % 256;
+            stream << chars[factor % 62];
+        }
+
+        return stream.str();
+    }
+
     std::string uint64_to_str(unsigned long num) {
 
         Mac mac;
