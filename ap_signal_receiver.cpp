@@ -83,7 +83,7 @@ void parse_apmac_closer_msg(const char* msg)
                 update_user_duration(2, shop_id, user_id, datetime, now - last_time);
             }
 
-            if(!check_vip || is_vip)
+            if((!check_vip || is_vip )&& now -last_time > 10*60)
             {
                 update_vip_arrive_time(2, shop_id, user_id, mac, now);
             }

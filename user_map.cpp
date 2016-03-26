@@ -626,23 +626,15 @@ namespace user_map
     void update_vip_arrive_time(int mall_id, int shop_id, int user_id, unsigned long mac, std::time_t now)
     {
         user_map_init();
-
         tair::common::data_entry key;
         get_data_entry(key, "user.vip:", mall_id, ":", shop_id, ":arrive.time");
 
         tair::common::data_entry value;
         get_data_entry(value, user_id);
-
-        std::time_t last = get_user_location_time(mall_id, shop_id, mac);
-
-        if(now - last > 10 * 60)
+        int result = g_tair.zadd(tair_namespace, key, (double)now, value, 0, 0);
+        if(result != 0)
         {
-            int result = g_tair.zadd(tair_namespace, key, (double)now, value, 0, 0);
-
-            if(result != 0)
-            {
-                printf("update vip arrive time failed : %d %s\n", result, g_tair.get_error_msg(result));
-            }
+            printf("update vip arrive time failed : %d %s\n", result, g_tair.get_error_msg(result));
         }
     }
 
