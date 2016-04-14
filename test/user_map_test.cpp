@@ -139,7 +139,7 @@ TEST_F(UserMapTest, UserDuration)
     get_data_entry(key,"user:",s_date,":",mall_id,":",user_id,":duration");
     saved_keys.push_back(key);
     string duration=tair_get<string>(user_map::g_tair,nm,key,"");
-    EXPECT_STREQ("30",duration.c_str());
+    EXPECT_STREQ("120",duration.c_str());
 
     sleep(1);
     int ret = user_add(mac,x+2,y+4,z,-1,mall_id);
@@ -149,7 +149,7 @@ TEST_F(UserMapTest, UserDuration)
     cout<<"key is "<<key.get_data()<<endl;
     cout<<"value is "<<duration<<endl;
     int i_duration = std::stoi( duration );
-    EXPECT_LE(30,i_duration);
+    EXPECT_LE(120,i_duration);
 }
 
 
