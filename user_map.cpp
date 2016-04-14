@@ -35,6 +35,7 @@ namespace user_map
     int time_slice; // minutes
     int tair_namespace;
     int max_duration_gap; // users' stay time gap
+    int max_in_shop_gap; // user out of shop/mall, time gap
 
     const char * pg_server;
     const char * pg_user;
@@ -73,7 +74,8 @@ namespace user_map
             tair_namespace  = config.getInt("tair_rdb", "namespace", 0);
 
             tb_log_file      = config.getString("tair_rdb", "log_file", NULL);
-            max_duration_gap = config.getInt("user_map", "max_duration_gap", 30);
+            max_duration_gap = config.getInt("user_map", "max_duration_gap", 120);
+            max_in_shop_gap = config.getInt("user_map", "max_in_shop_gap", 300);
 
             pg_server   = config.getString("user_map", "pg_server", NULL);
             pg_user     = config.getString("user_map", "pg_user", NULL);
@@ -272,7 +274,7 @@ namespace user_map
     
     void vip_arrive_time_record(int user_id, int mall_id, time_t t_pre, time_t t_now)
     {
-        if(t_now - t_pre> 60*60 && (check_vip ==0 || is_mall_vip(user_id,mall_id)))
+        if(t_now - t_pre> max_in_shop_gap && (check_vip ==0 || is_mall_vip(user_id,mall_id)))
         {
             tair::common::data_entry key,value;
             get_data_entry(key,"user.vip:",mall_id,":arrive.time");
@@ -623,19 +625,23 @@ namespace user_map
         }
     }
 
-    void update_vip_arrive_time(int mall_id, int shop_id, int user_id, unsigned long mac, std::time_t now)
+    void shop_vip_arrive_time_record(int mall_id, int shop_id, int user_id, unsigned long mac, std::time_t pre, std::time_t now)
     {
         user_map_init();
-        tair::common::data_entry key;
-        get_data_entry(key, "user.vip:", mall_id, ":", shop_id, ":arrive.time");
-
-        tair::common::data_entry value;
-        get_data_entry(value, user_id);
-        int result = g_tair.zadd(tair_namespace, key, (double)now, value, 0, 0);
-        if(result != 0)
+        if(now -pre > max_in_shop_gap)
         {
-            printf("update vip arrive time failed : %d %s\n", result, g_tair.get_error_msg(result));
-        }
+            tair::common::data_entry key;
+            get_data_entry(key, "user.vip:", mall_id, ":", shop_id, ":arrive.time");
+            tair::common::data_entry value;
+            get_data_entry(value, user_id);
+            int result = g_tair.zadd(tair_namespace, key, (double)now, value, 0, 0);
+            if(result != 0)
+                printf("update vip arrive time failed : %d %s\n", result, g_tair.get_error_msg(result));
+            else
+                printf("update shop vip arrive time,shop_id:%d mac:%ld\n",shop_id, mac);
+
+        }    
+
     }
 
     void update_user_location_time(int mall_id, int shop_id, int user_id, unsigned long mac, std::time_t now)
@@ -712,8 +718,10 @@ namespace user_map
         return str.str();
     }
 
-    void update_user_duration(int mall_id, int shop_id, int user_id, std::string& datetime, double interval)
+    void shop_user_duration_add(int mall_id, int shop_id, int user_id, std::string& datetime, double interval)
     {
+        if(interval>max_duration_gap)
+            interval=max_duration_gap;
         tair::common::data_entry key;
         get_data_entry(key, "user:", datetime, ":", mall_id, ":", shop_id, ":", user_id, ":duration");
         std::time_t duration = tair_get<std::time_t>(g_tair, tair_namespace, key, 0);
