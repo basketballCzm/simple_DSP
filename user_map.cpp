@@ -469,7 +469,7 @@ namespace user_map
         if(user_id==0)
         {
             //get user id from pg db
-            string cmd=str(boost::format(add_user_sql)%mac%"guest"%mac%"guest"%mac%pg_password%pg_server%pg_user%pg_database);
+            string cmd=str(boost::format(add_user_sql)%mac%"guest"%mac%pg_password%pg_server%pg_user%pg_database);
             string s_id;
             for (int i=0;i<10;++i)
             {
