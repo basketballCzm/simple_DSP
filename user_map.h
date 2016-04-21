@@ -91,7 +91,7 @@ namespace user_map
 
     std::time_t get_user_location_time(int mall_id, int shop_id, unsigned long mac);
 
-    void shop_user_duration_add(int mall_id, int shop_id, int user_id, std::string& datetime, double interval);
+    void shop_user_duration_add(int mall_id, int shop_id, int user_id, std::string& datetime, int interval);
 
     // maintain key LOCATION:mall_id:mac:TIME
 

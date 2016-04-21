@@ -717,15 +717,23 @@ namespace user_map
 
         return str.str();
     }
+    void shop_all_users_duration_add(int mall_id, int shop_id,std::string& datetime, int interval)
+    {
+        tair::common::data_entry key;
+        int new_duration;
+        get_data_entry(key, "shop:", datetime, ":", mall_id, ":", shop_id, ":users.duration");
+        g_tair.incr(tair_namespace,key,interval,&new_duration);
+    }
 
-    void shop_user_duration_add(int mall_id, int shop_id, int user_id, std::string& datetime, double interval)
+    void shop_user_duration_add(int mall_id, int shop_id, int user_id, std::string& datetime, int interval)
     {
         if(interval>max_duration_gap)
             interval=max_duration_gap;
         tair::common::data_entry key;
+        int new_duration;
         get_data_entry(key, "user:", datetime, ":", mall_id, ":", shop_id, ":", user_id, ":duration");
-        std::time_t duration = tair_get<std::time_t>(g_tair, tair_namespace, key, 0);
-        tair_put<std::time_t>(g_tair, tair_namespace, key, duration + interval);
+        g_tair.incr(tair_namespace,key,interval,&new_duration);
+        shop_all_users_duration_add(mall_id,shop_id,datetime,interval);
     }
 
     void update_mac_location_time(int mall_id, unsigned long mac, std::time_t time)
