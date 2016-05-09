@@ -37,7 +37,7 @@ bool msg_start_with(const char* msg, const char* prefix)
 void parse_apmac_msg(const char* msg)
 {
     int offset = 30;
-    int num_macs = (strlen(msg) - 29) / 19;
+    int num_macs = (strlen(msg) - offset + 1) / 19;
 
     unsigned long ap_mac = str_to_uint64(msg + 6);
     int shop_id = apmac_get_shopid(ap_mac);
@@ -62,7 +62,7 @@ void parse_apmac_closer_msg(const char* msg)
     int shop_id = apmac_get_shopid(ap_mac);
 
     offset = strlen("ApMac-Closer:60:cd:a9:00:9a:3a Macs:[");
-    int num_macs = (strlen(msg) - offset) / 19;
+    int num_macs = (strlen(msg) - offset + 1) / 19;
 
     std::time_t now = std::time(0);
     std::string datetime = datetime_str(now);
