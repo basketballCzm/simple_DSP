@@ -675,10 +675,16 @@ namespace user_map
     void user_list(Json::Value& list, double start, double end, int mall_id, int shop_id)
     {
         user_map_init();
-
         tair::common::data_entry key;
-        get_data_entry(key, "user:", mall_id, ":", shop_id, ":arrive.time");
 
+        if(shop_id>0)
+        {
+            get_data_entry(key, "user:", mall_id, ":", shop_id, ":arrive.time");
+        }
+        else
+        {
+            get_data_entry(key, "location.update.time:", mall_id);
+        }
         std::vector<std::string> users;
         tair_zrangebyscore(g_tair, tair_namespace, key, start, end, users);
 
