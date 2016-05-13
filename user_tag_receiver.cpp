@@ -11,13 +11,16 @@ using namespace user_map;
 static const string s_topic = "user-tag";
 static const string brokers = "WUSHUU-KAFKA";
 static bool exit_eof = false;
-//static int64_t start_offset = RdKafka::Topic::OFFSET_BEGINNING; 
-static int64_t start_offset = RdKafka::Topic::OFFSET_STORED; 
+static int64_t start_offset = RdKafka::Topic::OFFSET_BEGINNING; 
+//static int64_t start_offset = RdKafka::Topic::OFFSET_STORED; 
 static int32_t partition = 0; 
 
 static bool run = true;
 
 void msg_consume(RdKafka::Message* message, void* opaque) {
+
+    const char * ori_msg=NULL;
+    char * p_msg=NULL;
 
     switch (message->err()) {
 
@@ -33,12 +36,17 @@ void msg_consume(RdKafka::Message* message, void* opaque) {
 
             }
             
-            char* msg = static_cast<char *>(message->payload());
+            ori_msg = static_cast<char *>(message->payload());
+            p_msg=new char[message->len()+1];
+            strncpy(p_msg,ori_msg,message->len());
+            p_msg[message->len()]=0;
 
+            std::cout << "Read msg: " << p_msg << std::endl;
             Mac mac;
             char usertag[40];
+            memset(usertag,0,40);
 
-            sscanf(msg,"Mac %hhx:%hhx:%hhx:%hhx:%hhx:%hhx %s",
+            sscanf(p_msg,"Mac %hhx:%hhx:%hhx:%hhx:%hhx:%hhx %s",
                 mac.bytes + 5,
                 mac.bytes + 4,
                 mac.bytes + 3,
@@ -46,7 +54,7 @@ void msg_consume(RdKafka::Message* message, void* opaque) {
                 mac.bytes + 1,
                 mac.bytes,
                 usertag);
-            
+            delete p_msg;            
             cout << "user tag is " << usertag << endl;
             cout << "mac number is " << mac.number << endl;
 

@@ -694,8 +694,8 @@ namespace user_map
 
         for(auto & id : users)
         {
-            int tmp;
-            sscanf(id.c_str(), "%d", &tmp);
+            unsigned long long  tmp;
+            sscanf(id.c_str(), "%llu", &tmp);
 
             array[i++] = tmp;
         }

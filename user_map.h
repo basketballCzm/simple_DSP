@@ -39,7 +39,7 @@ namespace user_map
 
     typedef union
     {
-        unsigned long number;
+        unsigned long long number;
         unsigned char bytes[8];
     } Mac;
 
