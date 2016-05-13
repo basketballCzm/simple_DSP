@@ -44,6 +44,7 @@ void msg_consume(RdKafka::Message* message, void* opaque) {
             std::cout << "Read msg: " << p_msg << std::endl;
             Mac mac;
             char usertag[40];
+            memset(usertag,0,40);
 
             sscanf(p_msg,"Mac %hhx:%hhx:%hhx:%hhx:%hhx:%hhx %s",
                 mac.bytes + 5,
