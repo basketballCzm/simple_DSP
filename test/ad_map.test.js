@@ -272,6 +272,7 @@ describe('ad_map.test.js', function () {
     
   it("ad_map insert test data to ad.location should be ok!",function(done){
     //240*120 => 24*12
+    this.timeout(10000)
     var x_len=24
     var y_len=12
     //this is a reverse data
