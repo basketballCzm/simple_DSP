@@ -1,0 +1,22 @@
+{
+  "name": "simple_dsp",
+  "version": "1.0.0",
+  "description": "c++ module of a simple dsp",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "node-tair-rdb": "git+ssh://git@115.28.9.186:wushuu-ads/node-tair-rdb.git"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "mocha "
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@115.28.9.186:wushuu-ads/simple_DSP.git"
+  },
+  "author": "caster zeng",
+  "license": "ISC"
+}

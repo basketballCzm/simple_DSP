@@ -239,6 +239,7 @@ describe('ad_map.test.js', function () {
     })
 
   it("ad_map insert test data ad should be ok!",function(done){
+      this.timeout(10000)
       var test_entry_list=[
         [1,1],
         [2,1],
