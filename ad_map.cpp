@@ -208,10 +208,12 @@ namespace ad_map
         ad_group_set_of_location.begin(),ad_group_set_of_location.end(),back_inserter(ad_group_list));
     TBSYS_LOG(DEBUG,"ad_map::bidding() ad_group_list.size()=%d\n",ad_group_list.size());
 
-
-    get_data_entry(key,"user:",user_id,":label.set");
     vector<string> user_label_set;
-    tair_hgetall<string>(g_tair,tair_namespace,key,user_label_set);
+    if(user_id>0)
+    {
+      get_data_entry(key,"user:",user_id,":label.set");
+      tair_hgetall<string>(g_tair,tair_namespace,key,user_label_set);
+    }
 
     for(vector< int>::iterator it=ad_group_list.begin();it!=ad_group_list.end();++it)
     {
@@ -225,7 +227,7 @@ namespace ad_map
       tair_smembers<string>(g_tair,tair_namespace,key,ad_group_label_set);
       TBSYS_LOG(DEBUG,"ad_map::bidding() ad_group_label_set.size()=%d\n",ad_group_label_set.size());
 
-      if( (ad_group_label_set.size()!=0) &&
+      if( user_id >0 && (ad_group_label_set.size()!=0) &&
         !check_intersection(user_label_set,ad_group_label_set))
         continue;
 
