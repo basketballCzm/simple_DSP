@@ -37,15 +37,15 @@ namespace ad_map
 
   void ad_map_init()
   {
-    syslog(LOG_INFO,"enter ad_map_init()");
+    TBSYS_LOG(DEBUG,"enter ad_map_init()");
     static bool b_started=false;
     if(!b_started)
     {
       if(config.load(config_file) == EXIT_FAILURE) {
-        syslog(LOG_INFO,"load config file %s error", config_file);
+        TBSYS_LOG(DEBUG,"load config file %s error", config_file);
         return;
       }
-      syslog(LOG_INFO,"ad_map_init() load config ok!");
+      TBSYS_LOG(DEBUG,"ad_map_init() load config ok!");
       master_addr=config.getString("tair_rdb","master_addr",NULL);
       slave_addr=config.getString("tair_rdb","slave_addr",NULL);			
       group_name=config.getString("tair_rdb","group_name",NULL);			
@@ -59,7 +59,7 @@ namespace ad_map
 
       g_tair.set_timeout(5000);
       g_tair.startup(master_addr,slave_addr,group_name); 
-      syslog(LOG_INFO,"ad_map_init() after g_tair.startup; log file is %s",tb_log_file);
+      TBSYS_LOG(DEBUG,"ad_map_init() after g_tair.startup; log file is %s",tb_log_file);
       b_started=true;
 
       tair::common::data_entry key;
@@ -89,7 +89,7 @@ namespace ad_map
     get_data_entry( ad_group_set_key,"ad.location:",mall_id,":"
         ,int(pos.position.x/slice_x),":",int(pos.position.y/slice_y),":",pos.position.z,":ad.group.set");
 
-    syslog(LOG_INFO, "ad_map::get_ad_group_set_of_location() slice_x=%d,pos.x=%f slice_y=%d pos.y=%f key=%s"
+    TBSYS_LOG(DEBUG, "ad_map::get_ad_group_set_of_location() slice_x=%d,pos.x=%f slice_y=%d pos.y=%f key=%s"
         ,slice_x ,pos.position.x, slice_y, pos.position.y, ad_group_set_key.get_data());   
     tair_zmembers<int>(g_tair,tair_namespace,ad_group_set_key,ad_group_set);
     return;
@@ -189,7 +189,7 @@ namespace ad_map
 
   void bidding(Json::Value &ret, const UserPosition &pos, const int user_id, const int space_id, const int mall_id,const int n)
   {
-    syslog(LOG_INFO, "enter ad_map::bidding() namespace=%d", tair_namespace);   
+    TBSYS_LOG(DEBUG, "enter ad_map::bidding() namespace=%d", tair_namespace);   
     int *highest_ad_group_list=new int[n]{};
     double *highest_eCPM_list=new double[n]{};
     int *next_ad_list=new int[n]{};
@@ -197,16 +197,16 @@ namespace ad_map
 
     vector< int>  ad_group_set_of_space;
     get_ad_group_set_of_space(mall_id,space_id, ad_group_set_of_space);
-    syslog(LOG_INFO,"ad_map::bidding() ad_group_set_of_space.size()=%d\n",ad_group_set_of_space.size());
+    TBSYS_LOG(DEBUG,"ad_map::bidding() ad_group_set_of_space.size()=%d\n",ad_group_set_of_space.size());
 
     vector< int>  ad_group_set_of_location;
     get_ad_group_set_of_location(mall_id,pos, ad_group_set_of_location);
-    syslog(LOG_INFO,"ad_map::bidding() ad_group_set_of_location.size()=%d\n",ad_group_set_of_location.size());
+    TBSYS_LOG(DEBUG,"ad_map::bidding() ad_group_set_of_location.size()=%d\n",ad_group_set_of_location.size());
 
     vector< int> ad_group_list;
     set_intersection(ad_group_set_of_space.begin(),ad_group_set_of_space.end(),
         ad_group_set_of_location.begin(),ad_group_set_of_location.end(),back_inserter(ad_group_list));
-    syslog(LOG_INFO,"ad_map::bidding() ad_group_list.size()=%d\n",ad_group_list.size());
+    TBSYS_LOG(DEBUG,"ad_map::bidding() ad_group_list.size()=%d\n",ad_group_list.size());
 
 
     get_data_entry(key,"user:",user_id,":label.set");
@@ -223,7 +223,7 @@ namespace ad_map
       get_data_entry(key,"ad.group:",mall_id,":",*it,":target.label.set");
       vector<string> ad_group_label_set;
       tair_smembers<string>(g_tair,tair_namespace,key,ad_group_label_set);
-      syslog(LOG_INFO,"ad_map::bidding() ad_group_label_set.size()=%d\n",ad_group_label_set.size());
+      TBSYS_LOG(DEBUG,"ad_map::bidding() ad_group_label_set.size()=%d\n",ad_group_label_set.size());
 
       if( (ad_group_label_set.size()!=0) &&
         !check_intersection(user_label_set,ad_group_label_set))
@@ -231,7 +231,7 @@ namespace ad_map
 
       int next_ad_id=-1;
       double eCPM=get_eCPM(mall_id,*it,next_ad_id);
-      syslog(LOG_INFO,"ad_map::bidding() eCPM=%f\n",eCPM);
+      TBSYS_LOG(DEBUG,"ad_map::bidding() eCPM=%f\n",eCPM);
 
       for(int j=n-1;j>=0;--j)
       {
