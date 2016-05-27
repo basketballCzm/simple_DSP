@@ -674,6 +674,7 @@ namespace user_map
 
     void user_list(Json::Value& list, double start, double end, int mall_id, int shop_id)
     {
+        TBSYS_LOG(DEBUG, "user_list() enter start=%lf,end=%lf,mall_id=%d,shop_id=%d",start,end,mall_id,shop_id);
         user_map_init();
         tair::common::data_entry key;
 
@@ -686,8 +687,9 @@ namespace user_map
             get_data_entry(key, "location.update.time:", mall_id);
         }
         std::vector<std::string> users;
+        TBSYS_LOG(DEBUG, "user_list() zrangebyscore key=%s",key.get_data());
         tair_zrangebyscore(g_tair, tair_namespace, key, start, end, users);
-
+        TBSYS_LOG(DEBUG, "user_list() zrangebyscore return, users.size=%d",(unsigned int)users.size());
         int i = 0;
         list["users"] = Json::arrayValue;
         auto & array = list["users"];
