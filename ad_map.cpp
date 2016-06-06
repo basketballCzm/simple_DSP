@@ -117,12 +117,12 @@ namespace ad_map
 
       get_data_entry(key,"ad:",mall_id,":",ad_id,":show.counter");
       const string & s_show_counter=tair_get<string>(g_tair,tair_namespace,key,"0");
-      TBSYS_LOG(DEBUG,"get_eCPM() s_show_counter=%s",s_show_counter.c_str());
       const int show_counter=std::atoi(s_show_counter.c_str());
+      TBSYS_LOG(DEBUG,"get_eCPM() show_counter=%d",show_counter);
       get_data_entry(key,"ad:",mall_id,":",ad_id,":click.counter");
       const string & s_click_counter=tair_get<string>(g_tair,tair_namespace,key,"0");
-      TBSYS_LOG(DEBUG,"get_eCPM() s_click_counter=%s",s_click_counter.c_str());
       const int click_counter=atoi(s_click_counter.c_str());
+      TBSYS_LOG(DEBUG,"get_eCPM() click_counter=%d",click_counter);
       get_data_entry(key,"ad:",mall_id,":",ad_id,":weight");
       int weight=tair_get<int>(g_tair,tair_namespace,key,0);
       if(weight==0)
