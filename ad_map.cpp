@@ -132,11 +132,11 @@ namespace ad_map
       }
       if(show_counter<NEW_AD_MIN_SHOW_COUNT)
       {
-        sum_eCPM+=1000.0*show_price+1000.0*click_price*NEW_AD_CTR*weight; 
+        sum_eCPM+=(1000.0*show_price+1000.0*click_price*NEW_AD_CTR)*weight; 
       }
       else
       {
-        sum_eCPM+=1000.0*show_price+1000.0*click_price*click_counter/show_counter*weight; 
+        sum_eCPM+=(1000.0*show_price+1000.0*click_price*click_counter/show_counter)*weight; 
       }	
       sum_weight+=weight;	
       double show_weight=(show_counter+1.0)/weight;
