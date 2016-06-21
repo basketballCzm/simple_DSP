@@ -750,7 +750,7 @@ namespace user_map
         get_data_entry(key, "user:", datetime, ":", mall_id, ":", shop_id, ":", user_id, ":duration");
         g_tair.incr(tair_namespace,key,interval,&new_duration);
         shop_all_users_duration_add(mall_id,shop_id,datetime,interval);
-        mall_all_users_duration_add(mall_id,shop_id,datetime,interval);
+        mall_all_users_duration_add(mall_id,datetime,interval);
     }
 
     void update_mac_location_time(int mall_id, unsigned long mac, std::time_t time)
