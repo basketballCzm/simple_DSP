@@ -93,7 +93,7 @@ namespace user_map
             TBSYS_LOGGER.setFileName(tb_log_file,true);
             TBSYS_LOGGER.setLogLevel("DEBUG");
 
-            g_tair.set_timeout(5000);
+            //g_tair.set_timeout(5000);
             g_tair.startup(master_addr,slave_addr,group_name);
 
             std::stringstream ss;
