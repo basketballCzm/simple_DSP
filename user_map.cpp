@@ -19,6 +19,9 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
+#include <sys/types.h>
+#include <unistd.h>
+
 using namespace std;
 
 namespace user_map
@@ -90,7 +93,7 @@ namespace user_map
             check_vip = config.getInt("tair_rdb", "check_vip", 1);
             user_tag_save_on_tair = config.getInt("tair_rdb", "user_tag_save_on_tair", true);
 
-            TBSYS_LOGGER.setFileName(tb_log_file,true);
+            TBSYS_LOGGER.setFileName((string(tb_log_file)+string(".")+to_string(getpid())).c_str(),true);
             TBSYS_LOGGER.setLogLevel("DEBUG");
 
             //g_tair.set_timeout(5000);
