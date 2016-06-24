@@ -12,6 +12,9 @@
 #include "cron_timing.h"
 #include <string>
 
+#include <sys/types.h>
+#include <unistd.h>
+
 #define NONE_INT_DATA INT_MIN
 #define NEW_AD_MIN_SHOW_COUNT 100
 #define NEW_AD_CTR 0.05
@@ -54,7 +57,7 @@ namespace ad_map
 
       tb_log_file=config.getString("tair_rdb","log_file",NULL);
 
-      TBSYS_LOGGER.setFileName(tb_log_file,true);
+      TBSYS_LOGGER.setFileName(tb_log_file+"."+std::toString(getpid()),true);
       TBSYS_LOGGER.setLogLevel("DEBUG");
 
       //g_tair.set_timeout(5000);
