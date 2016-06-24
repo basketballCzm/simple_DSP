@@ -57,7 +57,7 @@ namespace ad_map
 
       tb_log_file=config.getString("tair_rdb","log_file",NULL);
 
-      TBSYS_LOGGER.setFileName(tb_log_file+"."+std::toString(getpid()),true);
+      TBSYS_LOGGER.setFileName(tb_log_file+"."+std::to_string(getpid()),true);
       TBSYS_LOGGER.setLogLevel("DEBUG");
 
       //g_tair.set_timeout(5000);

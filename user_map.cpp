@@ -93,7 +93,7 @@ namespace user_map
             check_vip = config.getInt("tair_rdb", "check_vip", 1);
             user_tag_save_on_tair = config.getInt("tair_rdb", "user_tag_save_on_tair", true);
 
-            TBSYS_LOGGER.setFileName(tb_log_file+"."+std::toString(getpid()),true);
+            TBSYS_LOGGER.setFileName(tb_log_file+"."+std::to_string(getpid()),true);
             TBSYS_LOGGER.setLogLevel("DEBUG");
 
             //g_tair.set_timeout(5000);
