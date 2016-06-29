@@ -50,6 +50,7 @@ namespace user_map
     const char * query_user_id_sql;
     const char * common_sql;
     static const char * tb_log_file;
+    const char * tb_log_level;
 
     std::shared_ptr<pqxx::connection> conn;
 
@@ -77,6 +78,7 @@ namespace user_map
             tair_namespace  = config.getInt("tair_rdb", "namespace", 0);
 
             tb_log_file      = config.getString("tair_rdb", "log_file", NULL);
+            tb_log_level      = config.getString("tair_rdb", "log_level", NULL);
             max_duration_gap = config.getInt("user_map", "max_duration_gap", 120);
             max_in_shop_gap = config.getInt("user_map", "max_in_shop_gap", 300);
 
@@ -90,11 +92,12 @@ namespace user_map
             query_user_id_sql       = config.getString("user_map", "query_user_id_sql", NULL);
             common_sql       = config.getString("user_map", "common_sql", NULL);
 
+
             check_vip = config.getInt("tair_rdb", "check_vip", 1);
             user_tag_save_on_tair = config.getInt("tair_rdb", "user_tag_save_on_tair", true);
 
             TBSYS_LOGGER.setFileName((string(tb_log_file)+string(".")+to_string(getpid())).c_str(),true);
-            TBSYS_LOGGER.setLogLevel("DEBUG");
+            TBSYS_LOGGER.setLogLevel(tb_log_level);
 
             //g_tair.set_timeout(5000);
             g_tair.startup(master_addr,slave_addr,group_name);
