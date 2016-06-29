@@ -97,7 +97,7 @@ namespace user_map
 
     void update_mac_location_time(int mall_id, unsigned long mac, std::time_t time);
 
-    // maintain key LOCATION.UPDATE.TIME:mall_id
+    // maintain key LOCATION.UPDATE.TIME:date_str:mall_id
 
     void update_location_update_time(int mall_id, unsigned long mac, std::time_t time);
 

@@ -34,9 +34,10 @@ namespace ad_map
   int tair_namespace;
   int slice_x;
   int slice_y;
-
-
   const char * tb_log_file;
+  const char * tb_log_level;
+
+
 
   void ad_map_init()
   {
@@ -56,9 +57,10 @@ namespace ad_map
       tair_namespace=config.getInt("tair_rdb","namespace",0);
 
       tb_log_file=config.getString("tair_rdb","log_file",NULL);
+      tb_log_level = config.getString("tair_rdb", "log_level", "DEBUG");
 
       TBSYS_LOGGER.setFileName((string(tb_log_file)+string(".")+to_string(getpid())).c_str(),true);
-      TBSYS_LOGGER.setLogLevel("DEBUG");
+      TBSYS_LOGGER.setLogLevel(tb_log_level);
 
       //g_tair.set_timeout(5000);
       g_tair.startup(master_addr,slave_addr,group_name); 

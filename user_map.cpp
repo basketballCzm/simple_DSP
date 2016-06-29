@@ -50,6 +50,7 @@ namespace user_map
     const char * query_user_id_sql;
     const char * common_sql;
     static const char * tb_log_file;
+    const char * tb_log_level;
 
     std::shared_ptr<pqxx::connection> conn;
 
@@ -77,6 +78,7 @@ namespace user_map
             tair_namespace  = config.getInt("tair_rdb", "namespace", 0);
 
             tb_log_file      = config.getString("tair_rdb", "log_file", NULL);
+            tb_log_level      = config.getString("tair_rdb", "log_level", "DEBUG");
             max_duration_gap = config.getInt("user_map", "max_duration_gap", 120);
             max_in_shop_gap = config.getInt("user_map", "max_in_shop_gap", 300);
 
@@ -90,11 +92,12 @@ namespace user_map
             query_user_id_sql       = config.getString("user_map", "query_user_id_sql", NULL);
             common_sql       = config.getString("user_map", "common_sql", NULL);
 
+
             check_vip = config.getInt("tair_rdb", "check_vip", 1);
             user_tag_save_on_tair = config.getInt("tair_rdb", "user_tag_save_on_tair", true);
 
             TBSYS_LOGGER.setFileName((string(tb_log_file)+string(".")+to_string(getpid())).c_str(),true);
-            TBSYS_LOGGER.setLogLevel("DEBUG");
+            TBSYS_LOGGER.setLogLevel(tb_log_level);
 
             //g_tair.set_timeout(5000);
             g_tair.startup(master_addr,slave_addr,group_name);
@@ -178,6 +181,7 @@ namespace user_map
 
         return tair_get(g_tair,tair_namespace,key,default_v);
     }
+
 
     inline void user_duration_add(const int user_id,const int mall_id,
         const time_t t_pre_time,const time_t t_now)
@@ -304,25 +308,14 @@ namespace user_map
         TBSYS_LOG(DEBUG, "user_map::user_add() enter mac=%ld,x=%f,y=%f,z=%f",mac,x,y,z); 
         //printf("user_map::user_add() enter mac=%d,x=%f,y=%f,z=%f",mac,x,y,z);
         time_t t_now=time(0);
-        
         tair_set_user_prop<float>(mall_id,mac,"x",x);
         tair_set_user_prop<float>(mall_id,mac,"y",y);
         if(z!=INT_MIN)
             tair_set_user_prop<int>(mall_id,mac,"z",z);
         const time_t &t_pre_time = tair_get_user_prop<time_t>(mall_id,mac,"time",0);
         tair_set_user_prop<time_t>(mall_id,mac,"time",t_now);
-
-        stringstream ss_key,ss_value;
-        ss_key<<"location.update.time:"<<mall_id;
-        ss_value<<mac;
-        tair::common::data_entry key(ss_key.str().c_str(),ss_key.str().size()+1,true);
-        tair::common::data_entry value(ss_value.str().c_str(),ss_value.str().size()+1,true);
-        double score=t_now;
-        int ret=g_tair.zadd(tair_namespace,key,score,value,0,0);
-        cout<<"zadd ns="<<tair_namespace<<",key="<<key.get_data()<<",size="
-            <<key.get_size()<<",value="<<value.get_data()<<",score="<<setprecision(17)<<score<<endl;
-        fprintf(stderr, "user_add tair.zadd: %d, %s\n", ret, g_tair.get_error_msg(ret));
-
+        
+        update_location_update_time(mall_id,mac,t_now);
         user_location_log_add(mac,x,y,z,kafka_offset,mall_id,t_now);
 
         int user_id = user_get_id(mac);
@@ -364,9 +357,11 @@ namespace user_map
         user_map_init(); 
 
         TBSYS_LOG(DEBUG, "user_list_all() enter");
-        stringstream ss_key;
-        ss_key<<"location.update.time:"<<mall_id;
-        tair::common::data_entry key(ss_key.str().c_str(),ss_key.str().size()+1,true);
+
+        tair::common::data_entry key;
+        time_t t_now=time(0);
+        const string & s_date=get_date_str(t_now);
+        get_data_entry(key,"location.update.time:",s_date,":",mall_id);
         
         vector <tair::common::data_entry *> vals;
         vector <double> scores;
@@ -687,7 +682,9 @@ namespace user_map
         }
         else
         {
-            get_data_entry(key, "location.update.time:", mall_id);
+            time_t t_now=time(0);
+            const string & s_date=get_date_str(t_now);
+            get_data_entry(key,"location.update.time:",s_date,":",mall_id);
         }
         std::vector<std::string> users;
         TBSYS_LOG(DEBUG, "user_list() zrangebyscore key=%s",key.get_data());
@@ -766,10 +763,10 @@ namespace user_map
     void update_location_update_time(int mall_id, unsigned long mac, std::time_t time)
     {
         tair::common::data_entry key;
-        get_data_entry(key, "location.update.time:", mall_id);
+        const string & s_date=get_date_str(time);
+        get_data_entry(key,"location.update.time:",s_date,":",mall_id);
         tair::common::data_entry value;
         get_data_entry(value, mac);
-
         g_tair.zadd(tair_namespace, key, (double)time, value, 0, 0);
     }
 }
