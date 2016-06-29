@@ -234,7 +234,9 @@ TEST_F(UserMapTest, RemoveKeys)
     cout<<"sql executed:"<<exec(cmd.c_str())<<endl;
 
     tair::common::data_entry key;
-    get_data_entry(key,"location.update.time:",mall_id);
+    time_t t_now=time(0);
+    const string & s_date=get_date_str(t_now);
+    get_data_entry(key,"location.update.time:",s_date,":",mall_id);
     saved_keys.push_back(key);
     get_data_entry(key,"location:",mall_id,":",mac,":time");
     saved_keys.push_back(key);
