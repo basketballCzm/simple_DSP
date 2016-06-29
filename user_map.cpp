@@ -78,7 +78,7 @@ namespace user_map
             tair_namespace  = config.getInt("tair_rdb", "namespace", 0);
 
             tb_log_file      = config.getString("tair_rdb", "log_file", NULL);
-            tb_log_level      = config.getString("tair_rdb", "log_level", NULL);
+            tb_log_level      = config.getString("tair_rdb", "log_level", "DEBUG");
             max_duration_gap = config.getInt("user_map", "max_duration_gap", 120);
             max_in_shop_gap = config.getInt("user_map", "max_in_shop_gap", 300);
 
