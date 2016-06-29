@@ -313,8 +313,6 @@ namespace user_map
         tair_set_user_prop<time_t>(mall_id,mac,"time",t_now);
         
         update_location_update_time(mall_id,mac,t_now);
-        fprintf(stderr, "user_add tair.zadd: %d, %s\n", ret, g_tair.get_error_msg(ret));
-
         user_location_log_add(mac,x,y,z,kafka_offset,mall_id,t_now);
 
         int user_id = user_get_id(mac);
