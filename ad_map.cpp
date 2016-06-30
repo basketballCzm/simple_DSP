@@ -194,9 +194,9 @@ namespace ad_map
   bool check_time_range(const int mall_id, const time_t time, const int ad_group_id){
     tair::common::data_entry key;
     get_data_entry(key,"ad.group:",mall_id,":",ad_group_id,":market.start");
-    string s_start (tair_get<string>(g_tair, mall_id, key,"").c_str());
+    string s_start (tair_get<string>(g_tair, tair_namespace, key,"").c_str());
     get_data_entry(key,"ad.group:",mall_id,":",ad_group_id,":market.end");
-    string s_start (tair_get<string>(g_tair, mall_id, key,"").c_str());
+    string s_start (tair_get<string>(g_tair, tair_namespace, key,"").c_str());
 
     if(s_start.empty() || s_end.empty()){
       return true;
@@ -241,6 +241,11 @@ namespace ad_map
 
     for(vector< int>::iterator it=ad_group_list.begin();it!=ad_group_list.end();++it)
     {
+      //filter by valid flag
+      get_data_entry(key,"ad.group:",mall_id,":",*it,":valid");
+      if(tair_get<int>(g_tair,tair_namespace,key,1)==0)
+        continue;
+
       //filter by timerange
       time_t t_now=time(0);
       if(check_time_range(mall_id,t_now,*it)==false ||check_cron_time_set(mall_id,t_now,*it)==false)
