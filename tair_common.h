@@ -13,7 +13,7 @@
 
 using namespace std;
 
-inline std::string hexStr(char *data, int len)
+inline std::string hexStr(const char *data, int len)
 {
 	std::stringstream ss;
 	ss<<std::hex;
