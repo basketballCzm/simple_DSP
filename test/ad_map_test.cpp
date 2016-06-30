@@ -30,6 +30,7 @@ namespace ad_map{
   void get_ad_group_set_of_location(const int mall_id, const UserPosition &pos, std::vector<int> &ad_group_set);
   double get_eCPM(const int mall_id,const int ad_group_id, int &next_ad_id);
   extern tair::tair_client_api g_tair;
+  bool check_time_range(const int mall_id, const time_t time, const int ad_group_id);
 }
 class AdMapTest : public testing::Test
 {
@@ -126,6 +127,19 @@ TEST_F(AdMapTest,UserLabelSet)
   vector<string> user_label_set;
   tair_hgetall<string>(ad_map::g_tair,nm,key,user_label_set);
   EXPECT_EQ(user_label_set.size(),3);
+}
+
+TEST_F(AdMapTest,CheckTimeRange)
+{
+  time_t t=1467056789;
+  EXPECT_TRUE(check_time_range(mall_id,t,5));
+  t=1467056788;
+  EXPECT_FALSE(check_time_range(mall_id,t,5));
+  t=1467856789;
+  EXPECT_TRUE(check_time_range(mall_id,t,5));
+  t=1467866789;
+  EXPECT_FALSE(check_time_range(mall_id,t,5));
+
 }
 
 TEST_F(AdMapTest,AdRequest)
