@@ -196,7 +196,7 @@ namespace ad_map
     get_data_entry(key,"ad.group:",mall_id,":",ad_group_id,":market.start");
     string s_start (tair_get<string>(g_tair, tair_namespace, key,"").c_str());
     get_data_entry(key,"ad.group:",mall_id,":",ad_group_id,":market.end");
-    string s_start (tair_get<string>(g_tair, tair_namespace, key,"").c_str());
+    string s_end   (tair_get<string>(g_tair, tair_namespace, key,"").c_str());
 
     if(s_start.empty() || s_end.empty()){
       return true;
