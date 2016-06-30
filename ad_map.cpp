@@ -194,10 +194,13 @@ namespace ad_map
   bool check_time_range(const int mall_id, const time_t time, const int ad_group_id){
     tair::common::data_entry key;
     get_data_entry(key,"ad.group:",mall_id,":",ad_group_id,":market.start");
-    string s_start = tair_get<string>(g_tair, mall_id, key,"0");
+    string s_start = tair_get<string>(g_tair, mall_id, key,"");
     get_data_entry(key,"ad.group:",mall_id,":",ad_group_id,":market.end");
-    string s_end = tair_get<string>(g_tair, mall_id, key,"4294967295");
+    string s_end = tair_get<string>(g_tair, mall_id, key,"");
 
+    if(s_start.empty() || s_end.empty()){
+      return true;
+    }
     long long start=stoll(s_start);
     long long end=stoll(s_end);
     if(time >= start && time <= end) {
