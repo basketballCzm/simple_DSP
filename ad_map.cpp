@@ -201,8 +201,15 @@ namespace ad_map
     if(s_start.empty() || s_end.empty()){
       return true;
     }
-    long long start=stoll(s_start);
-    long long end=stoll(s_end);
+    long long start,end;
+    try {
+      start=stoll(s_start);
+      end=stoll(s_end);
+    } catch(std::exception& e) {
+      TBSYS_LOG(DEBUG,"check_time_range() stoll() error: %s, s_start=%s,s_end=%s",e.what(),s_start.c_str(),s_end.c_str());
+      return true;
+    }
+    
     if(time >= start && time <= end) {
       return true;
     }else{
