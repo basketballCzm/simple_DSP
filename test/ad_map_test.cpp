@@ -31,6 +31,7 @@ namespace ad_map{
   double get_eCPM(const int mall_id,const int ad_group_id, int &next_ad_id);
   extern tair::tair_client_api g_tair;
   bool check_time_range(const int mall_id, const time_t time, const int ad_group_id);
+  bool check_market_shop(const int user_id, const int group_id, const int mall_id);
 }
 class AdMapTest : public testing::Test
 {
@@ -140,6 +141,22 @@ TEST_F(AdMapTest,CheckTimeRange)
   t=1467866789;
   EXPECT_FALSE(check_time_range(mall_id,t,5));
 
+}
+
+TEST_F(AdMapTest, CheckMarketShop)
+{
+  int mac=12345678;
+  int user_id=user_map::user_get_id(mac);
+  int group_id=5;
+  int shop_id=123456;
+  time_t t_now=time(0);
+
+  EXPECT_FALSE(check_market_shop(user_id,group_id,mall_id));
+  EXPECT_FALSE(check_market_shop(0,group_id,mall_id));
+  EXPECT_TRUE(check_market_shop(user_id,4,mall_id));
+  user_map::update_shopid_of_user_location(user_id,shop_id,t_now);
+  //TODO clean up key, "user:",s_date,":",user_id,":location.shop_id"
+  EXPECT_TRUE(check_market_shop(user_id,group_id,mall_id));
 }
 
 TEST_F(AdMapTest,AdRequest)

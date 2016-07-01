@@ -170,15 +170,15 @@ describe('ad_map.test.js', function () {
 
   it("ad_map insert test data ad.group should be ok!",function(done){
        var test_entry_list=[
-        [1,1.0,0.01,23,1,[1,2,7],['label1','label2', 'label3'],"",""],
-        [2,1.1,0.02,23,1,[3],['label1','label3', 'label6'],"",""],
-        [3,1.2,0.016,23,1,[4],['label3','label4'],"",""],
-        [4,1.4,0.014,28,1,[1,2,5],['label4','label5'],"",""],
-        [5,1.5,0.013,28,1,[],['label3','label6'],"1467056789","1467856789"],
-        [6,1.6,0.011,28,1,[6],['label4','label7'],"",""],
+        [1,1.0,0.01,23,1,[1,2,7],['label1','label2', 'label3'],"","",[]],
+        [2,1.1,0.02,23,1,[3],['label1','label3', 'label6'],"","",[]],
+        [3,1.2,0.016,23,1,[4],['label3','label4'],"","",[]],
+        [4,1.4,0.014,28,1,[1,2,5],['label4','label5'],"","",[]],
+        [5,1.5,0.013,28,1,[],['label3','label6'],"1467056789","1467856789",[123456,123457]],
+        [6,1.6,0.011,28,1,[6],['label4','label7'],"","",[]],
       ]
       var prop_list=["click.price","show.price",
-        "space","valid","ad.set","target.label.set","market.start","market.end"
+        "space","valid","ad.set","target.label.set","market.start","market.end",,"market.shop.set"
       ]
 
       var count=0

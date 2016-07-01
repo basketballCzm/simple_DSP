@@ -214,7 +214,7 @@ namespace ad_map
   bool check_market_shop(const int user_id, const int group_id, const int mall_id){
     vector<int> shop_id_list;
     tair::common::data_entry key;
-    get_data_entry(key,"ad.group:",mall_id,":",group_id,":market.shop.place");
+    get_data_entry(key,"ad.group:",mall_id,":",group_id,":market.shop.set");
     tair_smembers<int>(g_tair,tair_namespace,key,shop_id_list);
     if(shop_id_list.size()>0) {
       if(user_id>0){
