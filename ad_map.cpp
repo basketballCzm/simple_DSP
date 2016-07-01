@@ -220,7 +220,7 @@ namespace ad_map
       if(user_id>0){
         int shop_id=user_map::get_shopid_of_user_location(user_id);
         if(shop_id>0) {
-          for(vector< int>::iterator it;it!=shop_id_list.end();++it) {
+          for(vector< int>::iterator it=shop_id_list.begin();it!=shop_id_list.end();++it) {
             if(shop_id==*it) {
               return true;
             }
