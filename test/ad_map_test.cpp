@@ -204,6 +204,6 @@ TEST_F(AdMapTest, RemoveKeys)
     for(vector<tair::common::data_entry>::iterator it= saved_keys.begin(); it != saved_keys.end(); ++it)
     {
         cout<<"remove key:"<<it->get_data()<<endl;
-        user_map::g_tair.remove(nm,*it);
+        ad_map::g_tair.remove(nm,*it);
     }
 }
