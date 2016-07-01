@@ -50,6 +50,8 @@ protected:
     static vector<tair::common::data_entry> saved_keys;
 };
 
+vector<tair::common::data_entry> AdMapTest::saved_keys;
+
 TEST_F(AdMapTest,getAdGroupSetOfSpace)
 {
   int space_id=23;
