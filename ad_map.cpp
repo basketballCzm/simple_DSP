@@ -211,6 +211,27 @@ namespace ad_map
 
   }
 
+  bool check_market_shop(const int user_id, const int group_id, const int mall_id){
+    vector<int> shop_id_list;
+    tair::common::data_entry key;
+    get_data_entry(key,"ad.group:",mall_id,":",group_id,":market.shop.place");
+    tair_smembers<int>(g_tair,tair_namespace,key,shop_id_list);
+    if(shop_id_list.size()>0) {
+      if(user_id>0){
+        int shop_id=user_map::get_shopid_of_user_location(user_id);
+        if(shop_id>0) {
+          for(vector< int>::iterator it;it!=shop_id_list.end();++it) {
+            if(shop_id==*it) {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    }
+    return true;
+  }
+
   void bidding(Json::Value &ret, const UserPosition &pos, const int user_id, const int space_id, const int mall_id,const int n)
   {
     TBSYS_LOG(DEBUG, "enter ad_map::bidding() namespace=%d", tair_namespace);   
@@ -223,24 +244,30 @@ namespace ad_map
     get_ad_group_set_of_space(mall_id,space_id, ad_group_set_of_space);
     TBSYS_LOG(DEBUG,"ad_map::bidding() ad_group_set_of_space.size()=%d\n",ad_group_set_of_space.size());
 
-    vector< int>  ad_group_set_of_location;
-    get_ad_group_set_of_location(mall_id,pos, ad_group_set_of_location);
-    TBSYS_LOG(DEBUG,"ad_map::bidding() ad_group_set_of_location.size()=%d\n",ad_group_set_of_location.size());
-
     vector< int> ad_group_list;
-    set_intersection(ad_group_set_of_space.begin(),ad_group_set_of_space.end(),
-        ad_group_set_of_location.begin(),ad_group_set_of_location.end(),back_inserter(ad_group_list));
-    TBSYS_LOG(DEBUG,"ad_map::bidding() ad_group_list.size()=%d\n",ad_group_list.size());
+    if(user_id>0){
+      //filter by location
+      vector< int>  ad_group_set_of_location;
+      get_ad_group_set_of_location(mall_id,pos, ad_group_set_of_location);
+      TBSYS_LOG(DEBUG,"ad_map::bidding() ad_group_set_of_location.size()=%d\n",ad_group_set_of_location.size());
+      set_intersection(ad_group_set_of_space.begin(),ad_group_set_of_space.end(),
+          ad_group_set_of_location.begin(),ad_group_set_of_location.end(),back_inserter(ad_group_list));
+      TBSYS_LOG(DEBUG,"ad_map::bidding() ad_group_list.size()=%d\n",ad_group_list.size());
+    }else{
+      ad_group_list=ad_group_set_of_space;
+    }
 
     vector<string> user_label_set;
-    if(user_id>0)
-    {
+    if(user_id>0) {
       get_data_entry(key,"user:",user_id,":label.set");
       tair_hgetall<string>(g_tair,tair_namespace,key,user_label_set);
     }
 
-    for(vector< int>::iterator it=ad_group_list.begin();it!=ad_group_list.end();++it)
-    {
+    for(vector< int>::iterator it=ad_group_list.begin();it!=ad_group_list.end();++it) {
+      //filter by market shop
+      if(!check_market_shop(user_id,*it,mall_id))
+        continue;
+
       //filter by valid flag
       get_data_entry(key,"ad.group:",mall_id,":",*it,":valid");
       if(tair_get<int>(g_tair,tair_namespace,key,1)==0)
