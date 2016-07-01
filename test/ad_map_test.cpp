@@ -47,6 +47,7 @@ protected:
     }
     const int mall_id=2;
     const int nm=2;
+    static vector<tair::common::data_entry> saved_keys;
 };
 
 TEST_F(AdMapTest,getAdGroupSetOfSpace)
@@ -150,12 +151,15 @@ TEST_F(AdMapTest, CheckMarketShop)
   int group_id=5;
   int shop_id=123456;
   time_t t_now=time(0);
+  const string & s_date=get_date_str(t_now);
+  tair::common::data_entry key;
+  get_data_entry(key,"user:",s_date,":",user_id,":location.shop_id");
+  saved_keys.push_back(key);
 
   EXPECT_FALSE(check_market_shop(user_id,group_id,mall_id));
   EXPECT_FALSE(check_market_shop(0,group_id,mall_id));
   EXPECT_TRUE(check_market_shop(user_id,4,mall_id));
   user_map::update_shopid_of_user_location(user_id,shop_id,t_now);
-  //TODO clean up key, "user:",s_date,":",user_id,":location.shop_id"
   EXPECT_TRUE(check_market_shop(user_id,group_id,mall_id));
 }
 
@@ -192,4 +196,14 @@ TEST_F(AdMapTest,AdClick)
   int counter2=std::atoi(s_counter.c_str());
   cout<<"counter2="<<counter2;
   EXPECT_EQ(1,counter2-counter1);
+}
+
+
+TEST_F(AdMapTest, RemoveKeys)
+{
+    for(vector<tair::common::data_entry>::iterator it= saved_keys.begin(); it != saved_keys.end(); ++it)
+    {
+        cout<<"remove key:"<<it->get_data()<<endl;
+        user_map::g_tair.remove(nm,*it);
+    }
 }

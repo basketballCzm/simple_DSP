@@ -178,7 +178,7 @@ describe('ad_map.test.js', function () {
         [6,1.6,0.011,28,1,[6],['label4','label7'],"","",[]],
       ]
       var prop_list=["click.price","show.price",
-        "space","valid","ad.set","target.label.set","market.start","market.end",,"market.shop.set"
+        "space","valid","ad.set","target.label.set","market.start","market.end","market.shop.set"
       ]
 
       var count=0
