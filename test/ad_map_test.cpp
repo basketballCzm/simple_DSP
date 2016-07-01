@@ -31,6 +31,7 @@ namespace ad_map{
   double get_eCPM(const int mall_id,const int ad_group_id, int &next_ad_id);
   extern tair::tair_client_api g_tair;
   bool check_time_range(const int mall_id, const time_t time, const int ad_group_id);
+  bool check_market_shop(const int user_id, const int group_id, const int mall_id);
 }
 class AdMapTest : public testing::Test
 {
@@ -46,7 +47,10 @@ protected:
     }
     const int mall_id=2;
     const int nm=2;
+    static vector<tair::common::data_entry> saved_keys;
 };
+
+vector<tair::common::data_entry> AdMapTest::saved_keys;
 
 TEST_F(AdMapTest,getAdGroupSetOfSpace)
 {
@@ -142,6 +146,25 @@ TEST_F(AdMapTest,CheckTimeRange)
 
 }
 
+TEST_F(AdMapTest, CheckMarketShop)
+{
+  int mac=12345678;
+  int user_id=user_map::user_get_id(mac);
+  int group_id=5;
+  int shop_id=123456;
+  time_t t_now=time(0);
+  const string & s_date=get_date_str(t_now);
+  tair::common::data_entry key;
+  get_data_entry(key,"user:",s_date,":",user_id,":location.shop_id");
+  saved_keys.push_back(key);
+
+  EXPECT_FALSE(check_market_shop(user_id,group_id,mall_id));
+  EXPECT_FALSE(check_market_shop(0,group_id,mall_id));
+  EXPECT_TRUE(check_market_shop(user_id,4,mall_id));
+  user_map::update_shopid_of_user_location(user_id,shop_id,t_now);
+  EXPECT_TRUE(check_market_shop(user_id,group_id,mall_id));
+}
+
 TEST_F(AdMapTest,AdRequest)
 {
   int space_id=23;
@@ -175,4 +198,14 @@ TEST_F(AdMapTest,AdClick)
   int counter2=std::atoi(s_counter.c_str());
   cout<<"counter2="<<counter2;
   EXPECT_EQ(1,counter2-counter1);
+}
+
+
+TEST_F(AdMapTest, RemoveKeys)
+{
+    for(vector<tair::common::data_entry>::iterator it= saved_keys.begin(); it != saved_keys.end(); ++it)
+    {
+        cout<<"remove key:"<<it->get_data()<<endl;
+        ad_map::g_tair.remove(nm,*it);
+    }
 }

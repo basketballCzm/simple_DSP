@@ -769,4 +769,21 @@ namespace user_map
         get_data_entry(value, mac);
         g_tair.zadd(tair_namespace, key, (double)time, value, 0, 0);
     }
+
+    int get_shopid_of_user_location(const int user_id){
+        tair::common::data_entry key;
+        time_t t_now=time(0);
+        const string & s_date=get_date_str(t_now);
+        get_data_entry(key,"user:",s_date,":",user_id,":location.shop_id");
+        return tair_get<int>(g_tair,tair_namespace,key,0);
+    }
+
+    void update_shopid_of_user_location(const int user_id,const int shop_id,time_t time){
+        tair::common::data_entry key;
+        const string & s_date=get_date_str(time);
+        get_data_entry(key,"user:",s_date,":",user_id,":location.shop_id");
+        tair_put<int>(g_tair,tair_namespace,key,shop_id);
+        return ;
+    }
+
 }

@@ -108,4 +108,6 @@ namespace user_map
     std::string uuid();
 
     //-----------------------end gui add-----------------------------------------
+    int get_shopid_of_user_location(const int user_id);
+    void update_shopid_of_user_location(const int user_id, const int shop_id, time_t time);
 }
