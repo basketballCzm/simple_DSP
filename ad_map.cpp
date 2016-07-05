@@ -224,29 +224,32 @@ namespace ad_map
     get_data_entry(key,"ad.group:",mall_id,":",group_id,":market.shop.set");
     tair_smembers<int>(g_tair,tair_namespace,key,shop_id_list);
     if(shop_id_list.size()>0) {
-      if(user_id>0){
-        int shop_id=user_map::get_shopid_of_user_location(user_id);
-        if(shop_id>0) {
-          if(shop_id_list[0]>=0)
-          {
+      if(shop_id_list[0]>=0) {
+        if(user_id>0){
+          int shop_id=user_map::get_shopid_of_user_location(user_id);
+          if(shop_id>0) {
             for(vector< int>::iterator it=shop_id_list.begin();it!=shop_id_list.end();++it) {
               if(shop_id==*it) {
                 return true;
               }
             }
-            return false;
-          }else{
-            //reverse selection
+          }
+        }
+        return false;
+      } else {
+        //reverse selection
+        if(user_id>0){
+          int shop_id=user_map::get_shopid_of_user_location(user_id);
+          if(shop_id>0) {
             for(vector< int>::iterator it=shop_id_list.begin();it!=shop_id_list.end();++it) {
               if(-shop_id==*it) {
                 return false;
               }
             }
-            return true;
           }
         }
-      }
-      return false;
+        return true;
+      }  
     }
     return true;
   }
