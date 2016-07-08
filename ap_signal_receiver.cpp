@@ -82,7 +82,7 @@ void parse_apmac_closer_msg(const char* msg)
                 shop_vip_arrive_time_record(2, shop_id, user_id, mac,last_time, now);
             // i don't know this line do what
             update_user_arrive_time(2, shop_id, user_id, now);
-            update_shopid_of_user_location(shop_id, user_id, now);
+            update_shopid_of_user_location(user_id,shop_id, now);
 
         }
     }

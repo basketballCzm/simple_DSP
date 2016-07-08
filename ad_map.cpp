@@ -215,7 +215,6 @@ namespace ad_map
     }else{
       return false;
     }
-
   }
 
   bool check_market_shop(const int user_id, const int group_id, const int mall_id){
