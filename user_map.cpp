@@ -623,13 +623,16 @@ namespace user_map
         }
     }
 
-    void shop_vip_arrive_time_record(int mall_id, int shop_id, int user_id, unsigned long mac, std::time_t pre, std::time_t now)
+    void update_user_arrive_time(int mall_id, int shop_id, int user_id, unsigned long mac, std::time_t pre, std::time_t now, bool is_vip)
     {
         user_map_init();
         if(now -pre > max_in_shop_gap)
         {
             tair::common::data_entry key;
-            get_data_entry(key, "user.vip:", mall_id, ":", shop_id, ":arrive.time");
+            if(is_vip)
+                get_data_entry(key, "user.vip:", mall_id, ":", shop_id, ":arrive.time");
+            else    
+                get_data_entry(key, "user:", mall_id, ":", shop_id, ":arrive.time");
             tair::common::data_entry value;
             get_data_entry(value, user_id);
             int result = g_tair.zadd(tair_namespace, key, (double)now, value, 0, 0);
@@ -652,7 +655,7 @@ namespace user_map
         tair_put<std::time_t>(g_tair, tair_namespace, key, now);
     }
 
-    void update_user_arrive_time(int mall_id, int shop_id, int user_id, std::time_t now)
+/*    void update_user_arrive_time(int mall_id, int shop_id, int user_id, std::time_t now)
     {
         user_map_init();
 
@@ -668,7 +671,7 @@ namespace user_map
         {
             printf("update user arrive time failed : %d %s\n", ret, g_tair.get_error_msg(ret));
         }
-    }
+    }*/
 
     void user_list(Json::Value& list, double start, double end, int mall_id, int shop_id)
     {
