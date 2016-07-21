@@ -653,6 +653,13 @@ namespace user_map
         get_data_entry(key, "location:", mall_id, ":", shop_id, ":", mac, ":time");
 
         tair_put<std::time_t>(g_tair, tair_namespace, key, now);
+        const string & s_date=get_date_str(now);
+
+        get_data_entry(key,"location.update.time:",s_date,":",mall_id,":",shop_id);
+        tair::common::data_entry value;
+        get_data_entry(value, mac);
+        g_tair.zadd(tair_namespace, key, (double)now, value, 0, 0);
+
     }
 
 /*    void update_user_arrive_time(int mall_id, int shop_id, int user_id, std::time_t now)
@@ -678,15 +685,16 @@ namespace user_map
         TBSYS_LOG(DEBUG, "user_list() enter start=%lf,end=%lf,mall_id=%d,shop_id=%d",start,end,mall_id,shop_id);
         user_map_init();
         tair::common::data_entry key;
+        time_t t_now=time(0);
+        const string & s_date=get_date_str(t_now);
 
         if(shop_id>0)
         {
-            get_data_entry(key, "user:", mall_id, ":", shop_id, ":arrive.time");
+            //get_data_entry(key, "user:", mall_id, ":", shop_id, ":arrive.time");
+            get_data_entry(key,"location.update.time:",s_date,":",mall_id,":",shop_id);
         }
         else
         {
-            time_t t_now=time(0);
-            const string & s_date=get_date_str(t_now);
             get_data_entry(key,"location.update.time:",s_date,":",mall_id);
         }
         std::vector<std::string> users;
