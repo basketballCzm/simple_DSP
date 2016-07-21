@@ -685,6 +685,8 @@ namespace user_map
         TBSYS_LOG(DEBUG, "user_list() enter start=%lf,end=%lf,mall_id=%d,shop_id=%d",start,end,mall_id,shop_id);
         user_map_init();
         tair::common::data_entry key;
+        time_t t_now=time(0);
+        const string & s_date=get_date_str(t_now);
 
         if(shop_id>0)
         {
@@ -693,8 +695,6 @@ namespace user_map
         }
         else
         {
-            time_t t_now=time(0);
-            const string & s_date=get_date_str(t_now);
             get_data_entry(key,"location.update.time:",s_date,":",mall_id);
         }
         std::vector<std::string> users;
