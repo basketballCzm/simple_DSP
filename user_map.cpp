@@ -653,6 +653,11 @@ namespace user_map
         get_data_entry(key, "location:", mall_id, ":", shop_id, ":", mac, ":time");
 
         tair_put<std::time_t>(g_tair, tair_namespace, key, now);
+        get_data_entry(key,"location.update.time:",s_date,":",mall_id,":",shop_id);
+        tair::common::data_entry value;
+        get_data_entry(value, mac);
+        g_tair.zadd(tair_namespace, key, (double)now, value, 0, 0);
+
     }
 
 /*    void update_user_arrive_time(int mall_id, int shop_id, int user_id, std::time_t now)
@@ -681,7 +686,8 @@ namespace user_map
 
         if(shop_id>0)
         {
-            get_data_entry(key, "user:", mall_id, ":", shop_id, ":arrive.time");
+            //get_data_entry(key, "user:", mall_id, ":", shop_id, ":arrive.time");
+            get_data_entry(key,"location.update.time:",s_date,":",mall_id,":",shop_id);
         }
         else
         {
