@@ -653,6 +653,8 @@ namespace user_map
         get_data_entry(key, "location:", mall_id, ":", shop_id, ":", mac, ":time");
 
         tair_put<std::time_t>(g_tair, tair_namespace, key, now);
+        const string & s_date=get_date_str(now);
+
         get_data_entry(key,"location.update.time:",s_date,":",mall_id,":",shop_id);
         tair::common::data_entry value;
         get_data_entry(value, mac);
