@@ -310,7 +310,7 @@ namespace ad_map
 
       int next_ad_id=-1;
       double eCPM=get_eCPM(mall_id,*it,next_ad_id);
-      TBSYS_LOG(DEBUG,"ad_map::bidding() eCPM=%f\n",eCPM);
+      TBSYS_LOG(DEBUG,"ad_map::bidding() group_id=%d eCPM=%f\n",*it,eCPM);
 
       for(int j=n-1;j>=0;--j)
       {
