@@ -191,6 +191,7 @@ int main()
     openlog("adstat", LOG_PID|LOG_PERROR, LOG_LOCAL0 );
 
     FCGX_Init();
+    user_map_init();
     FCGX_Request request;
     FCGX_InitRequest(&request, 0, 0);
 

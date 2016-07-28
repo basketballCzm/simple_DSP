@@ -707,10 +707,14 @@ namespace user_map
 
         for(auto & id : users)
         {
-            unsigned long long  tmp;
-            sscanf(id.c_str(), "%llu", &tmp);
-
-            array[i++] = tmp;
+            if(i<50){
+                unsigned long long  tmp;
+                sscanf(id.c_str(), "%llu", &tmp);
+                array[i++] = tmp;
+            }else{
+                array[i++] = "and more..";
+                break;
+            }
         }
 
         list["size"] = (unsigned int)users.size();
