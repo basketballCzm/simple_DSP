@@ -304,7 +304,7 @@ namespace ad_map
       change=-change;
     get_data_entry( key,"ad.group:",mall_id,":",ad_group_id,":owner");
     const int owner_id=tair_get<int>(g_tair,tair_namespace,key,0);
-    return boost::str(boost::format(charge_ad_sql)%owner_id%type%change%s_remark.substr(0,s_remark.size()-1)%mall_id%pg_password%pg_server%pg_user%pg_database);
+    return boost::str(boost::format(charge_ad_sql)%owner_id%"adv_consume"%change%s_remark.substr(0,s_remark.size()-1)%mall_id%pg_password%pg_server%pg_user%pg_database);
   }
 
   inline void charge_ad(int mall_id, int ad_id, int ad_group_id, string type){
