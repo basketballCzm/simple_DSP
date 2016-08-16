@@ -169,7 +169,7 @@ TEST_F(AdMapTest, CheckMarketShop)
 TEST_F(AdMapTest, getChargeCmd){
   int ad_id=4;
   int ad_group_id=3;
-  string cmd="echo 'insert into public.fund_queue(owner,type,change,remark,mall_id,transaction_time,checked,code,create_time,update_time) values(97,'\\''show'\\'',-1.2,'\\''{\"ad_group_id\":3,\"ad_id\":4,\"charge_type\":\"show\",\"engine_id\":1}'\\'',2,now(),0,0,now(),now())'";
+  string cmd="echo 'insert into public.fund_queue(owner,type,change,remark,mall_id,transaction_time,checked,code,create_time,update_time) values(97,'\\''adv_consume'\\'',-1.2,'\\''{\"ad_group_id\":3,\"ad_id\":4,\"charge_type\":\"click\",\"engine_id\":1}'\\'',2,now(),0,0,now(),now())'";
   int len=cmd.size();
   EXPECT_STREQ(ad_map::get_charge_cmd(mall_id,ad_id,ad_group_id,"click").substr(0,len).c_str(),cmd.c_str());
 }
