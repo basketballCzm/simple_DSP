@@ -287,7 +287,7 @@ namespace ad_map
     return 1;
   }
 
-  inline string & get_charge_cmd(int mall_id, int ad_id, int ad_group_id, string type){
+  inline const string & get_charge_cmd(int mall_id, int ad_id, int ad_group_id, string type){
     Json::Value remark;
     remark["engine_id"]=get_engine_id();
     remark["ad_id"]=ad_id;
@@ -302,7 +302,7 @@ namespace ad_map
       change=-change;
     get_data_entry( key,"ad.group:",mall_id,":",ad_group_id,":owner");
     const int owner_id=tair_get<int>(g_tair,tair_namespace,key,0);
-    return boost::str(boost::format(charge_ad_sql)%mall_id%type%change%writer.write(remark)%pg_password%pg_server%pg_user%pg_database);
+    return boost::str(boost::format(charge_ad_sql)%owner_id%type%change%writer.write(remark)%mall_id%pg_password%pg_server%pg_user%pg_database);
   }
 
   inline void charge_ad(int mall_id, int ad_id, int ad_group_id, string type){
