@@ -293,7 +293,9 @@ namespace ad_map
     remark["ad_id"]=ad_id;
     remark["ad_group_id"]=ad_group_id;
     remark["charge_type"]=type;
-    Json::StyledWriter writer;
+    Json::FastWriter writer;
+    const string & s_remark =writer.write(remark);
+
     tair::common::data_entry key;
 
     get_data_entry( key,"ad.group:",mall_id,":",ad_group_id,":",type,".price");
@@ -302,14 +304,14 @@ namespace ad_map
       change=-change;
     get_data_entry( key,"ad.group:",mall_id,":",ad_group_id,":owner");
     const int owner_id=tair_get<int>(g_tair,tair_namespace,key,0);
-    return boost::str(boost::format(charge_ad_sql)%owner_id%type%change%writer.write(remark)%mall_id%pg_password%pg_server%pg_user%pg_database);
+    return boost::str(boost::format(charge_ad_sql)%owner_id%type%change%s_remark.substr(0,s_remark.size()-1)%mall_id%pg_password%pg_server%pg_user%pg_database);
   }
 
   inline void charge_ad(int mall_id, int ad_id, int ad_group_id, string type){
     const string &cmd =get_charge_cmd(mall_id, ad_id, ad_group_id, type);
-    TBSYS_LOG(DEBUG, "charge_ad() PG_CMD:" , cmd.c_str() );
+    TBSYS_LOG(DEBUG, "charge_ad() PG_CMD:%s" , cmd.c_str() );
     string res = exec(cmd.c_str());
-    TBSYS_LOG(DEBUG, "charge_ad() PG_OUT:" , res.c_str() );
+    TBSYS_LOG(DEBUG, "charge_ad() PG_OUT:%s" , res.c_str() );
   }
 
   void bidding(Json::Value &ret, const UserPosition &pos, const int user_id, const int space_id, const int mall_id,const int n)
