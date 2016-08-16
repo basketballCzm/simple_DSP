@@ -287,7 +287,7 @@ namespace ad_map
     return 1;
   }
 
-  inline const string & get_charge_cmd(int mall_id, int ad_id, int ad_group_id, string type){
+  inline string get_charge_cmd(int mall_id, int ad_id, int ad_group_id, string type){
     Json::Value remark;
     remark["engine_id"]=get_engine_id();
     remark["ad_id"]=ad_id;
