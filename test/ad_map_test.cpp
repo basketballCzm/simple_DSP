@@ -32,6 +32,7 @@ namespace ad_map{
   extern tair::tair_client_api g_tair;
   bool check_time_range(const int mall_id, const time_t time, const int ad_group_id);
   bool check_market_shop(const int user_id, const int group_id, const int mall_id);
+  inline string & get_charge_cmd(int mall_id, int ad_id, int ad_group_id, string type);
 }
 class AdMapTest : public testing::Test
 {
@@ -164,6 +165,15 @@ TEST_F(AdMapTest, CheckMarketShop)
   user_map::update_shopid_of_user_location(user_id,shop_id,t_now);
   EXPECT_TRUE(check_market_shop(user_id,group_id,mall_id));
 }
+
+TEST_F(AdMapTest, getChargeCmd){
+  int ad_id=4;
+  int ad_group_id=3;
+  string cmd="echo 'insert into public.fund_queue(owner,type,change,remark,mall_id,transaction_time,checked,code,create_time,update_time) values(97,\\'click\\',2,\\'{ \"engine_id\":\"1\" ,\n\"ad_id\" : \"4\" \n }\\'',2,now(),0,0,now(),now())' |  PGPASSWORD";
+  string len=cmd.size();
+  EXPECT_STREQ(ad_map::get_charge_cmd(mall_id,ad_id,ad_group_id,"click").substr(0,len),cmd);
+}
+
 
 TEST_F(AdMapTest,AdRequest)
 {

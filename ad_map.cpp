@@ -36,6 +36,7 @@ namespace ad_map
   int slice_y;
   const char * tb_log_file;
   const char * tb_log_level;
+  const char * charge_ad_sql;
 
 
 
@@ -58,6 +59,7 @@ namespace ad_map
 
       tb_log_file=config.getString("tair_rdb","log_file",NULL);
       tb_log_level = config.getString("tair_rdb", "log_level", "DEBUG");
+      charge_ad_sql = config.getString("ad_map", "charge_ad_sql", NULL);
 
       TBSYS_LOGGER.setFileName((string(tb_log_file)+string(".")+to_string(getpid())).c_str(),true);
       TBSYS_LOGGER.setLogLevel(tb_log_level);
@@ -253,6 +255,52 @@ namespace ad_map
     return true;
   }
 
+  inline void increase_ad_time (int mall_id, int show_ad_id,string type){
+    tair::common::data_entry key;
+    get_data_entry(key,"ad:",mall_id,":",show_ad_id,":",type,".counter");
+    int show_counter;
+    g_tair.incr(tair_namespace,key,1,&show_counter);
+  }
+
+  inline Json::Value & get_ad(int mall_id,int show_ad_group_id ,int show_ad_id){
+    tair::common::data_entry key;
+    Json::Value ad_node;
+    get_data_entry(key,"ad:",mall_id,":",show_ad_id,":content");
+    ad_node["content"]=tair_get<string>(g_tair,tair_namespace,key,"");
+    get_data_entry(key,"ad:",mall_id,":",show_ad_id,":jump.url");
+    ad_node["jump_url"]=tair_get<string>(g_tair,tair_namespace,key,"");
+    ad_node["id"]=show_ad_id;
+    ad_node["group_id"]=show_ad_group_id;  
+    return ad_node;
+  }
+  inline int get_engine_id(){
+    return 1;
+  }
+
+  inline string & get_charge_cmd(int mall_id, int ad_id, int ad_group_id, string type){
+    Json::Value remark;
+    remark["engine_id"]=get_engine_id();
+    remark["ad_id"]=ad_id;
+    remark["ad_group_id"]=ad_group_id;
+    remark["type"]=type;
+    Json::StyledWriter writer;
+
+    get_data_entry( key,"ad.group:",mall_id,":",ad_group_id,":",types,".price");
+    const double & change=tair_get<double>(g_tair,tair_namespace,key,0);
+    if(change>=0)
+      change=-change;
+    get_data_entry( key,"ad.group:",mall_id,":",ad_group_id,":owner");
+    const int owner_id=tair_get<int>(g_tair,tair_namespace,key,0);
+    return str(boost::format(charge_ad_sql)%mall_id%type%change%writer.write(ret)%pg_password%pg_server%pg_user%pg_database);
+  }
+
+  inline void charge_ad(int mall_id, int ad_id, int ad_group_id, string type){
+    const string &cmd =get_charge_cmd(mall_id, ad_id, ad_group_id, type);
+    TBSYS_LOG(DEBUG, "charge_ad() PG_CMD:" , cmd );
+    string res = exec(cmd.c_str());
+    TBSYS_LOG(DEBUG, "charge_ad() PG_OUT:" , cmd );
+  }
+
   void bidding(Json::Value &ret, const UserPosition &pos, const int user_id, const int space_id, const int mall_id,const int n)
   {
     TBSYS_LOG(DEBUG, "enter ad_map::bidding() namespace=%d", tair_namespace);   
@@ -342,24 +390,13 @@ namespace ad_map
     int length=0;
     for(int i=0;i<n;++i)
     {
-      if(highest_eCPM_list[i]!=0)
-      {
+      if(highest_eCPM_list[i]!=0) {
         length++;
-        Json::Value ad_node;
         int show_ad_group_id=highest_ad_group_list[i];
         int show_ad_id=next_ad_list[i];
-        get_data_entry(key,"ad:",mall_id,":",show_ad_id,":content");
-        ad_node["content"]=tair_get<string>(g_tair,tair_namespace,key,"");
-        get_data_entry(key,"ad:",mall_id,":",show_ad_id,":jump.url");
-        ad_node["jump_url"]=tair_get<string>(g_tair,tair_namespace,key,"");
-        ad_node["id"]=show_ad_id;
-        ad_node["group_id"]=show_ad_group_id;
-        ret["ad"].append(ad_node);
-
-        //increase show time
-        get_data_entry(key,"ad:",mall_id,":",show_ad_id,":show.counter");
-        int show_counter;
-        g_tair.incr(tair_namespace,key,1,&show_counter);
+        ret["ad"].append(get_ad(mall_id,show_ad_group_id,show_ad_id));
+        increase_ad_time(mall_id,show_ad_id,"show");
+        charge_ad(mall_id,show_ad_id,owner_id,"show",-show_price);
       }
       else
         break;
@@ -425,10 +462,8 @@ namespace ad_map
       return -1;
     }
 
-    //increase show time
-    get_data_entry(key,"ad:",mall_id,":",ad_id,":click.counter");
-    int counter;
-    g_tair.incr(tair_namespace,key,1,&counter);
+    increase_ad_time(mall_id, ad_id, "click");
+    charge_ad(mall_id, ad_id, group_id, "click");
     ret["result"]="ok";
     return 0;
   }   
