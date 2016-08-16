@@ -11,6 +11,7 @@
 #include "user_map.h"
 #include "cron_timing.h"
 #include <string>
+#include "boost/format.hpp"
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -37,6 +38,10 @@ namespace ad_map
   const char * tb_log_file;
   const char * tb_log_level;
   const char * charge_ad_sql;
+  const char * pg_server;
+  const char * pg_user;
+  const char * pg_password;
+  const char * pg_database;
 
 
 
@@ -60,6 +65,11 @@ namespace ad_map
       tb_log_file=config.getString("tair_rdb","log_file",NULL);
       tb_log_level = config.getString("tair_rdb", "log_level", "DEBUG");
       charge_ad_sql = config.getString("ad_map", "charge_ad_sql", NULL);
+      pg_server   = config.getString("user_map", "pg_server", NULL);
+      pg_user     = config.getString("user_map", "pg_user", NULL);
+      pg_database = config.getString("user_map", "pg_database", NULL);
+      pg_password = config.getString("user_map", "pg_password", NULL);
+
 
       TBSYS_LOGGER.setFileName((string(tb_log_file)+string(".")+to_string(getpid())).c_str(),true);
       TBSYS_LOGGER.setLogLevel(tb_log_level);
@@ -282,23 +292,24 @@ namespace ad_map
     remark["engine_id"]=get_engine_id();
     remark["ad_id"]=ad_id;
     remark["ad_group_id"]=ad_group_id;
-    remark["type"]=type;
+    remark["charge_type"]=type;
     Json::StyledWriter writer;
+    tair::common::data_entry key;
 
-    get_data_entry( key,"ad.group:",mall_id,":",ad_group_id,":",types,".price");
-    const double & change=tair_get<double>(g_tair,tair_namespace,key,0);
+    get_data_entry( key,"ad.group:",mall_id,":",ad_group_id,":",type,".price");
+    double change=tair_get<double>(g_tair,tair_namespace,key,0);
     if(change>=0)
       change=-change;
     get_data_entry( key,"ad.group:",mall_id,":",ad_group_id,":owner");
     const int owner_id=tair_get<int>(g_tair,tair_namespace,key,0);
-    return str(boost::format(charge_ad_sql)%mall_id%type%change%writer.write(ret)%pg_password%pg_server%pg_user%pg_database);
+    return boost::str(boost::format(charge_ad_sql)%mall_id%type%change%writer.write(remark)%pg_password%pg_server%pg_user%pg_database);
   }
 
   inline void charge_ad(int mall_id, int ad_id, int ad_group_id, string type){
     const string &cmd =get_charge_cmd(mall_id, ad_id, ad_group_id, type);
-    TBSYS_LOG(DEBUG, "charge_ad() PG_CMD:" , cmd );
+    TBSYS_LOG(DEBUG, "charge_ad() PG_CMD:" , cmd.c_str() );
     string res = exec(cmd.c_str());
-    TBSYS_LOG(DEBUG, "charge_ad() PG_OUT:" , cmd );
+    TBSYS_LOG(DEBUG, "charge_ad() PG_OUT:" , res.c_str() );
   }
 
   void bidding(Json::Value &ret, const UserPosition &pos, const int user_id, const int space_id, const int mall_id,const int n)
@@ -396,7 +407,7 @@ namespace ad_map
         int show_ad_id=next_ad_list[i];
         ret["ad"].append(get_ad(mall_id,show_ad_group_id,show_ad_id));
         increase_ad_time(mall_id,show_ad_id,"show");
-        charge_ad(mall_id,show_ad_id,owner_id,"show",-show_price);
+        charge_ad(mall_id,show_ad_id,show_ad_group_id,"show");
       }
       else
         break;
