@@ -272,7 +272,7 @@ namespace ad_map
     g_tair.incr(tair_namespace,key,1,&show_counter);
   }
 
-  inline Json::Value & get_ad(int mall_id,int show_ad_group_id ,int show_ad_id){
+  inline Json::Value get_ad(int mall_id,int show_ad_group_id ,int show_ad_id){
     tair::common::data_entry key;
     Json::Value ad_node;
     get_data_entry(key,"ad:",mall_id,":",show_ad_id,":content");
