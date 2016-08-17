@@ -238,6 +238,7 @@ namespace ad_map
       if(shop_id_list[0]>=0) {
         if(user_id>0){
           int shop_id=user_map::get_shopid_of_user_location(user_id);
+          TBSYS_LOG(DEBUG,"ad_map::check_market_shop() user:%d, shop:%d",user_id,shop_id);
           if(shop_id>0) {
             for(vector< int>::iterator it=shop_id_list.begin();it!=shop_id_list.end();++it) {
               if(shop_id==*it) {
@@ -251,6 +252,7 @@ namespace ad_map
         //reverse selection
         if(user_id>0){
           int shop_id=user_map::get_shopid_of_user_location(user_id);
+          TBSYS_LOG(DEBUG,"ad_map::check_market_shop() reverse select, user:%d, shop:%d",user_id,shop_id);
           if(shop_id>0) {
             for(vector< int>::iterator it=shop_id_list.begin();it!=shop_id_list.end();++it) {
               if(-shop_id==*it) {
@@ -333,7 +335,7 @@ namespace ad_map
       get_ad_group_set_of_location(mall_id,pos, ad_group_set_of_location);
       TBSYS_LOG(DEBUG,"ad_map::bidding() ad_group_set_of_location.size()=%d\n",ad_group_set_of_location.size());
       set_intersection(ad_group_set_of_space.begin(),ad_group_set_of_space.end(),
-          ad_group_set_of_location.begin(),ad_group_set_of_location.end(),back_inserter(ad_group_list));
+      ad_group_set_of_location.begin(),ad_group_set_of_location.end(),back_inserter(ad_group_list));
       TBSYS_LOG(DEBUG,"ad_map::bidding() ad_group_list.size()=%d\n",ad_group_list.size());
     }else{
       ad_group_list=ad_group_set_of_space;
@@ -346,11 +348,13 @@ namespace ad_map
     }
 
     for(vector< int>::iterator it=ad_group_list.begin();it!=ad_group_list.end();++it) {
+      TBSYS_LOG(DEBUG,"ad_map::bidding() loop, filter by market shop, group %d\n",*it);
       //filter by market shop
       if(!check_market_shop(user_id,*it,mall_id))
         continue;
 
       //filter by valid flag
+      TBSYS_LOG(DEBUG,"ad_map::bidding() loop, filter by valid flag, group %d\n",*it);
       get_data_entry(key,"ad.group:",mall_id,":",*it,":valid");
       if(tair_get<int>(g_tair,tair_namespace,key,1)==0)
         continue;
