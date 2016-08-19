@@ -1,4 +1,8 @@
+image: caster/wushuu_dsp
+
 before_script:
+  - aclocal
+  - automake --add-missing
   - autoconf
   - automake
   - ./configure
