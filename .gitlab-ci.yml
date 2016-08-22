@@ -8,6 +8,7 @@ stages:
   - deploy
 
 build:
+  stage: build
   script:
     - aclocal
     - automake --add-missing
@@ -18,6 +19,7 @@ build:
     - TBLIB_ROOT=/usr/local make install
 
 test:
+  stage: test
   script:
     - test/user_map_test
     - npm install
