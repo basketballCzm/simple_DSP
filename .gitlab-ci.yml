@@ -2,11 +2,6 @@ image: caster/wushuu_dsp
 variables:
   GIT_SSL_NO_VERIFY: "1"
 
-stages:
-  - build
-  - test
-  - deploy
-
 build:
   stage: build
   script:
@@ -17,20 +12,9 @@ build:
     - ./configure
     - TBLIB_ROOT=/usr/local make
     - TBLIB_ROOT=/usr/local make install
-  artifacts:
-    untracked: true
-
-
-test:
-  stage: test
-  script:
+    #test
     - test/user_map_test
     - npm install
     - mocha
-
-
-
-deploy:202:
-  stage: deploy
-  script:
+    #deploy
     - echo "TODO"
