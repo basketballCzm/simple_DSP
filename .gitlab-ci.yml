@@ -14,7 +14,7 @@ build:
     - TBLIB_ROOT=/usr/local make install
     #test
     - test/user_map_test
-    - cnpm install
+    - npm install
     - mocha
     #deploy
     - echo "TODO"
