@@ -19,7 +19,7 @@ TEST(TairCommon,GetDataEntry)
     int mall_id=3;
     float space_id=4.5;
     get_data_entry( key,"ad.space:",mall_id,":",space_id,":ad.group.set");
-    EXPECT_STREQ("ad.space:2:4.5:ad.group.set",key.get_data());
+    EXPECT_STREQ("ad.space:3:4.5:ad.group.set",key.get_data());
 }
 
 
