@@ -16,7 +16,7 @@
 TEST(TairCommon,GetDataEntry)
 {
     tair::common::data_entry key;
-    int mall_id=2;
+    int mall_id=3;
     float space_id=4.5;
     get_data_entry( key,"ad.space:",mall_id,":",space_id,":ad.group.set");
     EXPECT_STREQ("ad.space:2:4.5:ad.group.set",key.get_data());
@@ -46,7 +46,7 @@ protected:
     {
         //user_map::close();
     }
-    const int mall_id=2;
+    const int mall_id=3;
     const int nm=2;
     static vector<tair::common::data_entry> saved_keys;
 };
@@ -169,7 +169,7 @@ TEST_F(AdMapTest, CheckMarketShop)
 TEST_F(AdMapTest, getChargeCmd){
   int ad_id=4;
   int ad_group_id=3;
-  string cmd="echo 'insert into public.fund_queue(owner,type,change,remark,mall_id,transaction_time,checked,code,create_time,update_time) values(97,'\\''adv_consume'\\'',-1.2,'\\''{\"ad_group_id\":3,\"ad_id\":4,\"charge_type\":\"click\",\"engine_id\":1}'\\'',2,now(),0,0,now(),now())'";
+  string cmd="echo 'insert into public.fund_queue(owner,type,change,remark,mall_id,transaction_time,checked,code,create_time,update_time) values(97,'\\''adv_consume'\\'',-1.2,'\\''{\"ad_group_id\":3,\"ad_id\":4,\"charge_type\":\"click\",\"engine_id\":1}'\\'',3,now(),0,0,now(),now())'";
   int len=cmd.size();
   EXPECT_STREQ(ad_map::get_charge_cmd(mall_id,ad_id,ad_group_id,"click").substr(0,len).c_str(),cmd.c_str());
 }
