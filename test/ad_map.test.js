@@ -13,7 +13,7 @@ var deepcopy = require('deepcopy');
 var tair;
 var nm=2;
 var used_key={}
-var mall_id=2
+var mall_id=3
 var mall_level=1
 
 var test_user_list=[
