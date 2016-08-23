@@ -7,7 +7,7 @@
     "test": "test"
   },
   "dependencies": {
-    "node-tair-rdb": "git+ssh://git@115.28.9.186:wushuu-ads/node-tair-rdb.git"
+    "node-tair-rdb": "git+https://code.wushuu.com/wushuu-ads/node-tair-rdb.git"
   },
   "devDependencies": {},
   "scripts": {
