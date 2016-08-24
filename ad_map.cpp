@@ -112,6 +112,16 @@ namespace ad_map
     return;
   }
 
+  inline bool check_ad_valid(const int mall_id, int ad_id){
+    tair::common::data_entry key;
+    get_data_entry(key,"ad:",mall_id,":",ad_id,":valid");
+    const int valid = tair_get<int>(g_tair,tair_namespace,key,1);
+    if(valid<=0){
+      return false;
+    }else{
+      return true;
+    }
+  }
   double get_eCPM(const int mall_id,const int ad_group_id, int &next_ad_id)
   {
     tair::common::data_entry key;
@@ -131,6 +141,9 @@ namespace ad_map
     for(vector<tair::common::data_entry *>::iterator it=ad_id_set.begin();it!=ad_id_set.end();it++)
     {
       int ad_id=*( int*)((*it)->get_data());
+
+      if(!check_ad_valid(mall_id,ad_id))
+        continue;
 
       get_data_entry(key,"ad:",mall_id,":",ad_id,":show.counter");
       const string & s_show_counter=tair_get<string>(g_tair,tair_namespace,key,"0");
