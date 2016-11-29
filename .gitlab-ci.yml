@@ -17,5 +17,6 @@ build:
     - git config --global http.sslVerify false
     - npm install
     - mocha
+    - test/redisclass_test
     #deploy
     - echo "TODO"

@@ -13,7 +13,7 @@
 template<typename T>
 struct redis_identity
 {
-  typedef T type;
+    typedef T type;
 };
 
 class redis_Rdb
@@ -49,7 +49,22 @@ public:
     template <typename TL>
     inline tair::common::data_entry *get_data_entry_of_value (const TL & data)
     {
-      get_data_entry_of_value(data,redis_identity<TL>());
+        get_data_entry_of_value(data,redis_identity<TL>());
+    }
+
+    bool clean(int area,std::string key)
+    {
+        this->_reply = (redisReply*)redisCommand(this->_connect,"flushall");
+        std::string str  = this->_reply->str;
+        TBSYS_LOG(DEBUG,"set success %s",this->_reply->str);
+        if(NULL != this->_reply->str && 0 == strcmp("OK",this->_reply->str))
+        {
+            freeReplyObject(this->_reply);
+            return true;
+        }
+
+        freeReplyObject(this->_reply);
+        return false;
     }
 
 private:
@@ -155,7 +170,7 @@ int redis_Rdb::set(std::string key, T value)
 
 template<typename T>
 T redis_Rdb::get(std::string key,T default_v)
-{    
+{
     tair::common::data_entry *p_value;
     TBSYS_LOG(DEBUG,"redis: redis get %s",key.c_str());
     this->_reply = (redisReply*)redisCommand(this->_connect, "GET %s", key.c_str());
@@ -222,9 +237,9 @@ std::vector<V_TYPE>* redis_Rdb::zrange(std::string key, int min, int max, std::v
         V_TYPE value;
         stream1 >> value;
 
-/*        std::ostringstream strLog_ss;
-        strLog_ss << "redis: redis zrange" << value << std::endl;
-        TBSYS_LOG(DEBUG,"redis: redis zrange %s",strLog_ss.str().c_str());*/
+        /*        std::ostringstream strLog_ss;
+                strLog_ss << "redis: redis zrange" << value << std::endl;
+                TBSYS_LOG(DEBUG,"redis: redis zrange %s",strLog_ss.str().c_str());*/
 
         members_set.push_back(value);
     }

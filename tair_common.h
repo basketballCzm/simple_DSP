@@ -230,9 +230,9 @@ vector<V_TYPE>* tair_zrangebyscore(tair::tair_client_api & tair_instance,const i
     {
         members_set.push_back(get_value<V_TYPE>((*it)->get_data(),(*it)->get_size()));
 
-        /*std::ostringstream strLog_ss;
-        strLog_ss << "tair_common.h: tair get value: " << get_value<V_TYPE>((*it)->get_data(),(*it)->get_size())<< std::endl;
-        TBSYS_LOG(DEBUG,"get success %s",strLog_ss.str().c_str());*/
+        std::ostringstream strLog_ss;
+        strLog_ss << "tair_common.h: tair get value zrange: " << get_value<V_TYPE>((*it)->get_data(),(*it)->get_size())<< std::endl;
+        TBSYS_LOG(DEBUG,"get success %s",strLog_ss.str().c_str());
 
         delete (*it);    //为什么每个循环都要delete
     }
@@ -256,9 +256,9 @@ vector<V_TYPE>* tair_smembers(tair::tair_client_api & tair_instance,int area, co
     for(vector<tair::common::data_entry *>::iterator it=values.begin(); it!=values.end(); it++)
     {
         members_set.push_back(get_value<V_TYPE>((*it)->get_data(),(*it)->get_size()));
-        /*std::ostringstream strLog_ss;
-        strLog_ss << "tair_common.h: tair get value: " << get_value<V_TYPE>((*it)->get_data(),(*it)->get_size())<< std::endl;
-        TBSYS_LOG(DEBUG,"get success %s",strLog_ss.str().c_str());*/
+        std::ostringstream strLog_ss;
+        strLog_ss << "tair_common.h: tair get value smember : " << get_value<V_TYPE>((*it)->get_data(),(*it)->get_size())<< std::endl;
+        TBSYS_LOG(DEBUG,"get success %s",strLog_ss.str().c_str());
 
         delete (*it);
     }

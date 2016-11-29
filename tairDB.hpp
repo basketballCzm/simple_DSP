@@ -37,7 +37,7 @@ public:
     template<typename V_TYPE>
     inline tair::common::data_entry *get_data_entry_of_value (const V_TYPE & data);
 
-    int remove(int area,std::string key)
+    int clean(int area,std::string key)
     {
         TBSYS_LOG(DEBUG,"tair remove success!");
         tair::common::data_entry s_key(key.c_str(),key.size()+1,true);

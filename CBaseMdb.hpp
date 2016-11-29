@@ -33,6 +33,8 @@ public:
     template <typename V_TYPE>
     std::vector<V_TYPE>* smembers(std::string key,std::vector<V_TYPE> &members_set);
 
+    bool clean(int area,std::string key);
+
     CBaseMdb<T_db>* InitDB();
 
 };
@@ -43,6 +45,13 @@ bool CBaseMdb<T_db>::connect(std::string host, int port)
 {
     return db.connect(host,port);
 }
+
+template<typename T_db>
+bool CBaseMdb<T_db>::clean(int area,std::string key)
+{
+    return db.clean(area,key);
+}
+
 
 template<typename T_db>
 template<typename T>
