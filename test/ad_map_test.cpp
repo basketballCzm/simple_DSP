@@ -9,10 +9,6 @@
 #include <tbsys.h>
 #include <tbnet.h>
 
-
-
-
-
 TEST(TairCommon,GetDataEntry)
 {
     tair::common::data_entry key;

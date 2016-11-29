@@ -54,8 +54,8 @@ namespace ad_map
       if(config.load(config_file) == EXIT_FAILURE) {
         TBSYS_LOG(DEBUG,"load config file %s error", config_file);
         return;
-      }
-      TBSYS_LOG(DEBUG,"ad_map_init() load config ok!");
+    }
+    TBSYS_LOG(DEBUG,"ad_map_init() load config ok!");
       master_addr=config.getString("tair_rdb","master_addr",NULL);
       slave_addr=config.getString("tair_rdb","slave_addr",NULL);			
       group_name=config.getString("tair_rdb","group_name",NULL);			
@@ -69,7 +69,6 @@ namespace ad_map
       pg_user     = config.getString("user_map", "pg_user", NULL);
       pg_database = config.getString("user_map", "pg_database", NULL);
       pg_password = config.getString("user_map", "pg_password", NULL);
-
 
       TBSYS_LOGGER.setFileName((string(tb_log_file)+string(".")+to_string(getpid())).c_str(),true);
       TBSYS_LOGGER.setLogLevel(tb_log_level);
