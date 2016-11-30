@@ -286,16 +286,16 @@ TEST_F(tair_TdbTest,ClasstairTest)
     string str;
     integer = tair_Tdb_r->connect("WUSHUU-REDIS",6379);
     EXPECT_EQ(1,integer);
-    tair_Tdb_r->clean(2,"czmset_int"); 
-    tair_Tdb_r->clean(2,"czmset_float");
-    tair_Tdb_r->clean(2,"czmset_double");
-    tair_Tdb_r->clean(2,"czmset_string");
-    tair_Tdb_r->clean(2,"czmzadd_int");
-    tair_Tdb_r->clean(2,"czmzadd_double");
-    tair_Tdb_r->clean(2,"czmzadd_string");
-    tair_Tdb_r->clean(2,"czmsadd_int");
-    tair_Tdb_r->clean(2,"czmsadd_double");
-    tair_Tdb_r->clean(2,"czmsadd_string");
+    tair_Tdb_r->clean(tair_namespace,"czmset_int"); 
+    tair_Tdb_r->clean(tair_namespace,"czmset_float");
+    tair_Tdb_r->clean(tair_namespace,"czmset_double");
+    tair_Tdb_r->clean(tair_namespace,"czmset_string");
+    tair_Tdb_r->clean(tair_namespace,"czmzadd_int");
+    tair_Tdb_r->clean(tair_namespace,"czmzadd_double");
+    tair_Tdb_r->clean(tair_namespace,"czmzadd_string");
+    tair_Tdb_r->clean(tair_namespace,"czmsadd_int");
+    tair_Tdb_r->clean(tair_namespace,"czmsadd_double");
+    tair_Tdb_r->clean(tair_namespace,"czmsadd_string");
 
     //set 0 ---success
     std::string reply;
