@@ -5,7 +5,7 @@ TBLIB_ROOT = /usr/local
 AM_CPPFLAGS = -std=c++11  -I/opt/tair-2.3/include \
 	-I${TBLIB_ROOT}/include/tbnet -I${TBLIB_ROOT}/include/tbsys \
 	-I$(GTEST_ROOT) -I$(GTEST_ROOT)/include \
-	-I/usr/include/jsoncpp  -I../CBaseMdb.hpp -I../redisDB.hpp -I../tairDB.hpp
+	-I/usr/include/jsoncpp
 
 
 noinst_PROGRAMS=ad_map_test user_map_test user_tag_update get_user_id  redis_test redisclass_test
