@@ -3,7 +3,6 @@
 #include "gtest/gtest.h"
 #include <iostream>
 #include <string>
-#include <string.h>
 
 #include <hiredis/hiredis.h>
 
