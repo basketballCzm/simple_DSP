@@ -1,7 +1,7 @@
 #ifndef __TAIRDB_HPP__
 #define __TAIRDB_HPP__
 #include <string>
-#include <hiredis.h>
+#include <hiredis/hiredis.h>
 #include <vector>
 #include <tair_client_api.hpp>
 #include "db_map.h"
