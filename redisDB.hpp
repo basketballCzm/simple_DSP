@@ -1,7 +1,7 @@
 #ifndef __REDISDB_HPP__
 #define __REDISDB_HPP__
 #include <string>
-#include <hiredis.h>
+#include <hiredis/hiredis.h>
 #include <vector>
 #include "tblog.h"
 #include "db_map.h"

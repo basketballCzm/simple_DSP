@@ -4,7 +4,7 @@
 #include "gtest/gtest.h"
 #include <iostream>
 #include <string>
-#include <hiredis.h>
+#include <hiredis/hiredis.h>
 #include <algorithm>
 #include "../CBaseMdb.hpp"	//对第2次封装类的测试
 #include "db_map.h"

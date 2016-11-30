@@ -2,7 +2,7 @@ AUTOMAKE_OPTIONS = foreign
 TBLIB_ROOT = /usr/local
 AM_CPPFLAGS = -std=c++11  -I/opt/tair-2.3/include \
 	-I${TBLIB_ROOT}/include/tbnet -I${TBLIB_ROOT}/include/tbsys \
-	-I/usr/include/jsoncpp -I/usr/local/include/hiredis
+	-I/usr/include/jsoncpp 
 
 bin_PROGRAMS=user_op ad_op redis_op  ap_signal_receiver user_tag_receiver user_phone_receiver
 
