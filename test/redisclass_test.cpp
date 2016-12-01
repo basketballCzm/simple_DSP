@@ -32,7 +32,7 @@ TEST_F(redis_RdbTest,ClassRedisTest)
     TBSYS_LOGGER.setFileName("redis_db_test",true);   //文件名加上线程的id，确定日志的名称
     TBSYS_LOGGER.setLogLevel("debug"); 
     db_map_init();
- /*   TBSYS_LOG(DEBUG,"pCreateDB: %s",pCreateDB);
+    TBSYS_LOG(DEBUG,"pCreateDB: %s",pCreateDB);
     TBSYS_LOG(DEBUG,"pCreateDB: %d",tair_namespace);
     redis_Rdb_r = redis_Rdb_r->InitDB();
 
@@ -68,7 +68,7 @@ TEST_F(redis_RdbTest,ClassRedisTest)
 
 
 
-    integer = redis_Rdb_r->zadd<int>("czmzadd_int",0,111);
+    /*integer = redis_Rdb_r->zadd<int>("czmzadd_int",0,111);
     EXPECT_EQ(1,integer);
     integer = redis_Rdb_r->zadd<int>("czmzadd_int",1,222);
     EXPECT_EQ(1,integer);
