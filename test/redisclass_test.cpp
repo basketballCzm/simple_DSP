@@ -68,7 +68,7 @@ TEST_F(redis_RdbTest,ClassRedisTest)
 
 
 
-    /*integer = redis_Rdb_r->zadd<int>("czmzadd_int",0,111);
+    integer = redis_Rdb_r->zadd<int>("czmzadd_int",0,111);
     EXPECT_EQ(1,integer);
     integer = redis_Rdb_r->zadd<int>("czmzadd_int",1,222);
     EXPECT_EQ(1,integer);
