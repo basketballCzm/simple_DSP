@@ -32,8 +32,6 @@ TEST_F(redis_RdbTest,ClassRedisTest)
     TBSYS_LOGGER.setFileName("redis_db_test",true);   //文件名加上线程的id，确定日志的名称
     TBSYS_LOGGER.setLogLevel("debug"); 
     db_map_init();
-    TBSYS_LOG(DEBUG,"pCreateDB: %s",pCreateDB);
-    TBSYS_LOG(DEBUG,"pCreateDB: %d",tair_namespace);
 
     int integer = 0;
     float f_num = 0;

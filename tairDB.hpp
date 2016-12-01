@@ -121,6 +121,10 @@ bool tair_Tdb::connect(std::string host, int port)
     TBSYS_LOG(DEBUG,"entry InitDB %s",host.c_str());
     TBSYS_LOG(DEBUG,"entry InitDB %d",port);
     TBSYS_LOG(DEBUG,"entry InitDB %d",this);
+    TBSYS_LOG(DEBUG,"entry InitDB %s",master_addr);
+    TBSYS_LOG(DEBUG,"entry InitDB %s",slave_addr);
+    TBSYS_LOG(DEBUG,"entry InitDB %s",group_name);
+
     host = host + std::string(":") +std::string(szBuf);
     bool bFlag = ptair_Client->startup(master_addr,slave_addr,group_name);
     if(bFlag)

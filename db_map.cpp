@@ -5,7 +5,7 @@
 #include "config.h"
 #include "tblog.h"
 using namespace std;
-const char * config_file="../etc/config.ini";
+const char * config_file="etc/config.ini";
 tbsys::CConfig config;
 const char *pCreateDB;
 const char * master_addr;
