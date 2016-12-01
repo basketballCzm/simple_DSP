@@ -143,7 +143,9 @@ int redis_Rdb::set(std::string key, T value)
     strset_ss << "SET %s " << value << std::endl;
     std::string strset = strset_ss.str();
     TBSYS_LOG(DEBUG,strLog.c_str(),key.c_str());
+    TBSYS_LOG(DEBUG,"1111111111111111111111111111111111111111111111111111111111111111111111111");
     this->_reply = (redisReply*)redisCommand(this->_connect, strset.c_str(), key.c_str());
+    TBSYS_LOG(DEBUG,"2222222222222222222222222222222222222222222222222222222222222222222222222");
 
     if(NULL == this->_reply)
     {
