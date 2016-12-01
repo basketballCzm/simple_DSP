@@ -40,9 +40,7 @@ TEST_F(redis_RdbTest,ClassRedisTest)
     float f_num = 0;
     double d_num = 0;
     string str;
-
     
- 
 }
 
 
