@@ -42,7 +42,7 @@ TEST_F(redis_RdbTest,ClassRedisTest)
     string str;
     integer = redis_Rdb_r->connect("WUSHUU-REDIS",6379);
     EXPECT_EQ(1,integer);
-    redis_Rdb_r->clean(0,"all");
+  //  redis_Rdb_r->clean(0,"all");
     
     std::string reply;
     integer = redis_Rdb_r->set<int>("czmset_int",12345);
