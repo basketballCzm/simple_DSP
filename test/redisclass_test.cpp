@@ -284,7 +284,7 @@ TEST_F(tair_TdbTest,ClasstairTest)
     float f_num = 0;
     double d_num = 0;
     string str;
-    integer = tair_Tdb_r->connect("WUSHUU-REDIS",6379);
+    integer = tair_Tdb_r->connect("WUSHUU-TAIR-CS",5198);
     EXPECT_EQ(1,integer);
     tair_Tdb_r->clean(tair_namespace,"czmset_int"); 
     tair_Tdb_r->clean(tair_namespace,"czmset_float");
