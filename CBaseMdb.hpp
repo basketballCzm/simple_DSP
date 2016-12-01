@@ -35,8 +35,7 @@ public:
 
     bool clean(int area,std::string key);
 
-    CBaseMdb<T_db>* InitDB();
-
+    bool InitDB(std::string host, int port);
 };
 
 
@@ -97,24 +96,10 @@ std::vector<V_TYPE>* CBaseMdb<T_db>::smembers(std::string key,std::vector<V_TYPE
 }
 
 template <typename T_db>
-CBaseMdb<T_db>* CBaseMdb<T_db>::InitDB()
+bool CBaseMdb<T_db>::InitDB(std::string host, int port)
 {
-    if(NULL == pCreateDB)
-    {
-        return NULL;
-    }
-    else if(0 ==  strcmp("redis_Rdb",pCreateDB))
-    {
-        return (CBaseMdb<T_db>*)(new CBaseMdb<redis_Rdb>());
-    }
-    else if(0 == strcmp("tair_Tdb",pCreateDB))
-    {
-        return (CBaseMdb<T_db>*)(new CBaseMdb<tair_Tdb>());
-    }
-    else
-    {
-        return NULL;
-    }
+    bool bFlag = this->connect(host,port);
+    return bFlag;
 }
 #endif
 

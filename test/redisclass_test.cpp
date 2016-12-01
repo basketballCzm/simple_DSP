@@ -20,7 +20,7 @@ using namespace std;
 	}\
 	virtual void TearDown() {\
 	}\
-	CBaseMdb<type> *type##_r;\
+	CBaseMdb<type> type##_r;\
     };
 
 CREATE_DB(redis_Rdb)
@@ -34,51 +34,50 @@ TEST_F(redis_RdbTest,ClassRedisTest)
     db_map_init();
     TBSYS_LOG(DEBUG,"pCreateDB: %s",pCreateDB);
     TBSYS_LOG(DEBUG,"pCreateDB: %d",tair_namespace);
-    redis_Rdb_r = redis_Rdb_r->InitDB();
 
     int integer = 0;
     float f_num = 0;
     double d_num = 0;
     string str;
-    bool flag = redis_Rdb_r->connect("WUSHUU-REDIS",6397);//6379
+    bool flag = redis_Rdb_r.InitDB("WUSHUU-REDIS",6379);//6379
     //TBSYS_LOG(DEBUG,"redis connect number: %d",integer);
     EXPECT_TRUE(flag);
-    redis_Rdb_r->clean(0,"all");
+    redis_Rdb_r.clean(0,"all");
     
     std::string reply;
-    integer = redis_Rdb_r->set<int>("czmset_int",12345);
+    integer = redis_Rdb_r.set<int>("czmset_int",12345);
     EXPECT_EQ(1,integer);
     //float的精度会存在问题
-    integer = redis_Rdb_r->set<float>("czmset_float",99034.3);
+    integer = redis_Rdb_r.set<float>("czmset_float",99034.3);
     EXPECT_EQ(1,integer);
-    integer = redis_Rdb_r->set<double>("czmset_double",21.334);
+    integer = redis_Rdb_r.set<double>("czmset_double",21.334);
     EXPECT_EQ(1,integer);
-    integer = redis_Rdb_r->set<string>("czmset_string","123456");
+    integer = redis_Rdb_r.set<string>("czmset_string","123456");
     EXPECT_EQ(1,integer);
-    integer = redis_Rdb_r->get<int>("czmset_int",-1);
+    integer = redis_Rdb_r.get<int>("czmset_int",-1);
     EXPECT_EQ(12345,integer);
-    f_num = redis_Rdb_r->get<float>("czmset_float",-1);
+    f_num = redis_Rdb_r.get<float>("czmset_float",-1);
     EXPECT_FLOAT_EQ(99034.3,f_num);
-    d_num = redis_Rdb_r->get<double>("czmset_double",-1);
+    d_num = redis_Rdb_r.get<double>("czmset_double",-1);
     EXPECT_EQ(21.334,d_num);
-    str = redis_Rdb_r->get<string>("czmset_string","error");
+    str = redis_Rdb_r.get<string>("czmset_string","error");
     EXPECT_STREQ("123456",str.c_str());
     //empty
-    integer= redis_Rdb_r->get<int>("foo12",-1);
+    integer= redis_Rdb_r.get<int>("foo12",-1);
     EXPECT_EQ(integer,-1);
 
 
 
-    integer = redis_Rdb_r->zadd<int>("czmzadd_int",0,111);
+    integer = redis_Rdb_r.zadd<int>("czmzadd_int",0,111);
     EXPECT_EQ(1,integer);
-    integer = redis_Rdb_r->zadd<int>("czmzadd_int",1,222);
+    integer = redis_Rdb_r.zadd<int>("czmzadd_int",1,222);
     EXPECT_EQ(1,integer);
-    integer = redis_Rdb_r->zadd<int>("czmzadd_int",2,333);
+    integer = redis_Rdb_r.zadd<int>("czmzadd_int",2,333);
     EXPECT_EQ(1,integer);
-    integer = redis_Rdb_r->zadd<int>("czmzadd_int",3,444);
+    integer = redis_Rdb_r.zadd<int>("czmzadd_int",3,444);
     EXPECT_EQ(1,integer);
     vector<int> user_list_int;
-    redis_Rdb_r->zrange<int>("czmzadd_int",0,10,user_list_int);
+    redis_Rdb_r.zrange<int>("czmzadd_int",0,10,user_list_int);
     EXPECT_EQ(4,user_list_int.size());
     vector<int>::iterator iter_int;
     bool result = false;
@@ -97,16 +96,16 @@ TEST_F(redis_RdbTest,ClassRedisTest)
 
     
     //tair的底层有bug，float暂时不进行测试
-    /*integer = redis_Rdb_r->zadd<float>("czmzadd_float",0,111.1);
+    /*integer = redis_Rdb_r.zadd<float>("czmzadd_float",0,111.1);
     EXPECT_EQ(1,integer);
-    integer = redis_Rdb_r->zadd<float>("czmzadd_float",1,222.2);
+    integer = redis_Rdb_r.zadd<float>("czmzadd_float",1,222.2);
     EXPECT_EQ(1,integer);
-    integer = redis_Rdb_r->zadd<float>("czmzadd_float",2,333.3);
+    integer = redis_Rdb_r.zadd<float>("czmzadd_float",2,333.3);
     EXPECT_EQ(1,integer);
-    integer = redis_Rdb_r->zadd<float>("czmzadd_float",3,444.4);
+    integer = redis_Rdb_r.zadd<float>("czmzadd_float",3,444.4);
     EXPECT_EQ(1,integer);
     vector<float> user_list_float;
-    redis_Rdb_r->zrange<float>("czmzadd_float",0,10,user_list_float);
+    redis_Rdb_r.zrange<float>("czmzadd_float",0,10,user_list_float);
     EXPECT_EQ(4,user_list_float.size());
     vector<float>::iterator iter_float;
     iter_float = find(user_list_float.begin(),user_list_float.end(),111.1);
@@ -122,16 +121,16 @@ TEST_F(redis_RdbTest,ClassRedisTest)
     result = iter_float==user_list_float.end()?false:true;
     EXPECT_TRUE(result);*/
 
-    integer = redis_Rdb_r->zadd<double>("czmzadd_double",0,111.111);
+    integer = redis_Rdb_r.zadd<double>("czmzadd_double",0,111.111);
     EXPECT_EQ(1,integer);
-    integer = redis_Rdb_r->zadd<double>("czmzadd_double",1,222.222);
+    integer = redis_Rdb_r.zadd<double>("czmzadd_double",1,222.222);
     EXPECT_EQ(1,integer);
-    integer = redis_Rdb_r->zadd<double>("czmzadd_double",2,333.333);
+    integer = redis_Rdb_r.zadd<double>("czmzadd_double",2,333.333);
     EXPECT_EQ(1,integer);
-    integer = redis_Rdb_r->zadd<double>("czmzadd_double",3,444.444);
+    integer = redis_Rdb_r.zadd<double>("czmzadd_double",3,444.444);
     EXPECT_EQ(1,integer);
     vector<double> user_list_double;
-    redis_Rdb_r->zrange<double>("czmzadd_double",0,10,user_list_double);
+    redis_Rdb_r.zrange<double>("czmzadd_double",0,10,user_list_double);
     EXPECT_EQ(4,user_list_double.size());
     vector<double>::iterator iter_double;
     iter_double = find(user_list_double.begin(),user_list_double.end(),111.111);
@@ -148,16 +147,16 @@ TEST_F(redis_RdbTest,ClassRedisTest)
     EXPECT_TRUE(result);
 
 
-    integer = redis_Rdb_r->zadd<string>("czmzadd_string",0,"111");
+    integer = redis_Rdb_r.zadd<string>("czmzadd_string",0,"111");
     EXPECT_EQ(1,integer);
-    integer = redis_Rdb_r->zadd<string>("czmzadd_string",1,"222");
+    integer = redis_Rdb_r.zadd<string>("czmzadd_string",1,"222");
     EXPECT_EQ(1,integer);
-    integer = redis_Rdb_r->zadd<string>("czmzadd_string",2,"333");
+    integer = redis_Rdb_r.zadd<string>("czmzadd_string",2,"333");
     EXPECT_EQ(1,integer);
-    integer = redis_Rdb_r->zadd<string>("czmzadd_string",3,"444");
+    integer = redis_Rdb_r.zadd<string>("czmzadd_string",3,"444");
     EXPECT_EQ(1,integer);
     vector<string> user_list_string;
-    redis_Rdb_r->zrange<string>("czmzadd_string",0,10,user_list_string);
+    redis_Rdb_r.zrange<string>("czmzadd_string",0,10,user_list_string);
     EXPECT_EQ(4,user_list_string.size());
     vector<string>::iterator iter_string;
     iter_string = find(user_list_string.begin(),user_list_string.end(),"111");
@@ -173,16 +172,16 @@ TEST_F(redis_RdbTest,ClassRedisTest)
     result = iter_string==user_list_string.end()?false:true;
     EXPECT_TRUE(result);
 
-    integer = redis_Rdb_r->sadd<int>("czmsadd_int",111);   //这里的参数我也是一个整形传入进来的
+    integer = redis_Rdb_r.sadd<int>("czmsadd_int",111);   //这里的参数我也是一个整形传入进来的
     EXPECT_EQ(1,integer);
-    integer = redis_Rdb_r->sadd<int>("czmsadd_int",222);
+    integer = redis_Rdb_r.sadd<int>("czmsadd_int",222);
     EXPECT_EQ(1,integer);
-    integer = redis_Rdb_r->sadd<int>("czmsadd_int",333);
+    integer = redis_Rdb_r.sadd<int>("czmsadd_int",333);
     EXPECT_EQ(1,integer);
-    integer = redis_Rdb_r->sadd<int>("czmsadd_int",444);
+    integer = redis_Rdb_r.sadd<int>("czmsadd_int",444);
     EXPECT_EQ(1,integer);
     vector<int> user_list_s_int;
-    redis_Rdb_r->smembers<int>("czmsadd_int",user_list_s_int);
+    redis_Rdb_r.smembers<int>("czmsadd_int",user_list_s_int);
     EXPECT_EQ(4,user_list_s_int.size());
     vector<int>::iterator iter_s_int;
     iter_s_int = find(user_list_s_int.begin(),user_list_s_int.end(),111);
@@ -199,16 +198,16 @@ TEST_F(redis_RdbTest,ClassRedisTest)
     EXPECT_TRUE(result);
 
 
-    /*integer = redis_Rdb_r->sadd<float>("czmsadd_float",111.1);   //这里的参数我也是一个整形传入进来的
+    /*integer = redis_Rdb_r.sadd<float>("czmsadd_float",111.1);   //这里的参数我也是一个整形传入进来的
     EXPECT_EQ(1,integer);
-    integer = redis_Rdb_r->sadd<float>("czmsadd_float",222.2);
+    integer = redis_Rdb_r.sadd<float>("czmsadd_float",222.2);
     EXPECT_EQ(1,integer);
-    integer = redis_Rdb_r->sadd<float>("czmsadd_float",333.3);
+    integer = redis_Rdb_r.sadd<float>("czmsadd_float",333.3);
     EXPECT_EQ(1,integer);
-    integer = redis_Rdb_r->sadd<float>("czmsadd_float",444.4);
+    integer = redis_Rdb_r.sadd<float>("czmsadd_float",444.4);
     EXPECT_EQ(1,integer);
     vector<float> user_list_s_float;
-    redis_Rdb_r->smembers<float>("czmsadd_float",user_list_s_float);
+    redis_Rdb_r.smembers<float>("czmsadd_float",user_list_s_float);
     EXPECT_EQ(4,user_list_s_float.size());
     vector<float>::iterator iter_s_float;
     iter_s_float = find(user_list_s_float.begin(),user_list_s_float.end(),111.1);
@@ -224,16 +223,16 @@ TEST_F(redis_RdbTest,ClassRedisTest)
     result = iter_s_float==user_list_s_float.end()?false:true;
     EXPECT_TRUE(result);*/
 
-    integer = redis_Rdb_r->sadd<double>("czmsadd_double",111.111);   //这里的参数我也是一个整形传入进来的
+    integer = redis_Rdb_r.sadd<double>("czmsadd_double",111.111);   //这里的参数我也是一个整形传入进来的
     EXPECT_EQ(1,integer);
-    integer = redis_Rdb_r->sadd<double>("czmsadd_double",222.222);
+    integer = redis_Rdb_r.sadd<double>("czmsadd_double",222.222);
     EXPECT_EQ(1,integer);
-    integer = redis_Rdb_r->sadd<double>("czmsadd_double",333.333);
+    integer = redis_Rdb_r.sadd<double>("czmsadd_double",333.333);
     EXPECT_EQ(1,integer);
-    integer = redis_Rdb_r->sadd<double>("czmsadd_double",444.444);
+    integer = redis_Rdb_r.sadd<double>("czmsadd_double",444.444);
     EXPECT_EQ(1,integer);
     vector<double> user_list_s_double;
-    redis_Rdb_r->smembers<double>("czmsadd_double",user_list_s_double);
+    redis_Rdb_r.smembers<double>("czmsadd_double",user_list_s_double);
     EXPECT_EQ(4,user_list_s_double.size());
     vector<double>::iterator iter_s_double;
     iter_s_double = find(user_list_s_double.begin(),user_list_s_double.end(),111.111);
@@ -249,16 +248,16 @@ TEST_F(redis_RdbTest,ClassRedisTest)
     result = iter_s_double==user_list_s_double.end()?false:true;
     EXPECT_TRUE(result);
 
-    integer = redis_Rdb_r->sadd<string>("czmsadd_string","111.1");   //这里的参数我也是一个整形传入进来的
+    integer = redis_Rdb_r.sadd<string>("czmsadd_string","111.1");   //这里的参数我也是一个整形传入进来的
     EXPECT_EQ(1,integer);
-    integer = redis_Rdb_r->sadd<string>("czmsadd_string","222.2");
+    integer = redis_Rdb_r.sadd<string>("czmsadd_string","222.2");
     EXPECT_EQ(1,integer);
-    integer = redis_Rdb_r->sadd<string>("czmsadd_string","333.3");
+    integer = redis_Rdb_r.sadd<string>("czmsadd_string","333.3");
     EXPECT_EQ(1,integer);
-    integer = redis_Rdb_r->sadd<string>("czmsadd_string","444.4");
+    integer = redis_Rdb_r.sadd<string>("czmsadd_string","444.4");
     EXPECT_EQ(1,integer);
     vector<string> user_list_s_string;
-    redis_Rdb_r->smembers<string>("czmsadd_string",user_list_s_string);
+    redis_Rdb_r.smembers<string>("czmsadd_string",user_list_s_string);
     EXPECT_EQ(4,user_list_s_string.size());
     vector<string>::iterator iter_s_string;
     iter_s_string = find(user_list_s_string.begin(),user_list_s_string.end(),"111.1");
@@ -280,56 +279,55 @@ TEST_F(tair_TdbTest,ClasstairTest)
 {
     const char szBuf[255] = "tair_Tdb";
     pCreateDB = szBuf;
-    tair_Tdb_r = tair_Tdb_r->InitDB();
     int integer = 0;
     float f_num = 0;
     double d_num = 0;
     string str;
-    integer = tair_Tdb_r->connect("WUSHUU-TAIR-CS",5198);
-    EXPECT_EQ(1,integer);
-    tair_Tdb_r->clean(tair_namespace,"czmset_int"); 
-    tair_Tdb_r->clean(tair_namespace,"czmset_float");
-    tair_Tdb_r->clean(tair_namespace,"czmset_double");
-    tair_Tdb_r->clean(tair_namespace,"czmset_string");
-    tair_Tdb_r->clean(tair_namespace,"czmzadd_int");
-    tair_Tdb_r->clean(tair_namespace,"czmzadd_double");
-    tair_Tdb_r->clean(tair_namespace,"czmzadd_string");
-    tair_Tdb_r->clean(tair_namespace,"czmsadd_int");
-    tair_Tdb_r->clean(tair_namespace,"czmsadd_double");
-    tair_Tdb_r->clean(tair_namespace,"czmsadd_string");
+    bool flag = tair_Tdb_r.InitDB("WUSHUU-TAIR-CS",5198);//6379
+    EXPECT_TRUE(flag);
+    tair_Tdb_r.clean(tair_namespace,"czmset_int"); 
+    tair_Tdb_r.clean(tair_namespace,"czmset_float");
+    tair_Tdb_r.clean(tair_namespace,"czmset_double");
+    tair_Tdb_r.clean(tair_namespace,"czmset_string");
+    tair_Tdb_r.clean(tair_namespace,"czmzadd_int");
+    tair_Tdb_r.clean(tair_namespace,"czmzadd_double");
+    tair_Tdb_r.clean(tair_namespace,"czmzadd_string");
+    tair_Tdb_r.clean(tair_namespace,"czmsadd_int");
+    tair_Tdb_r.clean(tair_namespace,"czmsadd_double");
+    tair_Tdb_r.clean(tair_namespace,"czmsadd_string");
 
     //set 0 ---success
     std::string reply;
-    integer = tair_Tdb_r->set<int>("czmset_int",12345);
+    integer = tair_Tdb_r.set<int>("czmset_int",12345);
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r->set<float>("czmset_float",9034.3333);
+    integer = tair_Tdb_r.set<float>("czmset_float",9034.3333);
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r->set<double>("czmset_double",21.3);
+    integer = tair_Tdb_r.set<double>("czmset_double",21.3);
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r->set<string>("czmset_string","123456");
+    integer = tair_Tdb_r.set<string>("czmset_string","123456");
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r->get<int>("czmset_int",-1);
+    integer = tair_Tdb_r.get<int>("czmset_int",-1);
     EXPECT_EQ(12345,integer);
-    f_num = tair_Tdb_r->get<float>("czmset_float",-1);
+    f_num = tair_Tdb_r.get<float>("czmset_float",-1);
     EXPECT_FLOAT_EQ(9034.3333,f_num);
-    d_num = tair_Tdb_r->get<double>("czmset_double",-1);
+    d_num = tair_Tdb_r.get<double>("czmset_double",-1);
     EXPECT_EQ(21.3,d_num);
-    str = tair_Tdb_r->get<string>("czmset_string11","error");
+    str = tair_Tdb_r.get<string>("czmset_string11","error");
     EXPECT_STREQ("error",str.c_str());
     //empty
-    integer= tair_Tdb_r->get<int>("foo12",-1);
+    integer= tair_Tdb_r.get<int>("foo12",-1);
     EXPECT_EQ(integer,-1);
 
-    integer = tair_Tdb_r->zadd<int>("czmzadd_int",0,111);
+    integer = tair_Tdb_r.zadd<int>("czmzadd_int",0,111);
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r->zadd<int>("czmzadd_int",1,222);
+    integer = tair_Tdb_r.zadd<int>("czmzadd_int",1,222);
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r->zadd<int>("czmzadd_int",2,333);
+    integer = tair_Tdb_r.zadd<int>("czmzadd_int",2,333);
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r->zadd<int>("czmzadd_int",3,444);
+    integer = tair_Tdb_r.zadd<int>("czmzadd_int",3,444);
     EXPECT_EQ(0,integer);
     vector<int> user_list_int;
-    tair_Tdb_r->zrange<int>("czmzadd_int",0,10,user_list_int);
+    tair_Tdb_r.zrange<int>("czmzadd_int",0,10,user_list_int);
     EXPECT_EQ(4,user_list_int.size());
     vector<int>::iterator iter_int;
     bool result = false;
@@ -346,16 +344,16 @@ TEST_F(tair_TdbTest,ClasstairTest)
     result = iter_int==user_list_int.end()?false:true;
     EXPECT_TRUE(result);
 
-    /*integer = tair_Tdb_r->zadd<float>("czmzadd_float",0,111.1);
+    /*integer = tair_Tdb_r.zadd<float>("czmzadd_float",0,111.1);
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r->zadd<float>("czmzadd_float",1,222.2);
+    integer = tair_Tdb_r.zadd<float>("czmzadd_float",1,222.2);
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r->zadd<float>("czmzadd_float",2,333.3);
+    integer = tair_Tdb_r.zadd<float>("czmzadd_float",2,333.3);
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r->zadd<float>("czmzadd_float",3,444.4);
+    integer = tair_Tdb_r.zadd<float>("czmzadd_float",3,444.4);
     EXPECT_EQ(0,integer);
     vector<float> user_list_float;
-    tair_Tdb_r->zrange<float>("czmzadd_float",0,10,user_list_float);
+    tair_Tdb_r.zrange<float>("czmzadd_float",0,10,user_list_float);
     EXPECT_EQ(4,user_list_float.size());
     vector<float>::iterator iter_float;
     iter_float = find(user_list_float.begin(),user_list_float.end(),111.1);
@@ -371,16 +369,16 @@ TEST_F(tair_TdbTest,ClasstairTest)
     result = iter_float==user_list_float.end()?false:true;
     EXPECT_TRUE(result);*/
 
-    integer = tair_Tdb_r->zadd<double>("czmzadd_double",0,111.111);
+    integer = tair_Tdb_r.zadd<double>("czmzadd_double",0,111.111);
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r->zadd<double>("czmzadd_double",1,222.222);
+    integer = tair_Tdb_r.zadd<double>("czmzadd_double",1,222.222);
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r->zadd<double>("czmzadd_double",2,333.333);
+    integer = tair_Tdb_r.zadd<double>("czmzadd_double",2,333.333);
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r->zadd<double>("czmzadd_double",3,444.444);
+    integer = tair_Tdb_r.zadd<double>("czmzadd_double",3,444.444);
     EXPECT_EQ(0,integer);
     vector<double> user_list_double;
-    tair_Tdb_r->zrange<double>("czmzadd_double",0,10,user_list_double);
+    tair_Tdb_r.zrange<double>("czmzadd_double",0,10,user_list_double);
     EXPECT_EQ(4,user_list_double.size());
     vector<double>::iterator iter_double;
     iter_double = find(user_list_double.begin(),user_list_double.end(),111.111);
@@ -397,16 +395,16 @@ TEST_F(tair_TdbTest,ClasstairTest)
     EXPECT_TRUE(result);
 
 
-    integer = tair_Tdb_r->zadd<string>("czmzadd_string",0,"111");
+    integer = tair_Tdb_r.zadd<string>("czmzadd_string",0,"111");
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r->zadd<string>("czmzadd_string",1,"222");
+    integer = tair_Tdb_r.zadd<string>("czmzadd_string",1,"222");
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r->zadd<string>("czmzadd_string",2,"333");
+    integer = tair_Tdb_r.zadd<string>("czmzadd_string",2,"333");
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r->zadd<string>("czmzadd_string",3,"444");
+    integer = tair_Tdb_r.zadd<string>("czmzadd_string",3,"444");
     EXPECT_EQ(0,integer);
     vector<string> user_list_string;
-    tair_Tdb_r->zrange<string>("czmzadd_string",0,10,user_list_string);
+    tair_Tdb_r.zrange<string>("czmzadd_string",0,10,user_list_string);
     EXPECT_EQ(4,user_list_string.size());
     //string在泛型查找的过程中也有同样的问题,值取出来是正确的，但是泛型查找不到
 /*    vector<string>::iterator iter_string;
@@ -428,16 +426,16 @@ TEST_F(tair_TdbTest,ClasstairTest)
     EXPECT_STREQ("444",user_list_string[3].c_str());*/
 
 
-    integer = tair_Tdb_r->sadd<int>("czmsadd_int",111);   //这里的参数我也是一个整形传入进来的
+    integer = tair_Tdb_r.sadd<int>("czmsadd_int",111);   //这里的参数我也是一个整形传入进来的
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r->sadd<int>("czmsadd_int",222);
+    integer = tair_Tdb_r.sadd<int>("czmsadd_int",222);
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r->sadd<int>("czmsadd_int",333);
+    integer = tair_Tdb_r.sadd<int>("czmsadd_int",333);
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r->sadd<int>("czmsadd_int",444);
+    integer = tair_Tdb_r.sadd<int>("czmsadd_int",444);
     EXPECT_EQ(0,integer);
     vector<int> user_list_s_int;
-    tair_Tdb_r->smembers<int>("czmsadd_int",user_list_s_int);
+    tair_Tdb_r.smembers<int>("czmsadd_int",user_list_s_int);
     EXPECT_EQ(4,user_list_s_int.size());
     vector<int>::iterator iter_s_int;
     iter_s_int = find(user_list_s_int.begin(),user_list_s_int.end(),111);
@@ -453,16 +451,16 @@ TEST_F(tair_TdbTest,ClasstairTest)
     result = iter_s_int==user_list_s_int.end()?false:true;
     EXPECT_TRUE(result);
 
-    /*integer = tair_Tdb_r->sadd<float>("czmsadd_float",111.111);   //这里的参数我也是一个整形传入进来的
+    /*integer = tair_Tdb_r.sadd<float>("czmsadd_float",111.111);   //这里的参数我也是一个整形传入进来的
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r->sadd<float>("czmsadd_float",222.222);
+    integer = tair_Tdb_r.sadd<float>("czmsadd_float",222.222);
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r->sadd<float>("czmsadd_float",333.333);
+    integer = tair_Tdb_r.sadd<float>("czmsadd_float",333.333);
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r->sadd<float>("czmsadd_float",444.444);
+    integer = tair_Tdb_r.sadd<float>("czmsadd_float",444.444);
     EXPECT_EQ(0,integer);
     vector<float> user_list_s_float;
-    tair_Tdb_r->smembers<float>("czmsadd_float",user_list_s_float);
+    tair_Tdb_r.smembers<float>("czmsadd_float",user_list_s_float);
     EXPECT_EQ(4,user_list_s_float.size());
     vector<float>::iterator iter_s_float;
     iter_s_float = find(user_list_s_float.begin(),user_list_s_float.end(),111.1);
@@ -478,16 +476,16 @@ TEST_F(tair_TdbTest,ClasstairTest)
     result = iter_s_float==user_list_s_float.end()?false:true;
     EXPECT_TRUE(result);*/
 
-    integer = tair_Tdb_r->sadd<double>("czmsadd_double",111.1);   //这里的参数我也是一个整形传入进来的
+    integer = tair_Tdb_r.sadd<double>("czmsadd_double",111.1);   //这里的参数我也是一个整形传入进来的
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r->sadd<double>("czmsadd_double",222.2);
+    integer = tair_Tdb_r.sadd<double>("czmsadd_double",222.2);
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r->sadd<double>("czmsadd_double",333.3);
+    integer = tair_Tdb_r.sadd<double>("czmsadd_double",333.3);
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r->sadd<double>("czmsadd_double",444.4);
+    integer = tair_Tdb_r.sadd<double>("czmsadd_double",444.4);
     EXPECT_EQ(0,integer);
     vector<double> user_list_s_double;
-    tair_Tdb_r->smembers<double>("czmsadd_double",user_list_s_double);
+    tair_Tdb_r.smembers<double>("czmsadd_double",user_list_s_double);
     EXPECT_EQ(4,user_list_s_double.size());
     vector<double>::iterator iter_s_double;
     iter_s_double = find(user_list_s_double.begin(),user_list_s_double.end(),111.1);
@@ -503,16 +501,16 @@ TEST_F(tair_TdbTest,ClasstairTest)
     result = iter_s_double==user_list_s_double.end()?false:true;
     EXPECT_TRUE(result);
 
-    integer = tair_Tdb_r->sadd<string>("czmsadd_string","111.11111");   //这里的参数我也是一个整形传入进来的
+    integer = tair_Tdb_r.sadd<string>("czmsadd_string","111.11111");   //这里的参数我也是一个整形传入进来的
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r->sadd<string>("czmsadd_string","222.22222");
+    integer = tair_Tdb_r.sadd<string>("czmsadd_string","222.22222");
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r->sadd<string>("czmsadd_string","333.33333");
+    integer = tair_Tdb_r.sadd<string>("czmsadd_string","333.33333");
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r->sadd<string>("czmsadd_string","444.44444");
+    integer = tair_Tdb_r.sadd<string>("czmsadd_string","444.44444");
     EXPECT_EQ(0,integer);
     vector<string> user_list_s_string;
-    tair_Tdb_r->smembers<string>("czmsadd_string",user_list_s_string);
+    tair_Tdb_r.smembers<string>("czmsadd_string",user_list_s_string);
     EXPECT_EQ(4,user_list_s_string.size());
     /*vector<string>::iterator iter_s_string;
     iter_s_string = find(user_list_s_string.begin(),user_list_s_string.end(),"111.11111");
