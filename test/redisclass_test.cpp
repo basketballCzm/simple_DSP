@@ -41,7 +41,7 @@ TEST_F(redis_RdbTest,ClassRedisTest)
     double d_num = 0;
     string str;
     integer = redis_Rdb_r->connect("WUSHUU-REDIS",6379);
-    TBSYS_LOG(DEBUG,"redis connect number: %d",interger);
+    TBSYS_LOG(DEBUG,"redis connect number: %d",integer);
  
 }
 
