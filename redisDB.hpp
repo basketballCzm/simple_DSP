@@ -55,6 +55,11 @@ public:
     bool clean(int area,std::string key)
     {
         this->_reply = (redisReply*)redisCommand(this->_connect,"flushall");
+        if(NULL == this->_reply)
+        {
+            freeReplyObject(this->_reply);
+            return false;
+        }
         std::string str  = this->_reply->str;
         TBSYS_LOG(DEBUG,"set success %s",this->_reply->str);
         if(NULL != this->_reply->str && 0 == strcmp("OK",this->_reply->str))
@@ -123,10 +128,6 @@ inline std::string redis_Rdb::get_value<std::string>(char* data,int len)
 
 bool redis_Rdb::connect(std::string host, int port)
 {
-    TBSYS_LOG(DEBUG,"entry InitDB");
-    TBSYS_LOG(DEBUG,"entry InitDB %s",host.c_str());
-    TBSYS_LOG(DEBUG,"entry InitDB %d",port);
-    TBSYS_LOG(DEBUG,"entry InitDB %d",this);
     this->_connect = redisConnect(host.c_str(), port);
     if(this->_connect != NULL && this->_connect->err)
     {
