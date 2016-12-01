@@ -32,7 +32,7 @@ TEST_F(redis_RdbTest,ClassRedisTest)
     TBSYS_LOGGER.setFileName("redis_db_test",true);   //文件名加上线程的id，确定日志的名称
     TBSYS_LOGGER.setLogLevel("debug"); 
     db_map_init();
-    TBSYS_LOG(DEBUG,"pCreateDB: %s",pCreateDB);
+ /*   TBSYS_LOG(DEBUG,"pCreateDB: %s",pCreateDB);
     TBSYS_LOG(DEBUG,"pCreateDB: %d",tair_namespace);
     redis_Rdb_r = redis_Rdb_r->InitDB();
 
@@ -121,7 +121,7 @@ TEST_F(redis_RdbTest,ClassRedisTest)
     result = iter_float==user_list_float.end()?false:true;
     EXPECT_TRUE(result);*/
 
-    integer = redis_Rdb_r->zadd<double>("czmzadd_double",0,111.111);
+    /*integer = redis_Rdb_r->zadd<double>("czmzadd_double",0,111.111);
     EXPECT_EQ(1,integer);
     integer = redis_Rdb_r->zadd<double>("czmzadd_double",1,222.222);
     EXPECT_EQ(1,integer);
@@ -223,7 +223,7 @@ TEST_F(redis_RdbTest,ClassRedisTest)
     result = iter_s_float==user_list_s_float.end()?false:true;
     EXPECT_TRUE(result);*/
 
-    integer = redis_Rdb_r->sadd<double>("czmsadd_double",111.111);   //这里的参数我也是一个整形传入进来的
+    /*integer = redis_Rdb_r->sadd<double>("czmsadd_double",111.111);   //这里的参数我也是一个整形传入进来的
     EXPECT_EQ(1,integer);
     integer = redis_Rdb_r->sadd<double>("czmsadd_double",222.222);
     EXPECT_EQ(1,integer);
@@ -271,7 +271,7 @@ TEST_F(redis_RdbTest,ClassRedisTest)
     EXPECT_TRUE(result);
     iter_s_string = find(user_list_s_string.begin(),user_list_s_string.end(),"444.4");
     result = iter_s_string==user_list_s_string.end()?false:true;
-    EXPECT_TRUE(result);
+    EXPECT_TRUE(result);*/
 }
 
 
