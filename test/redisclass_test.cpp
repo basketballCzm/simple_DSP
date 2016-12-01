@@ -40,7 +40,7 @@ TEST_F(redis_RdbTest,ClassRedisTest)
     float f_num = 0;
     double d_num = 0;
     string str;
-    bool flag = redis_Rdb_r->connect("WUSHUU-REDIS",6);//6379
+    bool flag = redis_Rdb_r->connect("WUSHUU-REDIS",6397);//6379
     //TBSYS_LOG(DEBUG,"redis connect number: %d",integer);
     EXPECT_TRUE(flag);
     redis_Rdb_r->clean(0,"all");
