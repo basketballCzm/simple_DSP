@@ -125,8 +125,8 @@ TEST_F(AdMapTest,UserLabelSet)
   int user_id=user_map::user_get_id(mac);
   get_data_entry(key,"user:",user_id,":label.set");
   cout<<"UserLabelSet key is "<<key.get_data()<<endl;
-  vector<string> user_label_set;
-  tair_hgetall<string>(ad_map::g_tair,nm,key,user_label_set);
+  map<string,double> user_label_set;
+  tair_hgetall<double>(ad_map::g_tair,nm,key,user_label_set);
   EXPECT_EQ(user_label_set.size(),3);
 }
 

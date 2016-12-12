@@ -30,6 +30,11 @@
 		}
 
 
+        redisCommand(ctest,"del czmzadd_int");
+        redisCommand(ctest,"del foo");
+        redisCommand(ctest,"del myset");
+        redisCommand(ctest,"del smyset");
+        redisCommand(ctest,"del czmzadd_double");
 		std::string strr = "foo";
 	    std::string strrr = "hello world";
 	    reply = (redisReply*)redisCommand(ctest,"SET %s %s", strr.c_str(), strrr.c_str());
@@ -37,6 +42,14 @@
 		EXPECT_STREQ("OK",reply->str);
 		EXPECT_EQ(REDIS_REPLY_STATUS,reply->type);
 		freeReplyObject(reply);
+
+        std::string str_h = "HSET czmzadd_int field1 111";
+		reply = (redisReply*)redisCommand(ctest,str_h.c_str());
+		EXPECT_EQ(1,reply->integer);
+
+		std::string str_z = "HSET czmzadd_double 3 444.444";
+		reply = (redisReply*)redisCommand(ctest,str_z.c_str());
+		EXPECT_EQ(1,reply->integer);
 		
 		reply = (redisReply*)redisCommand(ctest,"GET fool");
 		EXPECT_STREQ(NULL,reply->str);

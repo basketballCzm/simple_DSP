@@ -4,17 +4,13 @@ AM_CPPFLAGS = -std=c++11  -I/opt/tair-2.3/include \
 	-I${TBLIB_ROOT}/include/tbnet -I${TBLIB_ROOT}/include/tbsys \
 	-I/usr/include/jsoncpp 
 
-bin_PROGRAMS=user_op ad_op redis_op  ap_signal_receiver user_tag_receiver user_phone_receiver
+bin_PROGRAMS=user_op ad_op  ap_signal_receiver user_tag_receiver user_phone_receiver
 
 user_op_SOURCES=user_op.cpp  user_map.cpp
 user_op_LDADD=-lfcgi -luriparser -ljsoncpp -lpthread -lhiredis -L/opt/tair-2.3/lib -ltairclientapi $(TBLIB_ROOT)/lib/libtbnet.a $(TBLIB_ROOT)/lib/libtbsys.a -lpqxx -lpq
 
 ad_op_SOURCES=ad_op.cpp  ad_map.cpp user_map.cpp cron_timing.cpp
 ad_op_LDADD=-lfcgi -luriparser -ljsoncpp -lpthread -L/opt/tair-2.3/lib -ltairclientapi $(TBLIB_ROOT)/lib/libtbnet.a $(TBLIB_ROOT)/lib/libtbsys.a -lpqxx -lpq
-
-redis_op_SOURCES=redis_op.cpp redisDB.hpp db_map.cpp
-redis_op_LDADD=-lfcgi -luriparser -ljsoncpp -lpthread -lhiredis -L/opt/tair-2.3/lib -ltairclientapi $(TBLIB_ROOT)/lib/libtbnet.a $(TBLIB_ROOT)/lib/libtbsys.a -lpqxx -lpq
-
 
 noinst_PROGRAMS=robot_commander #ap_signal_dock ap_signal_sender 
 

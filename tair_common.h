@@ -66,7 +66,7 @@ inline T get_value(char* data,int len)
 }
 
 template<>
-inline string get_value<string>(char* data,int len)
+inline string get_value<std::string>(char* data,int len)
 {
     return string(data,len);
 }
@@ -110,6 +110,36 @@ inline tair::common::data_entry * get_data_entry_of_value<string> (const string 
 }
 
 template <typename V_TYPE>
+inline int tair_hset(tair::tair_client_api & tair_instance,int area,const string & s_key,const string & s_field, const V_TYPE & data)
+{
+    tair::common::data_entry key(s_key.c_str(),s_key.size()+1,true);
+    tair::common::data_entry field(s_field.c_str(),s_field.c_str()+1,true);
+    tair::common::data_entry *p_value=get_data_entry_of_value(data);
+    int ret=tair_instance.hset(area,key,field,*p_value,0,0);
+    fprintf(stderr, "tair_put: %s\n",tair_instance.get_error_msg(ret));
+    delete (p_value);
+    return ret;
+}
+
+template <typename V_TYPE>
+inline int tair_hset(tair::tair_client_api & tair_instance,int area,const tair::common::data_entry & key,const tair::common::data_entry & field, const V_TYPE & data)
+{
+
+    std::ostringstream strLog_ss;
+    strLog_ss << "tair_common.h<field>: tair hset one value: " << get_value<std::string>(field.get_data(),field.get_size()) << std::endl;
+    TBSYS_LOG(DEBUG,"get one success %s",strLog_ss.str().c_str());
+
+    std::ostringstream strLog_ss1;
+    strLog_ss1 << "tair_common.h<value>: tair hset one value: " << data << std::endl;
+    TBSYS_LOG(DEBUG,"get one success %s",strLog_ss1.str().c_str());
+
+    tair::common::data_entry *p_value=get_data_entry_of_value(data);
+    int ret=tair_instance.hset(area,key,field,*p_value,0,0);
+    delete (p_value);
+    return ret;
+}
+
+template <typename V_TYPE>
 inline int tair_put(tair::tair_client_api & tair_instance,int area,const string & s_key, const V_TYPE & data)
 {
     tair::common::data_entry key(s_key.c_str(),s_key.size()+1,true);
@@ -124,9 +154,6 @@ template <typename V_TYPE>
 inline int tair_put(tair::tair_client_api & tair_instance,int area,const tair::common::data_entry & key, const V_TYPE & data)
 {
     tair::common::data_entry *p_value=get_data_entry_of_value(data);
-    /*std::ostringstream strLog_ss;
-    strLog_ss << "tair_common.h: tair get value: " << get_value<V_TYPE>(p_value->get_data(),p_value->get_size()) << std::endl;
-    TBSYS_LOG(DEBUG,"get success %s",strLog_ss.str().c_str());*/
     int ret=tair_instance.put(area,key,*p_value,0,0);
     fprintf(stderr, "tair_put: %s\n",tair_instance.get_error_msg(ret));
     delete (p_value);
@@ -267,13 +294,24 @@ vector<V_TYPE>* tair_smembers(tair::tair_client_api & tair_instance,int area, co
 }
 
 template <typename V_TYPE>
-vector<V_TYPE>* tair_hgetall(tair::tair_client_api & tair_instance,int area, const tair::common::data_entry &key, vector<V_TYPE> &members_set)
+std::map<std::string,V_TYPE>* tair_hgetall(tair::tair_client_api & tair_instance,int area, const tair::common::data_entry &key, std::map<std::string,V_TYPE> &members_set)
 {
-    map<tair::common::data_entry*, tair::common::data_entry*> field_values;
+    std::map<tair::common::data_entry*, tair::common::data_entry*> field_values;
     tair_instance.hgetall(area,key,field_values);
-    for(map<tair::common::data_entry*, tair::common::data_entry*>::iterator it=field_values.begin(); it!=field_values.end(); it++)
+    //注意这里有问题
+    for(std::map<tair::common::data_entry*, tair::common::data_entry*>::iterator it=field_values.begin(); it!=field_values.end(); it++)
     {
-        members_set.push_back(get_value<V_TYPE>((it->first)->get_data(),(it->first)->get_size()));
+        std::string str_field = get_value<std::string>((it->first)->get_data(),(it->first)->get_size());
+        V_TYPE value = get_value<V_TYPE>((it->second)->get_data(),(it->second)->get_size());
+        members_set[str_field] = value;
+        std::ostringstream strLog_ss;
+        strLog_ss << "tair_common.h: tair hgetall one value: " << str_field << std::endl;
+        TBSYS_LOG(DEBUG,"get one success %s",strLog_ss.str().c_str());
+
+        std::ostringstream strLog_ss1;
+        strLog_ss1 << "tair_common.h: tair hgetall one value: " << members_set[str_field] << std::endl;
+        TBSYS_LOG(DEBUG,"get one success %s",strLog_ss1.str().c_str());
+
         delete (it->first);
         delete (it->second);
     }

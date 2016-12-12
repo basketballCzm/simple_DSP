@@ -3,7 +3,7 @@
 #include <string>
 #include "redisDB.hpp"
 #include "tairDB.hpp"
-#include "db_map.h"
+#include "loadConf.h"
 #include "tblog.h"
 
 
@@ -14,6 +14,12 @@ private:
     T_db db;
 public:
     bool connect(std::string host, int port);
+
+    template<typename T>
+    int hset(std::string key,std::string field,T value);
+
+    template<typename V_TYPE>
+    std::map<std::string,V_TYPE>* hget(std::string key, std::map<std::string,V_TYPE> &members_set);
 
     template<typename T>
     int set(std::string key, T vlaue);
@@ -33,7 +39,7 @@ public:
     template <typename V_TYPE>
     std::vector<V_TYPE>* smembers(std::string key,std::vector<V_TYPE> &members_set);
 
-    bool clean(int area,std::string key);
+    int removeKey(int area,std::string key);
 
     bool InitDB(std::string host, int port);
 };
@@ -46,9 +52,9 @@ bool CBaseMdb<T_db>::connect(std::string host, int port)
 }
 
 template<typename T_db>
-bool CBaseMdb<T_db>::clean(int area,std::string key)
+int CBaseMdb<T_db>::removeKey(int area,std::string key)
 {
-    return db.clean(area,key);
+    return db.removeKey(area,key);
 }
 
 
@@ -58,6 +64,22 @@ int CBaseMdb<T_db>::set(std::string key, T value)
 {
     TBSYS_LOG(DEBUG,"enter base_mdb_set");
     return db.set<T>(key,value);
+}
+
+template<typename T_db>
+template<typename T>
+int CBaseMdb<T_db>::hset(std::string key,std::string field,T value)
+{
+    TBSYS_LOG(DEBUG,"enter base_mdb_hset");
+    return db.hset<T>(key,field,value);
+}
+
+template<typename T_db>
+template<typename V_TYPE>
+std::map<std::string,V_TYPE>* CBaseMdb<T_db>::hget(std::string key, std::map<std::string,V_TYPE> &members_set)
+{
+    TBSYS_LOG(DEBUG,"entry base_mdb_hget");
+    return db.hget<V_TYPE>(key,members_set);
 }
 
 template<typename T_db>
