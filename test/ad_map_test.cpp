@@ -120,14 +120,28 @@ TEST_F(AdMapTest,CheckIntersection)
 
 TEST_F(AdMapTest,UserLabelSet)
 {
+
   tair::common::data_entry key;
   int mac=12345678;
   int user_id=user_map::user_get_id(mac);
   get_data_entry(key,"user:",user_id,":label.set");
   cout<<"UserLabelSet key is "<<key.get_data()<<endl;
-  map<string,double> user_label_set;
-  tair_hgetall<double>(ad_map::g_tair,nm,key,user_label_set);
+  vector<string> user_label_set;
+  map<string,double> user_label_set_map;
+  tair_hgetall<double>(ad_map::g_tair,nm,key,user_label_set_map);
+  for(map<string,double>::iterator it=user_label_set_map.begin(); it!=user_label_set_map.end(); it++)
+  {
+    user_label_set.push_back(it->first);
+  }
   EXPECT_EQ(user_label_set.size(),3);
+  /*tair::common::data_entry key;
+  int mac=12345678;
+  int user_id=user_map::user_get_id(mac);
+  get_data_entry(key,"user:",user_id,":label.set");
+  cout<<"UserLabelSet key is "<<key.get_data()<<endl;
+  vector<string> user_label_set;
+  tair_hgetall<string>(ad_map::g_tair,nm,key,user_label_set);
+  EXPECT_EQ(user_label_set.size(),3);*/
 }
 
 TEST_F(AdMapTest,CheckTimeRange)

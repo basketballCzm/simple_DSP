@@ -361,10 +361,15 @@ void bidding(Json::Value &ret, const UserPosition &pos, const int user_id, const
         tair_hgetall<double>(g_tair,tair_namespace,key,user_label_set_map);
         for(std::map<string, double>::iterator it=user_label_set_map.begin(); it!=user_label_set_map.end(); it++)
         {
-            user_label_set.push_back(string(it->first));
+            user_label_set.push_back(it->first);
         }
         user_label_set_map.clear();
     }
+
+ /*       if(user_id>0) {
+      get_data_entry(key,"user:",user_id,":label.set");
+      tair_hgetall<string>(g_tair,tair_namespace,key,user_label_set);
+    }*/
 
     for(vector< int>::iterator it=ad_group_list.begin(); it!=ad_group_list.end(); ++it) {
         TBSYS_LOG(DEBUG,"ad_map::bidding() loop, filter by market shop, group %d\n",*it);

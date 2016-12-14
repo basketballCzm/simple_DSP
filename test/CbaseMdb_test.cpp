@@ -109,8 +109,15 @@ TEST_F(redis_RdbTest,ClassRedisTest_hset_int)
     EXPECT_EQ(1,integer);
     integer = redis_Rdb_r.hset<int>("czmhset_int","field4",444);
     EXPECT_EQ(1,integer);
-    map<string,int> user_list_int;
+    map<std::string,int> user_list_int;
     redis_Rdb_r.hget<int>("czmhset_int",user_list_int);
+
+
+    for(std::map<std::string,int>::iterator it = user_list_int.begin();it!= user_list_int.end();it++)
+    {
+        TBSYS_LOG(DEBUG,"string hex:%s",hexStr((it->first).c_str(), (it->first).size()).c_str());
+    }
+
     EXPECT_EQ(4,user_list_int.size());
     map<string,int>::iterator iter_int;
     iter_int = user_list_int.find("field1");
@@ -518,35 +525,46 @@ TEST_F(tair_TdbTest,ClasstairTest_hset_int)
 {
     flag = tair_Tdb_r.InitDB("WUSHUU-TAIR-CS",5198);
     EXPECT_TRUE(flag);
-    integer = tair_Tdb_r.hset<int>("czmhset_int","field1_int",111);
+    integer = tair_Tdb_r.hset<int>("czmhset_int","field1",111);
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r.hset<int>("czmhset_int","field2_int",222);
+    integer = tair_Tdb_r.hset<int>("czmhset_int","field2",222);
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r.hset<int>("czmhset_int","field3_int",333);
+    integer = tair_Tdb_r.hset<int>("czmhset_int","field3",333);
     EXPECT_EQ(0,integer);
-    integer = tair_Tdb_r.hset<int>("czmhset_int","field4_int",444);
+    integer = tair_Tdb_r.hset<int>("czmhset_int","field4",444);
     EXPECT_EQ(0,integer);
     std::map<std::string,int> user_list_int;
     tair_Tdb_r.hget<int>("czmhset_int",user_list_int);
+
+    //从tair中取出来的字符串用find函数进行查找会存在问题
     for(std::map<std::string,int>::iterator it = user_list_int.begin();it!= user_list_int.end();it++)
     {
         TBSYS_LOG(DEBUG,"ClasstairTest_hset_int: %s",(it->first).c_str());
         TBSYS_LOG(DEBUG,"ClasstairTest_hset_int: %d",it->second);
+        TBSYS_LOG(DEBUG,"get hset_int int string: %d",strlen((it->first).c_str()));
+        TBSYS_LOG(DEBUG,"get hset_int int value: %d",sizeof(it->first).c_str());
+        TBSYS_LOG(DEBUG,"string hex:%s",hexStr((it->first).c_str(), (it->first).size()).c_str());
+
+        std::string str;
+        TBSYS_LOG(DEBUG,"111111111111:%d",sizeof(str.c_str()));
+        TBSYS_LOG(DEBUG,"get hset_int int value: %d",sizeof(it->second));
     }
     EXPECT_EQ(4,user_list_int.size());
-/*    std::map<std::string,int>::iterator iter_int;
-    iter_int = user_list_int.find("field1_int");
+    /*std::map<std::string,int>::iterator iter_int;
+    EXPECT_EQ(1,user_list_int["field1"]);
+    iter_int = user_list_int.find("field1");
     result = (iter_int==user_list_int.end()?false:true);
     EXPECT_TRUE(result);
-    iter_int = user_list_int.find("field2_int");
+    iter_int = user_list_int.find("field2");
     result = iter_int==user_list_int.end()?false:true;
     EXPECT_TRUE(result);
-    iter_int = user_list_int.find("field3_int");
+    iter_int = user_list_int.find("field3");
     result = iter_int==user_list_int.end()?false:true;
     EXPECT_TRUE(result);
-    iter_int = user_list_int.find("field4_int");
+    iter_int = user_list_int.find("field4");
     result = iter_int==user_list_int.end()?false:true;
-    EXPECT_TRUE(result);*/
+    EXPECT_TRUE(result);
+    EXPECT_EQ(1,user_list_int["field1"]);*/
 }
 
 TEST_F(tair_TdbTest,ClasstairTest_hset_float)
