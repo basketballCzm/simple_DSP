@@ -107,7 +107,11 @@ inline T tair_Tdb::get_value(char* data,int len)
 template<>
 inline std::string tair_Tdb::get_value<std::string>(char* data,int len)
 {
-    return std::string(data,len);
+    std::stringstream ss;
+    std::string s;
+    ss << data;
+    ss >> s;
+    return s;
 }
 
 tair_Tdb::tair_Tdb()

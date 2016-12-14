@@ -109,7 +109,11 @@ inline T redis_Rdb::get_value(char* data,int len)
 template<>
 inline std::string redis_Rdb::get_value<std::string>(char* data,int len)
 {
-    return std::string(data,len);
+    std::stringstream ss;
+    std::string s;
+    ss << data;
+    ss >> s;
+    return s;
 }
 
 template<typename V_TYPE>

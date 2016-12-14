@@ -74,6 +74,7 @@ inline std::string get_value<std::string>(char* data,int len)
     ss << data;
     ss >> s;
     return s;
+    //return std::string(data,len);
 }
 
 template<typename T>

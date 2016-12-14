@@ -18,5 +18,6 @@ build:
     - git config --global http.sslVerify false
     - npm install
     - mocha
+    - sleep 10000
     #deploy
     - echo "TODO"
