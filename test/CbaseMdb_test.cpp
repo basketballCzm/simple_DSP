@@ -50,7 +50,7 @@ private:
 
 TEST_F(redis_RdbTest,ClassRedisTest_set)
 {
-    TBSYS_LOGGER.setFileName("redis_db_test",true);   //文件名加上线程的id，确定日志的名称
+    TBSYS_LOGGER.setFileName("CbaseMdb.log",true);   //文件名加上线程的id，确定日志的名称
     TBSYS_LOGGER.setLogLevel("debug"); 
     db_map_init();
 
@@ -723,7 +723,7 @@ TEST_F(tair_TdbTest,ClasstairTest_zadd_float)
     vector<float> user_list_float;
     tair_Tdb_r.zrange<float>("czmzadd_float",0,10,user_list_float);
     EXPECT_EQ(4,user_list_float.size());
-    /*vector<float>::iterator iter_float;
+/*    vector<float>::iterator iter_float;
     iter_float = find(user_list_float.begin(),user_list_float.end(),111.1);
     result = iter_float==user_list_float.end()?false:true;
     EXPECT_TRUE(result);
@@ -735,7 +735,11 @@ TEST_F(tair_TdbTest,ClasstairTest_zadd_float)
     EXPECT_TRUE(result);
     iter_float = find(user_list_float.begin(),user_list_float.end(),444.4);
     result = iter_float==user_list_float.end()?false:true;
-    EXPECT_TRUE(result);*/
+    EXPECT_TRUE(result);
+    EXPECT_EQ(111.1,user_list_float[0]);
+    EXPECT_EQ(222.2,user_list_float[1]);
+    EXPECT_EQ(333.3,user_list_float[2]);
+    EXPECT_EQ(444.4,user_list_float[3]);*/
 }
 
 TEST_F(tair_TdbTest,ClasstairTest_zadd_double)

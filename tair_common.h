@@ -65,6 +65,7 @@ inline T get_value(char* data,int len)
     return *(T*)(data);
 }
 
+//string(data,len)会重新加一个'\0'
 template<>
 inline std::string get_value<std::string>(char* data,int len)
 {
