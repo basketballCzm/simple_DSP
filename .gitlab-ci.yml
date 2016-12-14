@@ -16,8 +16,7 @@ build:
     - test/CbaseMdb_test
     - test/user_map_test
     - git config --global http.sslVerify false
-    - npm install
-    - sleep 10000
+    - cnpm install
     - mocha
     #deploy
     - echo "TODO"
