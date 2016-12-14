@@ -9,7 +9,6 @@ build:
     - automake --add-missing
     - autoconf
     - automake
-    - sleep 10000
     - ./configure
     - TBLIB_ROOT=/usr/local make
     - TBLIB_ROOT=/usr/local make install
