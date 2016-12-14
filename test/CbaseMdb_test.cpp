@@ -541,7 +541,7 @@ TEST_F(tair_TdbTest,ClasstairTest_hset_int)
     {
         TBSYS_LOG(DEBUG,"ClasstairTest_hset_int: %s",(it->first).c_str());
         TBSYS_LOG(DEBUG,"ClasstairTest_hset_int: %d",it->second);
-        TBSYS_LOG(DEBUG,"get hset_int int string: %d",strlen((it->first).c_str()));
+        TBSYS_LOG(DEBUG,"get hset_int int string: %d",(it->first).size());
         TBSYS_LOG(DEBUG,"get hset_int int value: %d",sizeof(it->first).c_str());
         TBSYS_LOG(DEBUG,"string hex:%s",hexStr((it->first).c_str(), (it->first).size()).c_str());
 
@@ -550,8 +550,8 @@ TEST_F(tair_TdbTest,ClasstairTest_hset_int)
         TBSYS_LOG(DEBUG,"get hset_int int value: %d",sizeof(it->second));
     }
     EXPECT_EQ(4,user_list_int.size());
-    /*std::map<std::string,int>::iterator iter_int;
-    EXPECT_EQ(1,user_list_int["field1"]);
+    std::map<std::string,int>::iterator iter_int;
+    EXPECT_EQ(111,user_list_int["field1"]);
     iter_int = user_list_int.find("field1");
     result = (iter_int==user_list_int.end()?false:true);
     EXPECT_TRUE(result);
@@ -564,7 +564,7 @@ TEST_F(tair_TdbTest,ClasstairTest_hset_int)
     iter_int = user_list_int.find("field4");
     result = iter_int==user_list_int.end()?false:true;
     EXPECT_TRUE(result);
-    EXPECT_EQ(1,user_list_int["field1"]);*/
+    EXPECT_EQ(111,user_list_int["field1"]);
 }
 
 TEST_F(tair_TdbTest,ClasstairTest_hset_float)
@@ -586,9 +586,12 @@ TEST_F(tair_TdbTest,ClasstairTest_hset_float)
     for(std::map<std::string,float>::iterator it = user_list_float.begin();it!= user_list_float.end();it++)
     {
         TBSYS_LOG(DEBUG,"ClasstairTest_hset_float: %s",(it->first).c_str());
-        TBSYS_LOG(DEBUG,"ClasstairTest_hset_float: %f",it->second);
+        std::ostringstream strLog_ss1;
+        strLog_ss1 << "tair_common.h: tair hgetall one value: " << it->second << std::endl;
+        TBSYS_LOG(DEBUG,"get one success %s",strLog_ss1.str().c_str());
+        //TBSYS_LOG(DEBUG,"ClasstairTest_hset_float: %f",it->second);
     }
-    /*map<string,float>::iterator iter_float;
+    map<string,float>::iterator iter_float;
     iter_float = user_list_float.find("field1_float");
     result = iter_float==user_list_float.end()?false:true;
     EXPECT_TRUE(result);
@@ -600,7 +603,7 @@ TEST_F(tair_TdbTest,ClasstairTest_hset_float)
     EXPECT_TRUE(result);
     iter_float = user_list_float.find("field4_float");
     result = iter_float==user_list_float.end()?false:true;
-    EXPECT_TRUE(result);*/
+    EXPECT_TRUE(result);
 }
 
 TEST_F(tair_TdbTest,ClasstairTest_hset_double)
@@ -624,7 +627,7 @@ TEST_F(tair_TdbTest,ClasstairTest_hset_double)
         TBSYS_LOG(DEBUG,"ClasstairTest_hset_double: %s",(it->first).c_str());
         TBSYS_LOG(DEBUG,"ClasstairTest_hset_double: %f",it->second);
     }
-/*    iter_double = user_list_double.find("field1_double");
+    iter_double = user_list_double.find("field1_double");
     result = iter_double==user_list_double.end()?false:true;
     EXPECT_TRUE(result);
     iter_double = user_list_double.find("field2_double");
@@ -635,7 +638,7 @@ TEST_F(tair_TdbTest,ClasstairTest_hset_double)
     EXPECT_TRUE(result);
     iter_double = user_list_double.find("field4_double");
     result = iter_double==user_list_double.end()?false:true;
-    EXPECT_TRUE(result);*/
+    EXPECT_TRUE(result);
 }
 
 TEST_F(tair_TdbTest,ClasstairTest_hset_string)
@@ -660,7 +663,8 @@ TEST_F(tair_TdbTest,ClasstairTest_hset_string)
         TBSYS_LOG(DEBUG,"ClasstairTest_hset_string: %s",(it->first).c_str());
         TBSYS_LOG(DEBUG,"ClasstairTest_hset_string: %s",(it->second).c_str());
     }
-  /*  result = iter_string==user_list_string.end()?false:true;
+    iter_string = user_list_string.find("field1_string");
+    result = iter_string==user_list_string.end()?false:true;
     EXPECT_TRUE(result);
     iter_string = user_list_string.find("field2_string");
     result = iter_string==user_list_string.end()?false:true;
@@ -670,7 +674,7 @@ TEST_F(tair_TdbTest,ClasstairTest_hset_string)
     EXPECT_TRUE(result);
     iter_string = user_list_string.find("field4_string");
     result = iter_string==user_list_string.end()?false:true;
-    EXPECT_TRUE(result);*/
+    EXPECT_TRUE(result);
 }
 
 TEST_F(tair_TdbTest,ClasstairTest_zadd_int)
@@ -780,7 +784,7 @@ TEST_F(tair_TdbTest,ClasstairTest_zadd_string)
     tair_Tdb_r.zrange<string>("czmzadd_string",0,10,user_list_string);
     EXPECT_EQ(4,user_list_string.size());
     //string在泛型查找的过程中也有同样的问题,值取出来是正确的，但是泛型查找不到
-/*  vector<string>::iterator iter_string;
+    vector<string>::iterator iter_string;
     iter_string = find(user_list_string.begin(),user_list_string.end(),"111");
     result = iter_string==user_list_string.end()?false:true;
     EXPECT_TRUE(result);
@@ -796,7 +800,7 @@ TEST_F(tair_TdbTest,ClasstairTest_zadd_string)
     EXPECT_STREQ("111",user_list_string[0].c_str());
     EXPECT_STREQ("222",user_list_string[1].c_str());
     EXPECT_STREQ("333",user_list_string[2].c_str());
-    EXPECT_STREQ("444",user_list_string[3].c_str());*/
+    EXPECT_STREQ("444",user_list_string[3].c_str());
 }
 
 TEST_F(tair_TdbTest,ClasstairTest_sadd_int)
@@ -844,8 +848,8 @@ TEST_F(tair_TdbTest,ClasstairTest_sadd_float)
     vector<float> user_list_s_float;
     tair_Tdb_r.smembers<float>("czmsadd_float",user_list_s_float);
     EXPECT_EQ(4,user_list_s_float.size());
-    /*vector<float>::iterator iter_s_float;
-    iter_s_float = find(user_list_s_float.begin(),user_list_s_float.end(),111.1);
+    vector<float>::iterator iter_s_float;
+    /*iter_s_float = find(user_list_s_float.begin(),user_list_s_float.end(),111.1);
     result = iter_s_float==user_list_s_float.end()?false:true;
     EXPECT_TRUE(result);
     iter_s_float = find(user_list_s_float.begin(),user_list_s_float.end(),222.2);
@@ -905,7 +909,7 @@ TEST_F(tair_TdbTest,ClasstairTest_sadd_string)
     vector<string> user_list_s_string;
     tair_Tdb_r.smembers<string>("czmsadd_string",user_list_s_string);
     EXPECT_EQ(4,user_list_s_string.size());
-/*    vector<string>::iterator iter_s_string;
+    vector<string>::iterator iter_s_string;
     iter_s_string = find(user_list_s_string.begin(),user_list_s_string.end(),"111.11111");
     result = iter_s_string==user_list_s_string.end()?false:true;
     EXPECT_TRUE(result);
@@ -918,9 +922,5 @@ TEST_F(tair_TdbTest,ClasstairTest_sadd_string)
     iter_s_string = find(user_list_s_string.begin(),user_list_s_string.end(),"444.44444");
     result = (iter_s_string==user_list_s_string.end())?false:true;
     EXPECT_TRUE(result);
-    EXPECT_STREQ("111.11111",user_list_s_string[0].c_str());
-    EXPECT_STREQ("222.22222",user_list_s_string[1].c_str());
-    EXPECT_STREQ("333.33333",user_list_s_string[2].c_str());
-    EXPECT_STREQ("444.44444",user_list_s_string[3].c_str());*/
 }
 

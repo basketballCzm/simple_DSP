@@ -66,9 +66,13 @@ inline T get_value(char* data,int len)
 }
 
 template<>
-inline string get_value<std::string>(char* data,int len)
+inline std::string get_value<std::string>(char* data,int len)
 {
-    return string(data,len);
+    std::stringstream ss;
+    std::string s;
+    ss << data;
+    ss >> s;
+    return s;
 }
 
 template<typename T>
@@ -80,10 +84,6 @@ T tair_get(tair::tair_client_api & tair_instance,int area, const tair::common::d
 
     if(ret==TAIR_RETURN_SUCCESS)
     {
-        /*std::ostringstream strLog_ss;
-        strLog_ss << "tair_common.h: tair get value: " << get_value<T>(p_value->get_data(),p_value->get_size())<< std::endl;
-        TBSYS_LOG(DEBUG,"get success %s",strLog_ss.str().c_str());*/
-        //fprintf(stderr, "tair_common.h tair_get() return value=%s\n",hexStr(p_value->get_data(),p_value->get_size()).c_str());
         const T & value= get_value<T>(p_value->get_data(),p_value->get_size());
         delete (p_value);
         return value;
@@ -94,6 +94,29 @@ T tair_get(tair::tair_client_api & tair_instance,int area, const tair::common::d
         return default_v;
     }
 }
+
+/*template<>
+std::string tair_get<std::string>(tair::tair_client_api & tair_instance,int area, const tair::common::data_entry &key, std::string default_v)
+{
+    tair::common::data_entry *p_value;
+    int ret=tair_instance.get(area,key,p_value);
+    fprintf(stderr, "tair_common.h tair_get() :%s\n",tair_instance.get_error_msg(ret));
+
+    if(ret==TAIR_RETURN_SUCCESS)
+    {
+        std::string str_value_temp = get_value<std::string>(p_value->get_data(),p_value->get_size());
+        //就在后面加一个\0
+        std::string str_value = get_value<std::string>(p_value->get_data(),strlen(str_value_temp.c_str()));
+        delete (p_value);
+        return str_value;
+    }
+    else
+    {
+        fprintf(stderr, "tair_common.h tair_get() error:%s\n",tair_instance.get_error_msg(ret));
+        return default_v;
+    }
+}*/
+
 
 template<typename V_TYPE>
 inline tair::common::data_entry *get_data_entry_of_value (const V_TYPE & data)
@@ -114,6 +137,7 @@ inline int tair_hset(tair::tair_client_api & tair_instance,int area,const string
 {
     tair::common::data_entry key(s_key.c_str(),s_key.size()+1,true);
     tair::common::data_entry field(s_field.c_str(),s_field.c_str()+1,true);
+
     tair::common::data_entry *p_value=get_data_entry_of_value(data);
     int ret=tair_instance.hset(area,key,field,*p_value,0,0);
     fprintf(stderr, "tair_put: %s\n",tair_instance.get_error_msg(ret));
@@ -124,15 +148,6 @@ inline int tair_hset(tair::tair_client_api & tair_instance,int area,const string
 template <typename V_TYPE>
 inline int tair_hset(tair::tair_client_api & tair_instance,int area,const tair::common::data_entry & key,const tair::common::data_entry & field, const V_TYPE & data)
 {
-
-    std::ostringstream strLog_ss;
-    strLog_ss << "tair_common.h<field>: tair hset one value: " << get_value<std::string>(field.get_data(),field.get_size()) << std::endl;
-    TBSYS_LOG(DEBUG,"get one success %s",strLog_ss.str().c_str());
-
-    std::ostringstream strLog_ss1;
-    strLog_ss1 << "tair_common.h<value>: tair hset one value: " << data << std::endl;
-    TBSYS_LOG(DEBUG,"get one success %s",strLog_ss1.str().c_str());
-
     tair::common::data_entry *p_value=get_data_entry_of_value(data);
     int ret=tair_instance.hset(area,key,field,*p_value,0,0);
     delete (p_value);
@@ -227,40 +242,16 @@ inline string  get_date_str(time_t t)
     return ss_date.str();
 }
 
-
-/*int tair_client_api::zrangebyscore (const int area, const data_entry & key, const double start,const double end,
-          vector <data_entry *> &vals, vector<double> &scores,const int limit,const int withscore) {
-    return impl->zrangebyscore(area, key, start, end, vals, scores,limit,withscore);
-
-int zrangebyscore (const int area, const data_entry & key, const double start,const double end,
-          vector <data_entry *> &vals, vector<double> &scores,const int limit,const int withscore);*/
-
 template <typename V_TYPE>
 vector<V_TYPE>* tair_zrangebyscore(tair::tair_client_api & tair_instance,const int area, const tair::common::data_entry &key,
                                    double start,double end, vector<V_TYPE> &members_set)
 {
     vector<tair::common::data_entry*> values;
     vector<double> scores;
- //   TBSYS_LOG(DEBUG,"entry members_set size %d",members_set.size());
     tair_instance.zrangebyscore(area,key,start,end,values,scores,0,0);
-  //  zrangebyscore(area,key,start,end,values,scores,0,0);
- //   TBSYS_LOG(DEBUG,"entry members_set size %d",values.size());
-
-    /*for(int i = 0; i < values.size(); i++)
-    {
-        std::ostringstream strLog_ss;
-        strLog_ss << "tair_common.h: tair get one value: " << get_value<V_TYPE>((values[i])->get_data(),(values[i])->get_size()) << std::endl;
-        TBSYS_LOG(DEBUG,"get one success %s",strLog_ss.str().c_str());
-    }*/
-
     for(vector<tair::common::data_entry *>::iterator it=values.begin(); it!=values.end(); it++)
     {
         members_set.push_back(get_value<V_TYPE>((*it)->get_data(),(*it)->get_size()));
-
-        std::ostringstream strLog_ss;
-        strLog_ss << "tair_common.h: tair get value zrange: " << get_value<V_TYPE>((*it)->get_data(),(*it)->get_size())<< std::endl;
-        TBSYS_LOG(DEBUG,"get success %s",strLog_ss.str().c_str());
-
         delete (*it);    //为什么每个循环都要delete
     }
     values.clear();
@@ -293,6 +284,7 @@ vector<V_TYPE>* tair_smembers(tair::tair_client_api & tair_instance,int area, co
     return & members_set;
 }
 
+
 template <typename V_TYPE>
 std::map<std::string,V_TYPE>* tair_hgetall(tair::tair_client_api & tair_instance,int area, const tair::common::data_entry &key, std::map<std::string,V_TYPE> &members_set)
 {
@@ -302,12 +294,14 @@ std::map<std::string,V_TYPE>* tair_hgetall(tair::tair_client_api & tair_instance
     for(std::map<tair::common::data_entry*, tair::common::data_entry*>::iterator it=field_values.begin(); it!=field_values.end(); it++)
     {
         std::string str_field = get_value<std::string>((it->first)->get_data(),(it->first)->get_size());
+        //就在后面加一个\0
+        //std::string str_field = get_value<std::string>((it->first)->get_data(),strlen(str_field_temp.c_str()));
         V_TYPE value = get_value<V_TYPE>((it->second)->get_data(),(it->second)->get_size());
-        members_set[str_field] = value;
+        members_set.insert(std::pair<std::string,V_TYPE>(str_field,value));
         std::ostringstream strLog_ss;
-        strLog_ss << "tair_common.h: tair hgetall one value: " << str_field << std::endl;
+        //TBSYS_LOG(DEBUG,"string hex:%s",hexStr((it->first).c_str(), (it->first).size()).c_str());
+        strLog_ss << "tair_common.h: tair hgetall one value: " << hexStr(str_field.c_str(),str_field.size())<<", size:"<<(it->first)->get_size()<< std::endl;
         TBSYS_LOG(DEBUG,"get one success %s",strLog_ss.str().c_str());
-
         std::ostringstream strLog_ss1;
         strLog_ss1 << "tair_common.h: tair hgetall one value: " << members_set[str_field] << std::endl;
         TBSYS_LOG(DEBUG,"get one success %s",strLog_ss1.str().c_str());

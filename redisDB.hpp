@@ -145,15 +145,6 @@ int redis_Rdb::hset(std::string key,std::string field,T value)
     std::ostringstream strLog_ss;
     strLog_ss << "redis_op: redis hset %s " << value << std::endl;
     std::string strLog = strLog_ss.str();
-    
-    /*std::ostringstream strset_ss;
-    strset_ss << "SET %s " << value << std::endl;
-    std::string strset = strset_ss.str();
-    TBSYS_LOG(DEBUG,strLog.c_str(),key.c_str());
-    this->_reply = (redisReply*)redisCommand(this->_connect, strset.c_str(), key.c_str());*/
-
-    /*std::string str_h = "HSET czm_int field 1111";
-    reply = (redisReply*)redisCommand(ctest,str_h.c_str());*/
 
     std::ostringstream strset_ss;
     strset_ss << "HSET " << key << " " << field << " " <<value << std::endl;
@@ -268,11 +259,8 @@ int redis_Rdb::zadd(std::string key, int score, T value)
     strset_ss << "ZADD " << key << " " << score << " " << value << std::endl;
     std::string strset = strset_ss.str();
     TBSYS_LOG(DEBUG,strLog.c_str(),key.c_str());
-    TBSYS_LOG(DEBUG,"success111111111");
-    TBSYS_LOG(DEBUG,"this->_connect:0x%x", this->_connect);
     TBSYS_LOG(DEBUG,"%s", strset.c_str());
     this->_reply = (redisReply*)redisCommand(this->_connect, strset.c_str());
-    TBSYS_LOG(DEBUG,"success222222222");
 
     if(NULL == this->_reply || REDIS_REPLY_INTEGER != this->_reply->type)
     {
@@ -282,7 +270,6 @@ int redis_Rdb::zadd(std::string key, int score, T value)
         freeReplyObject(this->_reply);
         return 0;
     }
-    TBSYS_LOG(DEBUG,"success333333333");
     int integer = this->_reply->integer;
     freeReplyObject(this->_reply);
     TBSYS_LOG(DEBUG,"zadd success");
@@ -307,10 +294,6 @@ std::vector<V_TYPE>* redis_Rdb::zrange(std::string key, int min, int max, std::v
         stream1.str(this->_reply->element[i]->str);
         V_TYPE value;
         stream1 >> value;
-
-        /*        std::ostringstream strLog_ss;
-                strLog_ss << "redis: redis zrange" << value << std::endl;
-                TBSYS_LOG(DEBUG,"redis: redis zrange %s",strLog_ss.str().c_str());*/
 
         members_set.push_back(value);
     }
