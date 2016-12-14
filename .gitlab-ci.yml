@@ -17,7 +17,7 @@ build:
     - test/user_map_test
     - git config --global http.sslVerify false
     - npm install
-    - mocha
     - sleep 10000
+    - mocha
     #deploy
     - echo "TODO"
