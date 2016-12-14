@@ -520,7 +520,7 @@ TEST_F(tair_TdbTest,ClasstairTest_set)
 }
 
 
-
+/*从tair中取出的字符串用find函数进行查找的话会存在问题*/
 TEST_F(tair_TdbTest,ClasstairTest_hset_int)
 {
     flag = tair_Tdb_r.InitDB("WUSHUU-TAIR-CS",5198);
