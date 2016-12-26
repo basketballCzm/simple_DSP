@@ -415,7 +415,10 @@ TEST_F(CBaseMdbTest,ClassTest_sadd_string)
     iter_s_string = find(user_list_s_string.begin(),user_list_s_string.end(),"444.4");
     result = iter_s_string==user_list_s_string.end()?false:true;
     EXPECT_TRUE(result);
+}
 
+TEST_F(CBaseMdbTest,ClassTest_removeKey)
+{
     r.removeKey(removekey_namespace[r.get_TypeDb()],"czmset_int");
     r.removeKey(removekey_namespace[r.get_TypeDb()],"czmset_float");
     r.removeKey(removekey_namespace[r.get_TypeDb()],"czmset_double");
