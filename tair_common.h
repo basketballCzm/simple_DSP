@@ -298,7 +298,6 @@ std::map<std::string,V_TYPE>* tair_hgetall(tair::tair_client_api & tair_instance
     for(std::map<tair::common::data_entry*, tair::common::data_entry*>::iterator it=field_values.begin(); it!=field_values.end(); it++)
     {
         std::string str_field = get_value<std::string>((it->first)->get_data(),(it->first)->get_size());
-        //就在后面加一个\0
         //std::string str_field = get_value<std::string>((it->first)->get_data(),strlen(str_field_temp.c_str()));
         V_TYPE value = get_value<V_TYPE>((it->second)->get_data(),(it->second)->get_size());
         members_set.insert(std::pair<std::string,V_TYPE>(str_field,value));

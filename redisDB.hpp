@@ -17,11 +17,11 @@ struct redis_identity
     typedef T type;
 };*/
 
-class redis_Rdb
+class RedisDb
 {
 public:
-    redis_Rdb() {}
-    ~redis_Rdb()
+    RedisDb() {}
+    ~RedisDb()
     {
         this->_connect = NULL;
         this->_reply = NULL;
@@ -66,12 +66,19 @@ public:
         return this->_reply->integer;
     }
 
+    void close()
+    {
+        TBSYS_LOG(DEBUG,"entry redis close!");
+        redisCommand(this->_connect,"QUIT");
+        TBSYS_LOG(DEBUG,"entry redis close success!");
+    }
+
 private:
     redisContext* _connect;
     redisReply* _reply;
 };
 
-bool redis_Rdb::connect(std::string host, int port)
+bool RedisDb::connect(std::string host, int port)
 {
     this->_connect = redisConnect(host.c_str(), port);
     if(this->_connect != NULL && this->_connect->err)
@@ -83,7 +90,7 @@ bool redis_Rdb::connect(std::string host, int port)
 }
 
 template<typename T>
-int redis_Rdb::hset(std::string key,std::string field,T value)
+int RedisDb::hset(std::string key,std::string field,T value)
 {
     TBSYS_LOG(DEBUG,"this->_connect:0x%x",this->_connect);
     TBSYS_LOG(DEBUG,"entry redis_mdb_hset");
@@ -106,7 +113,7 @@ int redis_Rdb::hset(std::string key,std::string field,T value)
 }
 
 template<typename V_TYPE>
-std::map<std::string,V_TYPE>* redis_Rdb::hget(std::string key, std::map<std::string,V_TYPE> &members_set)
+std::map<std::string,V_TYPE>* RedisDb::hget(std::string key, std::map<std::string,V_TYPE> &members_set)
 {
     TBSYS_LOG(DEBUG,"entry redis_mdb_hget");
     TBSYS_LOG(DEBUG,"this->_connect:0x%x", this->_connect);
@@ -132,7 +139,7 @@ std::map<std::string,V_TYPE>* redis_Rdb::hget(std::string key, std::map<std::str
 }
 
 template<typename T>
-int redis_Rdb::set(std::string key, T value)
+int RedisDb::set(std::string key, T value)
 {
     TBSYS_LOG(DEBUG,"enter redis_mdb_set");
     std::ostringstream strLog_ss;
@@ -163,13 +170,12 @@ int redis_Rdb::set(std::string key, T value)
         freeReplyObject(this->_reply);
         return 1;
     }
-
     freeReplyObject(this->_reply);
     return 0;
 }
 
 template<typename T>
-T redis_Rdb::get(std::string key,T default_v)
+T RedisDb::get(std::string key,T default_v)
 {
     tair::common::data_entry *p_value;
     TBSYS_LOG(DEBUG,"redis: redis get %s",key.c_str());
@@ -192,7 +198,7 @@ T redis_Rdb::get(std::string key,T default_v)
 }
 
 template<typename T>
-int redis_Rdb::zadd(std::string key, int score, T value)
+int RedisDb::zadd(std::string key, int score, T value)
 {
 
     TBSYS_LOG(DEBUG,"enter redis_mdb_zadd");
@@ -222,7 +228,7 @@ int redis_Rdb::zadd(std::string key, int score, T value)
 }
 
 template <typename V_TYPE>
-std::vector<V_TYPE>* redis_Rdb::zrange(std::string key, int min, int max, std::vector<V_TYPE> &members_set)
+std::vector<V_TYPE>* RedisDb::zrange(std::string key, int min, int max, std::vector<V_TYPE> &members_set)
 {
     TBSYS_LOG(DEBUG,"redis: redis zrange string %s %d %d",key.c_str(),min,max);
     this->_reply = (redisReply*)redisCommand(this->_connect,"ZRANGE %s %d %d",key.c_str(),min,max);
@@ -248,7 +254,7 @@ std::vector<V_TYPE>* redis_Rdb::zrange(std::string key, int min, int max, std::v
 }
 
 template<typename T>
-int redis_Rdb::sadd(std::string key, T value)
+int RedisDb::sadd(std::string key, T value)
 {
 
     TBSYS_LOG(DEBUG,"enter redis_mdb_sadd");
@@ -275,7 +281,7 @@ int redis_Rdb::sadd(std::string key, T value)
 }
 
 template <typename V_TYPE>
-std::vector<V_TYPE>* redis_Rdb::smembers(std::string key,std::vector<V_TYPE> &members_set)
+std::vector<V_TYPE>* RedisDb::smembers(std::string key,std::vector<V_TYPE> &members_set)
 {
     std::vector<tair::common::data_entry*> values;
     TBSYS_LOG(DEBUG,"user_op: redis smembers string %s",key.c_str());

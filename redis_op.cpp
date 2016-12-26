@@ -58,7 +58,7 @@ static void penv(const char * const * envp)
 
 }
 
-void Redis_op(UriQueryListA * queryList, Json::Value & ret, redis_Rdb *r)
+void Redis_op(UriQueryListA * queryList, Json::Value & ret, RedisDb *r)
 {
     string action;
     unsigned long long mac=INT_MIN;
@@ -225,7 +225,7 @@ int main()
     UriParserStateA state;
     Json::StyledWriter writer;
 	
-	redis_Rdb *r = new redis_Rdb();
+	RedisDb *r = new RedisDb();
 	if(!r->connect("WUSHUU-REDIS",6379))
 	{
 		TBSYS_LOG(DEBUG,"connect error!\n");
