@@ -6,4 +6,4 @@ extern const char * master_addr;
 extern const char * slave_addr;
 extern const char * group_name;
 extern int tair_namespace;
-void db_map_init();
+void db_map();

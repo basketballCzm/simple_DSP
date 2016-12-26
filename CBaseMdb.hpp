@@ -6,14 +6,25 @@
 #include "loadConf.h"
 #include "tblog.h"
 
+enum type_db {redis_type=0,tair_type=1};
 
-template <typename T_db>
 class CBaseMdb
 {
 private:
-    T_db db;
+    tair_Tdb  m_tair_db;
+    redis_Rdb m_redis_db;
+    type_db   m_type;
 public:
+    CBaseMdb()
+    {
+        m_type = redis_type;
+    }
+
     bool connect(std::string host, int port);
+
+    void set_type_db(int value);
+
+    int get_type_db();
 
     template<typename T>
     int hset(std::string key,std::string field,T value);
@@ -44,84 +55,209 @@ public:
     bool InitDB(std::string host, int port);
 };
 
-
-template<typename T_db>
-bool CBaseMdb<T_db>::connect(std::string host, int port)
+void CBaseMdb::set_type_db(int value)
 {
-    return db.connect(host,port);
+    m_type = (type_db)value;
 }
 
-template<typename T_db>
-int CBaseMdb<T_db>::removeKey(int area,std::string key)
+int CBaseMdb::get_type_db()
 {
-    return db.removeKey(area,key);
+    return (int)m_type;
+}
+
+bool CBaseMdb::connect(std::string host, int port)
+{
+    if(redis_type == m_type)
+    {
+        return m_redis_db.connect(host,port);
+    }
+    else if(tair_type == m_type)
+    {
+        return m_tair_db.connect(host,port);
+    }
+    else
+    {
+        return false;
+    }
+}
+
+int CBaseMdb::removeKey(int area,std::string key)
+{
+    if(redis_type == m_type)
+    {
+        return m_redis_db.removeKey(area,key);
+    }
+    else if(tair_type == m_type)
+    {
+        return m_tair_db.removeKey(area,key);
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 
-template<typename T_db>
 template<typename T>
-int CBaseMdb<T_db>::set(std::string key, T value)
+int CBaseMdb::set(std::string key, T value)
 {
     TBSYS_LOG(DEBUG,"enter base_mdb_set");
-    return db.set<T>(key,value);
+    if(redis_type == m_type)
+    {
+        return m_redis_db.set<T>(key,value);
+    }
+    else if(tair_type == m_type)
+    {
+        return m_tair_db.set<T>(key,value);
+    }
+    else
+    {
+        return 0;
+    }
 }
 
-template<typename T_db>
+
 template<typename T>
-int CBaseMdb<T_db>::hset(std::string key,std::string field,T value)
+int CBaseMdb::hset(std::string key,std::string field,T value)
 {
     TBSYS_LOG(DEBUG,"enter base_mdb_hset");
-    return db.hset<T>(key,field,value);
+    if(redis_type == m_type)
+    {
+        return m_redis_db.hset<T>(key,field,value);
+    }
+    else if(tair_type == m_type)
+    {
+        return m_tair_db.hset<T>(key,field,value);
+    }
+    else
+    {
+        return 0;
+    }
 }
 
-template<typename T_db>
 template<typename V_TYPE>
-std::map<std::string,V_TYPE>* CBaseMdb<T_db>::hget(std::string key, std::map<std::string,V_TYPE> &members_set)
+std::map<std::string,V_TYPE>* CBaseMdb::hget(std::string key, std::map<std::string,V_TYPE> &members_set)
 {
     TBSYS_LOG(DEBUG,"entry base_mdb_hget");
-    return db.hget<V_TYPE>(key,members_set);
+    if(redis_type == m_type)
+    {
+        return m_redis_db.hget<V_TYPE>(key,members_set);
+    }
+    else if(tair_type == m_type)
+    {
+        return m_tair_db.hget<V_TYPE>(key,members_set);
+    }
+    else
+    {
+        return &members_set;
+    }
 }
 
-template<typename T_db>
 template<typename T>
-T CBaseMdb<T_db>::get(std::string key,T default_v)
+T CBaseMdb::get(std::string key,T default_v)
 {
-    return db.get<T>(key,default_v);
+    TBSYS_LOG(DEBUG,"entry base_mdb_get");
+    if(redis_type == m_type)
+    {
+        return m_redis_db.get<T>(key,default_v);
+    }
+    else if(tair_type == m_type)
+    {
+        return m_tair_db.get<T>(key,default_v);
+    }
+    else
+    {
+        return default_v;
+    }
 }
 
-template<typename T_db>
 template<typename T>
-int CBaseMdb<T_db>::zadd(std::string key, int score, T value)
+int CBaseMdb::zadd(std::string key, int score, T value)
 {
-    return db.zadd<T>(key,score,value);
+    TBSYS_LOG(DEBUG,"entry base_mdb_zadd");
+    if(redis_type == m_type)
+    {
+        return m_redis_db.zadd<T>(key,score,value);
+    }
+    else if(tair_type == m_type)
+    {
+        return m_tair_db.zadd<T>(key,score,value);
+    }
+    else
+    {
+        return 0;
+    }
 }
 
-template<typename T_db>
 template <typename V_TYPE>
-std::vector<V_TYPE>* CBaseMdb<T_db>::zrange(std::string key, int min, int max, std::vector<V_TYPE> &members_set)
+std::vector<V_TYPE>* CBaseMdb::zrange(std::string key, int min, int max, std::vector<V_TYPE> &members_set)
 {
-    return db.zrange<V_TYPE>(key,min,max,members_set);
+    TBSYS_LOG(DEBUG,"entry base_mdb_zrange");
+    if(redis_type == m_type)
+    {
+        return m_redis_db.zrange<V_TYPE>(key,min,max,members_set);
+    }
+    else if(tair_type == m_type)
+    {
+        return m_tair_db.zrange<V_TYPE>(key,min,max,members_set);
+    }
+    else
+    {
+        return &members_set;
+    }
 }
 
-template<typename T_db>
 template<typename T>
-int CBaseMdb<T_db>::sadd(std::string key, T value)
+int CBaseMdb::sadd(std::string key, T value)
 {
-    return db.sadd<T>(key,value);
+    TBSYS_LOG(DEBUG,"entry base_mdb_sadd");
+    if(redis_type == m_type)
+    {
+        return m_redis_db.sadd<T>(key,value);
+    }
+    else if(tair_type == m_type)
+    {
+        return m_tair_db.sadd<T>(key,value);
+    }
+    else
+    {
+        return 0;
+    }
 }
 
-template<typename T_db>
 template <typename V_TYPE>
-std::vector<V_TYPE>* CBaseMdb<T_db>::smembers(std::string key,std::vector<V_TYPE> &members_set)
+std::vector<V_TYPE>* CBaseMdb::smembers(std::string key,std::vector<V_TYPE> &members_set)
 {
-    return db.smembers<V_TYPE>(key,members_set);
+    TBSYS_LOG(DEBUG,"entry base_mdb_smembers");
+    if(redis_type == m_type)
+    {
+        return m_redis_db.smembers<V_TYPE>(key,members_set);
+    }
+    else if(tair_type == m_type)
+    {
+        return m_tair_db.smembers<V_TYPE>(key,members_set);
+    }
+    else
+    {
+        return &members_set;
+    }
 }
 
-template <typename T_db>
-bool CBaseMdb<T_db>::InitDB(std::string host, int port)
+bool CBaseMdb::InitDB(std::string host, int port)
 {
-    bool bFlag = this->connect(host,port);
-    return bFlag;
+    TBSYS_LOG(DEBUG,"entry base_mdb_InitDB");
+    if(redis_type == m_type)
+    {
+        return m_redis_db.connect(host,port);
+    }
+    else if(tair_type == m_type)
+    {
+        return m_tair_db.connect(host,port);
+    }
+    else
+    {
+        return false;
+    }
 }
 #endif
 

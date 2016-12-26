@@ -54,65 +54,8 @@ public:
 
 private:
     tair::tair_client_api *ptair_Client;
-
-    inline void get_data_entry_sstream(std::stringstream&)
-    {
-    }
-
-    template<typename T, typename... Args>
-    void get_data_entry_sstream(std::stringstream &ss_entry,T t,Args... args)
-    {
-        ss_entry<<t; //和cin一样
-        get_data_entry_sstream(ss_entry,args...);
-    }
-
-    template<typename... Args>
-    void get_data_entry(tair::common::data_entry &entry,Args... args)
-    {
-        std::stringstream ss_entry;
-        get_data_entry_sstream(ss_entry,args...);
-        std::string s_entry=ss_entry.str();
-        entry.set_data(s_entry.c_str(), s_entry.size() + 1, true);
-        return;
-    }
-
-    template<typename T>
-    inline T get_value(char* data,int len);
-
 };
 //"add redisBD and tairDB from MDB"
-
-
-template<typename V_TYPE>
-inline tair::common::data_entry * tair_Tdb::get_data_entry_of_value (const V_TYPE & data)
-{
-    tair::common::data_entry *p_new_entry=new tair::common::data_entry((char *)(&data),sizeof(V_TYPE),true);
-    return p_new_entry;
-}
-
-template<>
-inline tair::common::data_entry * tair_Tdb::get_data_entry_of_value<std::string> (const std::string & data)
-{
-    tair::common::data_entry *p_new_entry=new tair::common::data_entry(data.c_str(),data.size()+1,true);
-    return p_new_entry;
-}
-
-template<typename T>
-inline T tair_Tdb::get_value(char* data,int len)
-{
-    TBSYS_LOG(DEBUG,"entry get_value");
-    return *(T*)(data);
-}
-
-template<>
-inline std::string tair_Tdb::get_value<std::string>(char* data,int len)
-{
-    std::stringstream ss;
-    std::string s;
-    ss << data;
-    ss >> s;
-    return s;
-}
 
 tair_Tdb::tair_Tdb()
 {

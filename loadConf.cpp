@@ -12,9 +12,9 @@ const char * master_addr;
 const char * slave_addr;
 const char * group_name;
 int tair_namespace;
-void db_map_init()
+void db_map()
 {
-	TBSYS_LOG(DEBUG,"enter db_map_init()");
+	TBSYS_LOG(DEBUG,"enter db_map()");
     static bool b_started=false;
     if(!b_started)
     {
@@ -23,8 +23,8 @@ void db_map_init()
         TBSYS_LOG(DEBUG,"load config file %s error", config_file);
         return;
       }
-    TBSYS_LOG(DEBUG,"db_map_init() load config ok!");
-    pCreateDB       = config.getString("base_mdb","create_db",NULL);
+    TBSYS_LOG(DEBUG,"db_map() load config ok!");
+    pCreateDB       = config.getString("tair_rdb","create_db",NULL);
     master_addr     = config.getString("tair_rdb", "master_addr", NULL);
     slave_addr      = config.getString("tair_rdb", "slave_addr", NULL);            
     group_name      = config.getString("tair_rdb", "group_name", NULL);

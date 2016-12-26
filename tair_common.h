@@ -69,11 +69,13 @@ inline T get_value(char* data,int len)
 template<>
 inline std::string get_value<std::string>(char* data,int len)
 {
-    std::stringstream ss;
+    int nSize = strlen(data)<len?strlen(data):len;
+    return std::string(data,nSize);
+    /*std::stringstream ss;
     std::string s;
     ss << data;
     ss >> s;
-    return s;
+    return s;*/
     //return std::string(data,len);
 }
 
@@ -254,7 +256,7 @@ vector<V_TYPE>* tair_zrangebyscore(tair::tair_client_api & tair_instance,const i
     for(vector<tair::common::data_entry *>::iterator it=values.begin(); it!=values.end(); it++)
     {
         members_set.push_back(get_value<V_TYPE>((*it)->get_data(),(*it)->get_size()));
-        delete (*it);    //为什么每个循环都要delete
+        delete (*it);
     }
     values.clear();
     TBSYS_LOG(DEBUG,"members_set size %d",members_set.size());
@@ -292,7 +294,7 @@ std::map<std::string,V_TYPE>* tair_hgetall(tair::tair_client_api & tair_instance
 {
     std::map<tair::common::data_entry*, tair::common::data_entry*> field_values;
     tair_instance.hgetall(area,key,field_values);
-    //注意这里有问题
+    //map的迭代器不能加模板中的类型
     for(std::map<tair::common::data_entry*, tair::common::data_entry*>::iterator it=field_values.begin(); it!=field_values.end(); it++)
     {
         std::string str_field = get_value<std::string>((it->first)->get_data(),(it->first)->get_size());

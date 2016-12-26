@@ -69,66 +69,7 @@ public:
 private:
     redisContext* _connect;
     redisReply* _reply;
-
-    template<typename V_TYPE>
-    inline tair::common::data_entry *get_data_entry_of_value (const V_TYPE & data);
-
-    inline void get_data_entry_sstream(std::stringstream&)
-    {
-    }
-
-    template<typename T, typename... Args>
-    void get_data_entry_sstream(std::stringstream &ss_entry,T t,Args... args)
-    {
-        ss_entry<<t; //和cin一样
-        get_data_entry_sstream(ss_entry,args...);
-    }
-
-    template<typename... Args>
-    void get_data_entry(tair::common::data_entry &entry,Args... args)
-    {
-        std::stringstream ss_entry;
-        get_data_entry_sstream(ss_entry,args...);
-        std::string s_entry=ss_entry.str();
-        entry.set_data(s_entry.c_str(), s_entry.size() + 1, true);
-        return;
-    }
-
-    template<typename T>
-    inline T get_value(char* data,int len);
-
 };
-
-//两个模板类的实例化
-template<typename T>
-inline T redis_Rdb::get_value(char* data,int len)
-{
-    return *(T*)(data);
-}
-
-template<>
-inline std::string redis_Rdb::get_value<std::string>(char* data,int len)
-{
-    std::stringstream ss;
-    std::string s;
-    ss << data;
-    ss >> s;
-    return s;
-}
-
-template<typename V_TYPE>
-inline tair::common::data_entry* redis_Rdb::get_data_entry_of_value(const V_TYPE & data)
-{
-    tair::common::data_entry *p_new_entry=new tair::common::data_entry((char *)(&data),sizeof(V_TYPE),true);
-    return p_new_entry;
-}
-
-template<>
-inline tair::common::data_entry* redis_Rdb::get_data_entry_of_value<std::string>(const std::string & data)
-{
-    tair::common::data_entry *p_new_entry=new tair::common::data_entry(data.c_str(),data.size()+1,true);
-    return p_new_entry;
-}
 
 bool redis_Rdb::connect(std::string host, int port)
 {
