@@ -1,8 +1,5 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
-/* ad data file path */
-#undef AD_DATA_FILE
-
 /* Define to 1 if you have the <fcgi_config.h> header file. */
 #undef HAVE_FCGI_CONFIG_H
 
@@ -65,9 +62,6 @@
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
-
-/* users map file path */
-#undef USER_MAP_FILE
 
 /* Version number of package */
 #undef VERSION

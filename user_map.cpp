@@ -83,6 +83,7 @@ namespace user_map
             max_in_shop_gap = config.getInt("user_map", "max_in_shop_gap", 300);
 
             pg_server   = config.getString("user_map", "pg_server", NULL);
+            
             pg_user     = config.getString("user_map", "pg_user", NULL);
             pg_database = config.getString("user_map", "pg_database", NULL);
             pg_password = config.getString("user_map", "pg_password", NULL);
