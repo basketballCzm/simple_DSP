@@ -1,5 +1,5 @@
-#ifndef __REDISDB_HPP__
-#define __REDISDB_HPP__
+#ifndef REDISDB_HPP_INCLUDED
+#define REDISDB_HPP_INCLUDED
 #include <string>
 #include <hiredis/hiredis.h>
 #include <vector>
@@ -43,10 +43,10 @@ public:
     T get(std::string key,T default_v);
 
     template<typename T>
-    int zadd(std::string key, int score, T value);
+    int zadd(std::string key, double score, T value);
 
     template <typename V_TYPE>
-    std::vector<V_TYPE>* zrange(std::string key, int min, int max, std::vector<V_TYPE> &members_set);
+    std::vector<V_TYPE>* zrange(std::string key, double min, double max, std::vector<V_TYPE> &members_set);
 
     template<typename T>
     int sadd(std::string key, T value);
@@ -71,6 +71,18 @@ public:
         TBSYS_LOG(DEBUG,"entry redis close!");
         redisCommand(this->_connect,"QUIT");
         TBSYS_LOG(DEBUG,"entry redis close success!");
+    }
+
+    int incr(std::string key,int integer)
+    {
+        this->_reply = (redisReply*)redisCommand(this->_connect,"incrby %s %d",key.c_str(),integer);
+        if(NULL == this->_reply || REDIS_REPLY_INTEGER != this->_reply->type)
+        {
+            freeReplyObject(this->_reply);
+            return 0;
+        }
+        freeReplyObject(this->_reply);
+        return this->_reply->integer;
     }
 
 private:
@@ -198,7 +210,7 @@ T RedisDb::get(std::string key,T default_v)
 }
 
 template<typename T>
-int RedisDb::zadd(std::string key, int score, T value)
+int RedisDb::zadd(std::string key, double score, T value)
 {
 
     TBSYS_LOG(DEBUG,"enter redis_mdb_zadd");
@@ -228,7 +240,7 @@ int RedisDb::zadd(std::string key, int score, T value)
 }
 
 template <typename V_TYPE>
-std::vector<V_TYPE>* RedisDb::zrange(std::string key, int min, int max, std::vector<V_TYPE> &members_set)
+std::vector<V_TYPE>* RedisDb::zrange(std::string key, double min, double max, std::vector<V_TYPE> &members_set)
 {
     TBSYS_LOG(DEBUG,"redis: redis zrange string %s %d %d",key.c_str(),min,max);
     this->_reply = (redisReply*)redisCommand(this->_connect,"ZRANGE %s %d %d",key.c_str(),min,max);

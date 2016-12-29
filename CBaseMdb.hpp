@@ -1,5 +1,5 @@
-#ifndef __CBASEMDB_HPP__
-#define __CBASEMDB_HPP__
+#ifndef CBASEMDB_HPP_INCLUDED
+#define CBASEMDB_HPP_INCLUDED
 #include <string>
 #include "redisDB.hpp"
 #include "tairDB.hpp"
@@ -17,7 +17,7 @@ private:
 public:
     CBaseMdb()
     {
-        m_type = REDIS;
+        m_type = TAIR;
     }
 
     bool connect(std::string host, int port);
@@ -41,10 +41,10 @@ public:
     T get(std::string key,T default_v);
 
     template<typename T>
-    int zadd(std::string key, int score, T value);
+    int zadd(std::string key, double score, T value);
 
     template <typename V_TYPE>
-    std::vector<V_TYPE>* zrange(std::string key, int min, int max, std::vector<V_TYPE> &members_set);
+    std::vector<V_TYPE>* zrange(std::string key, double min, double max, std::vector<V_TYPE> &members_set);
 
     template<typename T>
     int sadd(std::string key, T value);
@@ -55,6 +55,8 @@ public:
     int removeKey(int area,std::string key);
 
     bool initDb(std::string host, int port);
+
+    int  incr(std::string key,int integer);
 };
 
 void CBaseMdb::set_TypeDb(TypeDb value)
@@ -190,7 +192,7 @@ T CBaseMdb::get(std::string key,T default_v)
 }
 
 template<typename T>
-int CBaseMdb::zadd(std::string key, int score, T value)
+int CBaseMdb::zadd(std::string key, double score, T value)
 {
     TBSYS_LOG(DEBUG,"entry base_mdb_zadd");
     if(REDIS == m_type)
@@ -208,7 +210,7 @@ int CBaseMdb::zadd(std::string key, int score, T value)
 }
 
 template <typename V_TYPE>
-std::vector<V_TYPE>* CBaseMdb::zrange(std::string key, int min, int max, std::vector<V_TYPE> &members_set)
+std::vector<V_TYPE>* CBaseMdb::zrange(std::string key, double min, double max, std::vector<V_TYPE> &members_set)
 {
     TBSYS_LOG(DEBUG,"entry base_mdb_zrange");
     if(REDIS == m_type)
@@ -277,5 +279,24 @@ bool CBaseMdb::initDb(std::string host, int port)
         return false;
     }
 }
+
+/*0----fail   success value*/
+int  CBaseMdb::incr(std::string key,int integer)
+{
+    TBSYS_LOG(DEBUG,"entry base_mdb_incr");
+    if(REDIS == m_type)
+    {
+        return m_redis_db.incr(key,integer);
+    }
+    else if(TAIR == m_type)
+    {
+        return m_tair_db.incr(key,integer);
+    }
+    else
+    {
+        return 0;
+    }
+}
+
 #endif
 

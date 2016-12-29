@@ -8,7 +8,6 @@
 #include <vector>
 #include <unordered_map>
 #include <data_entry.hpp>
-#include "tair_common.h"
 #include "boost/format.hpp"
 #include "config.h"
 
@@ -18,11 +17,14 @@
 #include <string.h>         // headers for hostname translation
 #include <arpa/inet.h>
 #include <netdb.h>
-
 #include <sys/types.h>
+
 #include <unistd.h>
+#include <stdlib.h>
+#include "CBaseMdb.hpp"
 
 using namespace std;
+CBaseMdb g_baseMdb;
 
 namespace user_map
 {
@@ -32,6 +34,9 @@ namespace user_map
     tbsys::CConfig config;
 
     const char * master_addr;
+    const char * master_addr_ip;
+    const char * master_addr_op;
+    int port;
     const char * slave_addr;
     const char * group_name;
 
@@ -66,12 +71,19 @@ namespace user_map
             if(config.load(config_file) == EXIT_FAILURE)
             {
                 syslog(LOG_INFO,"load config file %s error", config_file);
+                TBSYS_LOG(DEBUG,"load config file %s error", config_file);
                 return;
             }
 
             syslog(LOG_INFO,"user_map_init() load config ok!");
 
             master_addr     = config.getString("tair_rdb", "master_addr", NULL);
+            master_addr_ip  = config.getString("tair_rdb", "master_addr_ip", NULL);
+            master_addr_op  = config.getString("tair_rdb", "master_addr_op", NULL);
+            port = atoi(master_addr_op);
+            TBSYS_LOG(DEBUG,"%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+            TBSYS_LOG(DEBUG,"master_addr_op = %s",master_addr_op);
+            TBSYS_LOG(DEBUG,"***********8*master_addr_ip = %s*port = %d ",master_addr_ip,port);
             slave_addr      = config.getString("tair_rdb", "slave_addr", NULL);            
             group_name      = config.getString("tair_rdb", "group_name", NULL);            
             time_slice      = config.getInt("tair_rdb", "time_slice", 10);
@@ -103,6 +115,9 @@ namespace user_map
             //g_tair.set_timeout(5000);
             g_tair.startup(master_addr,slave_addr,group_name);
 
+            g_baseMdb.initDb(std::string(master_addr_ip),port);
+            TBSYS_LOG(DEBUG,"*****************************************rrrrrrrr******888");
+
             std::stringstream ss;
             ss << "dbname="     << pg_database
                << " user="      << pg_user
@@ -132,11 +147,17 @@ namespace user_map
       user_map_init();
       tair::common::data_entry key;
       get_data_entry(key,"location:",mall_id,":",pos.mac,":x");
-      pos.position.x = tair_get<float>(g_tair,tair_namespace,key,0);
+      std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+      //pos.position.x = tair_get<float>(g_tair,tair_namespace,key,0);
+      pos.position.x = g_baseMdb.get<float>(s_key,0);
       get_data_entry(key,"location:",mall_id,":",pos.mac,":y");
-      pos.position.y = tair_get<float>(g_tair,tair_namespace,key,0);
+      s_key = get_value<std::string>(key.get_data(),key.get_size());
+      //pos.position.y = tair_get<float>(g_tair,tair_namespace,key,0);
+      pos.position.y = g_baseMdb.get<float>(s_key,0);
       get_data_entry(key,"location:",mall_id,":",pos.mac,":z");
-      pos.position.z = tair_get<int>(g_tair,tair_namespace,key,0);
+      s_key = get_value<std::string>(key.get_data(),key.get_size());
+      //pos.position.z = tair_get<int>(g_tair,tair_namespace,key,0);
+      pos.position.z = g_baseMdb.get<int>(s_key,0);
       return 0;
     }
 
@@ -145,7 +166,9 @@ namespace user_map
     {
         stringstream ss_key;
         ss_key<<"location:"<<mall_id<<":"<<mac<<":"<<prop;
-        tair_put(g_tair,tair_namespace,ss_key.str(),value);
+        std::string s_key = ss_key.str();
+        //tair_put(g_tair,tair_namespace,ss_key.str(),value);
+        g_baseMdb.set<V_TYPE>(s_key,value);
     }
 
     template <typename V_TYPE>
@@ -154,7 +177,9 @@ namespace user_map
         stringstream ss_key;
         
         ss_key<<"location.log:"<<mall_id<<":"<<s_date_time<<":"<<log_id<<":"<<prop;
-        tair_put(g_tair,tair_namespace,ss_key.str(),value);
+        std::string s_key = ss_key.str();
+        //tair_put(g_tair,tair_namespace,ss_key.str(),value);
+        g_baseMdb.set<V_TYPE>(s_key,value);
     }
 
     std::time_t tair_get_user_time(int mall_id, const char* mac, string prop)
@@ -162,7 +187,9 @@ namespace user_map
         tair::common::data_entry key;
         get_data_entry(key, "location:", mall_id, ":", mac, ":", prop);
 
-        return tair_get(g_tair, tair_namespace, key, 0);
+        std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+        //return tair_get(g_tair, tair_namespace, key, 0);
+        return g_baseMdb.get<std::time_t>(s_key,0);
     }
 
     template <typename V_TYPE>
@@ -171,7 +198,9 @@ namespace user_map
         tair::common::data_entry key;
         get_data_entry(key,"location:",mall_id,":",mac,":",prop);
 
-        return tair_get(g_tair,tair_namespace,key,default_v);
+        std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+        //return tair_get(g_tair,tair_namespace,key,default_v);
+        return g_baseMdb.get<V_TYPE>(s_key,default_v);
     }
 
     template <typename V_TYPE>
@@ -180,7 +209,9 @@ namespace user_map
         tair::common::data_entry key;
         get_data_entry(key,"location:",mall_id,":",mac,":",prop);
 
-        return tair_get(g_tair,tair_namespace,key,default_v);
+        std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+        //return tair_get(g_tair,tair_namespace,key,default_v);
+        return g_baseMdb.get<V_TYPE>(s_key,default_v);
     }
 
 
@@ -196,7 +227,10 @@ namespace user_map
           delta=max_duration_gap;
         if(delta>0)
           cout<<"delta="<<delta<<endl;
-          g_tair.incr(tair_namespace,key,delta,&new_duration);
+
+          std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+          new_duration = g_baseMdb.incr(s_key,delta);
+          //g_tair.incr(tair_namespace,key,delta,&new_duration);
     }
 
     inline void user_location_log_add(const unsigned long long  mac,const float x,
@@ -210,7 +244,9 @@ namespace user_map
         ss_key<<"location.log:"<<mall_id<<":"<<s_date_time<<":counter";
         tair::common::data_entry key_counter(ss_key.str().c_str(),ss_key.str().size()+1,true);
         int log_id;
-        g_tair.incr(tair_namespace,key_counter,1,&log_id);
+        std::string s_key = get_value<std::string>(key_counter.get_data(),key_counter.get_size());
+        //g_tair.incr(tair_namespace,key_counter,1,&log_id);
+        log_id = g_baseMdb.incr(s_key,1);
         TBSYS_LOG(DEBUG,"user_location_log_add() date_time=%s, log_id=%d",s_date_time.c_str(),log_id);
         
         //save to pg
@@ -231,7 +267,11 @@ namespace user_map
             tair::common::data_entry key_date_time(ss_key.str().c_str(),ss_key.str().size()+1,true);
             tair::common::data_entry value_date_time((char *) &t_time,sizeof(time_t),true);
             double score=t_time;
-            int ret=g_tair.zadd(tair_namespace,key_date_time,score,value_date_time,0,0);
+
+            std::string s_key_date_time = get_value<std::string>(key_date_time.get_data(),key_date_time.get_size());
+            std::string s_value_date_time = get_value<std::string>(value_date_time.get_data(),value_date_time.get_size());
+            int ret = g_baseMdb.zadd<std::string>(s_key_date_time,score,s_value_date_time);
+            //int ret=g_tair.zadd(tair_namespace,key_date_time,score,value_date_time,0,0);
             cout<<"user_location_log_add() zadd ns="<<tair_namespace<<",key="<<key_date_time.get_data()<<endl;
             last_date_time_map[mall_id]=s_date_time;
         }
@@ -250,8 +290,10 @@ namespace user_map
         ss_value<<mac;
         tair::common::data_entry key_mac_set(ss_key.str().c_str(),ss_key.str().size()+1,true);
         tair::common::data_entry value_mac_set(ss_value.str().c_str(),ss_value.str().size()+1,true);
-        g_tair.sadd(tair_namespace,key_mac_set,value_mac_set,0,0);
-
+        std::string s_key_mac_set = get_value<std::string>(key_mac_set.get_data(),key_mac_set.get_size());
+        std::string s_value_mac_set = get_value<std::string>(value_mac_set.get_data(),value_mac_set.get_size());
+        //g_tair.sadd(tair_namespace,key_mac_set,value_mac_set,0,0);
+        g_baseMdb.sadd<std::string>(s_key_mac_set,s_value_mac_set);
 
         //set loc.log.set
         ss_key.str("");
@@ -260,8 +302,11 @@ namespace user_map
         ss_value<<log_id;
         tair::common::data_entry key_log_set(ss_key.str().c_str(),ss_key.str().size()+1,true);
         tair::common::data_entry value_log_set(ss_value.str().c_str(),ss_value.str().size()+1,true);
+        std::string s_key_log_set = get_value<std::string>(key_log_set.get_data(),key_log_set.get_size());
+        std::string s_value_log_set = get_value<std::string>(value_log_set.get_data(),value_log_set.get_size());
         double score=t_time;
-        int ret=g_tair.zadd(tair_namespace,key_log_set,score,value_log_set,0,0);
+        //int ret=g_tair.zadd(tair_namespace,key_log_set,score,value_log_set,0,0);
+        int ret = g_baseMdb.zadd<std::string>(s_key_log_set,score,s_value_log_set);
         
         //set log's property
         tair_set_log_prop<unsigned long long>(mall_id,s_date_time,log_id,"mac",mac);
@@ -277,7 +322,9 @@ namespace user_map
     {
         tair::common::data_entry key;
         get_data_entry(key,"user:",mall_id,":",user_id,":is.mall.vip");
-        return tair_get<int>(g_tair,tair_namespace,key,0);
+        std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+        return g_baseMdb.get<int>(s_key,0);
+        //return tair_get<int>(g_tair,tair_namespace,key,0);
     }
     
     void vip_arrive_time_record(int user_id, int mall_id, time_t t_pre, time_t t_now)
@@ -288,8 +335,10 @@ namespace user_map
             get_data_entry(key,"user.vip:",mall_id,":arrive.time");
             get_data_entry(value,user_id);
             double score=t_now;
-
-            g_tair.zadd(tair_namespace,key,score,value,0,0);     
+            std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+            std::string s_value = get_value<std::string>(value.get_data(),value.get_size());
+            g_baseMdb.zadd<std::string>(s_key,score,s_value);
+            //g_tair.zadd(tair_namespace,key,score,value,0,0);     
         }
     }
 
@@ -299,7 +348,10 @@ namespace user_map
         tair::common::data_entry key,value;
         get_data_entry(key,"mac.set:",s_date,":",mall_id,":daily");
         get_data_entry(value,mac);
-        g_tair.sadd(tair_namespace,key,value,0,0);
+        std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+        std::string s_value = get_value<std::string>(value.get_data(),value.get_size());
+        //g_tair.sadd(tair_namespace,key,value,0,0);
+        g_baseMdb.sadd<std::string>(s_key,s_value);
     }
 
     int user_add(const unsigned long long  mac,const float x,const float y,const int z,const int kafka_offset, int mall_id )
@@ -364,21 +416,26 @@ namespace user_map
         const string & s_date=get_date_str(t_now);
         get_data_entry(key,"location.update.time:",s_date,":",mall_id);
         
-        vector <tair::common::data_entry *> vals;
+        //vector <tair::common::data_entry *> vals;
         vector <double> scores;
-        g_tair.zrangebyscore(tair_namespace, key, start, end, vals,scores,0,0);
+
+        std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+        std::vector <std::string> values;
+        g_baseMdb.zrange<std::string>(s_key,start,end,values);
+
+        //g_tair.zrangebyscore(tair_namespace, key, start, end, vals,scores,0,0);
 
         int number=0;
-        for(vector<tair::common::data_entry *>::iterator it=vals.begin();it!=vals.end();it++)
+        for(vector<std::string>::iterator it=values.begin();it!=values.end();it++)
         {
             Json::Value user;
 
             number++;
-            user["id"]=(*it)->get_data();
+            user["id"]=(*it).c_str();
 
-            user["x"]=tair_get_user_prop<float>(mall_id,(*it)->get_data(),"x",0.0);
-            user["y"]=tair_get_user_prop<float>(mall_id,(*it)->get_data(),"y",0.0);
-            user["z"]=tair_get_user_prop<int>(mall_id,(*it)->get_data(),"z",0);
+            user["x"]=tair_get_user_prop<float>(mall_id,(*it).c_str(),"x",0.0);
+            user["y"]=tair_get_user_prop<float>(mall_id,(*it).c_str(),"y",0.0);
+            user["z"]=tair_get_user_prop<int>(mall_id,(*it).c_str(),"z",0);
 
 /*
             tair_get_user_prop(mall_id,(*it)->get_data(),"z",value);
@@ -387,9 +444,8 @@ namespace user_map
 */
 
             user_list[std::to_string(number).c_str()]=user;
-            delete (*it);
         }
-        vals.clear();
+        values.clear();
         user_list["size"]=number;
     }
 
@@ -409,12 +465,16 @@ namespace user_map
 
             tair::common::data_entry value;
             get_data_entry(value, user_value);
+            std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+            std::string s_field = get_value<std::string>(field.get_data(),field.get_size());
+            std::string s_value = get_value<std::string>(value.get_data(),value.get_size());
 
-            int ret = g_tair.hset(tair_namespace, key, field, value, 0, 0);
+            int ret = g_baseMdb.hset<std::string>(s_key,s_field,s_value);
+            //int ret = g_tair.hset(tair_namespace, key, field, value, 0, 0);
 
-            if(ret != 0)
+            if(ret == 0)
             {
-                fprintf(stderr, "user_tag_update tair.hset: %s\n", g_tair.get_error_msg(ret));
+                //fprintf(stderr, "user_tag_update tair.hset: %s\n", g_tair.get_error_msg(ret));
                 return 1;
             }
 
@@ -433,8 +493,11 @@ namespace user_map
     {
         user_map_init();
         tair::common::data_entry key;
+        TBSYS_LOG(DEBUG,"******************************************************************");
         get_data_entry(key,"user:",user_id,":mac");
-        unsigned long long mac = tair_get<unsigned long long >(g_tair,tair_namespace,key,0);
+        std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+        unsigned long long mac = g_baseMdb.get<unsigned long long>(s_key,0);
+        //unsigned long long mac = tair_get<unsigned long long >(g_tair,tair_namespace,key,0);
         if(mac !=0)
           return mac;
         else
@@ -447,9 +510,14 @@ namespace user_map
             mac = std::stoull(s_mac);
             tair::common::data_entry key;
             get_data_entry(key,"mac:",mac,":user.id");
-            tair_put<int >(g_tair,tair_namespace,key,user_id);
+            s_key = get_value<std::string>(key.get_data(),key.get_size());
+            //tair_put<int >(g_tair,tair_namespace,key,user_id);
+            g_baseMdb.set<int>(s_key,user_id);
+
             get_data_entry(key,"user:",user_id,":mac");
-            tair_put<unsigned long long >(g_tair,tair_namespace,key,mac);
+            s_key = get_value<std::string>(key.get_data(),key.get_size());
+            //tair_put<unsigned long long >(g_tair,tair_namespace,key,mac);
+            g_baseMdb.set<unsigned long long>(s_key,mac);
 
             return mac;
           }
@@ -464,7 +532,9 @@ namespace user_map
         user_map_init();
         tair::common::data_entry key;
         get_data_entry(key,"mac:",mac,":user.id");
-        int user_id=tair_get<int >(g_tair,tair_namespace,key,0);
+        std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+        //int user_id=tair_get<int >(g_tair,tair_namespace,key,0);
+        int user_id = g_baseMdb.get<int>(s_key,0);
         if(user_id==0)
         {
             //get user id from pg db
@@ -488,9 +558,11 @@ namespace user_map
             cout <<"user_id="<<user_id<<endl;
             if(user_id>0)
             {
-                tair_put<int >(g_tair,tair_namespace,key,user_id);
+                g_baseMdb.set<int>(s_key,user_id);
+                //tair_put<int >(g_tair,tair_namespace,key,user_id);
                 get_data_entry(key,"user:",user_id,":mac");
-                tair_put<unsigned long long >(g_tair,tair_namespace,key,mac);
+                //tair_put<unsigned long long >(g_tair,tair_namespace,key,mac);
+                g_baseMdb.set<unsigned long long>(s_key,mac);
             }
         }
         return user_id;
@@ -636,9 +708,13 @@ namespace user_map
                 get_data_entry(key, "user:", mall_id, ":", shop_id, ":arrive.time");
             tair::common::data_entry value;
             get_data_entry(value, user_id);
-            int result = g_tair.zadd(tair_namespace, key, (double)now, value, 0, 0);
-            if(result != 0)
-                printf("update vip arrive time failed : %d %s\n", result, g_tair.get_error_msg(result));
+            std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+            std::string s_value = get_value<std::string>(value.get_data(),value.get_size());
+            int result = g_baseMdb.zadd<std::string>(s_key,(double)now,s_value);
+            //int result = g_tair.zadd(tair_namespace, key, (double)now, value, 0, 0);
+            if(result == 0)
+                //printf("update vip arrive time failed : %d %s\n", result, g_tair.get_error_msg(result));
+                ;
             else
                 printf("update shop vip arrive time,shop_id:%d mac:%ld\n",shop_id, mac);
 
@@ -659,7 +735,10 @@ namespace user_map
         get_data_entry(key,"location.update.time:",s_date,":",mall_id,":",shop_id);
         tair::common::data_entry value;
         get_data_entry(value, mac);
-        g_tair.zadd(tair_namespace, key, (double)now, value, 0, 0);
+        std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+        std::string s_value = get_value<std::string>(value.get_data(),value.get_size());
+        //g_tair.zadd(tair_namespace, key, (double)now, value, 0, 0);
+        g_baseMdb.zadd<std::string>(s_key,(double)now,s_value);
 
     }
 
@@ -700,7 +779,9 @@ namespace user_map
         }
         std::vector<std::string> users;
         TBSYS_LOG(DEBUG, "user_list() zrangebyscore key=%s",key.get_data());
-        tair_zrangebyscore(g_tair, tair_namespace, key, start, end, users);
+        std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+        g_baseMdb.zrange<std::string>(s_key,start,end,users);
+        //tair_zrangebyscore(g_tair, tair_namespace, key, start, end, users);
         TBSYS_LOG(DEBUG, "user_list() zrangebyscore return, users.size=%d",(unsigned int)users.size());
         int i = 0;
         list["users"] = Json::arrayValue;
@@ -728,7 +809,10 @@ namespace user_map
         tair::common::data_entry time_key;
         get_data_entry(time_key, "location:", mall_id, ":", shop_id, ":", mac, ":time");
 
-        return tair_get<std::time_t>(g_tair, tair_namespace, time_key, 0);
+        std::string s_key = get_value<std::string>(time_key.get_data(),time_key.get_size());
+        return g_baseMdb.get<std::time_t>(s_key,0);
+
+        //return tair_get<std::time_t>(g_tair, tair_namespace, time_key, 0);
     }
 
     std::string datetime_str(std::time_t time)
@@ -746,7 +830,9 @@ namespace user_map
         tair::common::data_entry key;
         int new_duration;
         get_data_entry(key, "shop:", datetime, ":", mall_id, ":", shop_id, ":users.duration");
-        g_tair.incr(tair_namespace,key,interval,&new_duration);
+        std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+        g_baseMdb.incr(s_key,interval);
+        //g_tair.incr(tair_namespace,key,interval,&new_duration);
     }
 
     void mall_all_users_duration_add(int mall_id, std::string& datetime, int interval)
@@ -754,7 +840,9 @@ namespace user_map
         tair::common::data_entry key;
         int new_duration;
         get_data_entry(key, "mall:", datetime, ":", mall_id,":users.duration");
-        g_tair.incr(tair_namespace,key,interval,&new_duration);
+        std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+        g_baseMdb.incr(s_key,interval);
+        //g_tair.incr(tair_namespace,key,interval,&new_duration);
     }
 
     void shop_user_duration_add(int mall_id, int shop_id, int user_id, std::string& datetime, int interval)
@@ -764,7 +852,9 @@ namespace user_map
         tair::common::data_entry key;
         int new_duration;
         get_data_entry(key, "user:", datetime, ":", mall_id, ":", shop_id, ":", user_id, ":duration");
-        g_tair.incr(tair_namespace,key,interval,&new_duration);
+        std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+        g_baseMdb.incr(s_key,interval);
+        //g_tair.incr(tair_namespace,key,interval,&new_duration);
         shop_all_users_duration_add(mall_id,shop_id,datetime,interval);
         mall_all_users_duration_add(mall_id,datetime,interval);
     }
@@ -773,7 +863,9 @@ namespace user_map
     {
         tair::common::data_entry key;
         get_data_entry(key, "location:", mall_id, ":", mac, ":time");
-        tair_put<std::time_t>(g_tair, tair_namespace, key, time);
+        std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+        g_baseMdb.set<std::time_t>(s_key,time);
+        //tair_put<std::time_t>(g_tair, tair_namespace, key, time);
     }
 
     void update_location_update_time(int mall_id, unsigned long mac, std::time_t time)
@@ -783,7 +875,10 @@ namespace user_map
         get_data_entry(key,"location.update.time:",s_date,":",mall_id);
         tair::common::data_entry value;
         get_data_entry(value, mac);
-        g_tair.zadd(tair_namespace, key, (double)time, value, 0, 0);
+        std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+        std::string s_value = get_value<std::string>(value.get_data(),value.get_size());
+        g_baseMdb.zadd<std::string>(s_key,(double)time,s_value);
+        //g_tair.zadd(tair_namespace, key, (double)time, value, 0, 0);
     }
 
     int get_shopid_of_user_location(const int user_id){
@@ -791,14 +886,18 @@ namespace user_map
         time_t t_now=time(0);
         const string & s_date=get_date_str(t_now);
         get_data_entry(key,"user:",s_date,":",user_id,":location.shop_id");
-        return tair_get<int>(g_tair,tair_namespace,key,0);
+        std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+        return g_baseMdb.get<int>(s_key,0);
+        //return tair_get<int>(g_tair,tair_namespace,key,0);
     }
 
     void update_shopid_of_user_location(const int user_id,const int shop_id,time_t time){
         tair::common::data_entry key;
         const string & s_date=get_date_str(time);
         get_data_entry(key,"user:",s_date,":",user_id,":location.shop_id");
-        tair_put<int>(g_tair,tair_namespace,key,shop_id);
+        std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+        g_baseMdb.set<int>(s_key,shop_id);
+        //tair_put<int>(g_tair,tair_namespace,key,shop_id);
         return ;
     }
 

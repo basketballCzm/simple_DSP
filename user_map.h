@@ -4,7 +4,6 @@
 #include <limits>
 #include <ctime>
 #include <string>
-
 using namespace std;
 
 //mac is the mac address

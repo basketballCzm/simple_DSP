@@ -1,13 +1,14 @@
 #include "ad_map.h"
 #include "user_map.h"
 #include <ctime>
-#include "tair_common.h"
 #include "gtest/gtest.h"
+#include "tair_common.h"
 #include <data_entry.hpp>
 #include <json/json.h>
 #include <syslog.h>
 #include <tbsys.h>
 #include <tbnet.h>
+#include "loadConf.h"
 
 TEST(TairCommon,GetDataEntry)
 {

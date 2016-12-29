@@ -55,14 +55,14 @@ TEST_F(CBaseMdbTest,ClassTest_set)
     TBSYS_LOG(DEBUG,"address_op[r.get_TypeDb()]:%d",address_op[r.get_TypeDb()]);
 
     integer = r.set<int>("czmset_int",12345);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     //float的精度会存在问题
     integer = r.set<float>("czmset_float",99034.3);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.set<double>("czmset_double",21.334);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.set<string>("czmset_string","123456");
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.get<int>("czmset_int",-1);
     EXPECT_EQ(12345,integer);
     f_num = r.get<float>("czmset_float",-1);
@@ -81,13 +81,13 @@ TEST_F(CBaseMdbTest,ClassTest_hset_int)
     TBSYS_LOG(DEBUG,"ClassTest_hset_int  str_ip[r.get_TypeDb()].c_str() %s: ",str_ip[r.get_TypeDb()].c_str());
     TBSYS_LOG(DEBUG,"ClassTest_hset_int  address_op[r.get_TypeDb()]:%d",address_op[r.get_TypeDb()]);
     integer = r.hset<int>("czmhset_int","field1",111);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.hset<int>("czmhset_int","field2",222);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.hset<int>("czmhset_int","field3",333);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.hset<int>("czmhset_int","field4",444);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     map<std::string,int> user_list_int;
     r.hget<int>("czmhset_int",user_list_int);
     EXPECT_EQ(4,user_list_int.size());
@@ -111,13 +111,13 @@ TEST_F(CBaseMdbTest,ClassTest_hset_float)
 {
     //tair的底层有bug，float暂时不进行测试
     integer = r.hset<float>("czmhset_float","field1",111.1);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.hset<float>("czmhset_float","field2",222.2);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.hset<float>("czmhset_float","field3",333.3);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.hset<float>("czmhset_float","field4",444.4);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     map<string,float> user_list_float;
     r.hget<float>("czmhset_float",user_list_float);
     EXPECT_EQ(4,user_list_float.size());
@@ -139,13 +139,13 @@ TEST_F(CBaseMdbTest,ClassTest_hset_float)
 TEST_F(CBaseMdbTest,ClassTest_hset_double)
 {
     integer = r.hset<double>("czmhset_double","field1",111.111);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.hset<double>("czmhset_double","field2",222.222);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.hset<double>("czmhset_double","field3",333.333);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.hset<double>("czmhset_double","field4",444.444);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     map<string,double> user_list_double;
     r.hget<double>("czmhset_double",user_list_double);
     EXPECT_EQ(4,user_list_double.size());
@@ -167,13 +167,13 @@ TEST_F(CBaseMdbTest,ClassTest_hset_double)
 TEST_F(CBaseMdbTest,ClassTest_hset_string)
 {
     integer = r.hset<string>("czmhset_string","field1","111");
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.hset<string>("czmhset_string","field2","222");
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.hset<string>("czmhset_string","field3","333");
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.hset<string>("czmhset_string","field4","444");
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     map<string,string> user_list_string;
     r.hget<string>("czmhset_string",user_list_string);
     EXPECT_EQ(4,user_list_string.size());
@@ -195,13 +195,13 @@ TEST_F(CBaseMdbTest,ClassTest_hset_string)
 TEST_F(CBaseMdbTest,ClassTest_zadd_int)
 {
     integer = r.zadd<int>("czmzadd_int",0,111);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.zadd<int>("czmzadd_int",1,222);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.zadd<int>("czmzadd_int",2,333);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.zadd<int>("czmzadd_int",3,444);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     vector<int> user_list_int;
     r.zrange<int>("czmzadd_int",0,10,user_list_int);
     EXPECT_EQ(4,user_list_int.size());
@@ -224,13 +224,13 @@ TEST_F(CBaseMdbTest,ClassTest_zadd_float)
 {
     //tair的底层有bug，float暂时不进行测试
     integer = r.zadd<float>("czmzadd_float",0,111.1);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.zadd<float>("czmzadd_float",1,222.2);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.zadd<float>("czmzadd_float",2,333.3);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.zadd<float>("czmzadd_float",3,444.4);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     vector<float> user_list_float;
     r.zrange<float>("czmzadd_float",0,10,user_list_float);
     EXPECT_EQ(4,user_list_float.size());
@@ -252,13 +252,13 @@ TEST_F(CBaseMdbTest,ClassTest_zadd_float)
 TEST_F(CBaseMdbTest,ClassTest_zadd_double)
 {
     integer = r.zadd<double>("czmzadd_double",0,111.111);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.zadd<double>("czmzadd_double",1,222.222);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.zadd<double>("czmzadd_double",2,333.333);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.zadd<double>("czmzadd_double",3,444.444);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     vector<double> user_list_double;
     r.zrange<double>("czmzadd_double",0,10,user_list_double);
     EXPECT_EQ(4,user_list_double.size());
@@ -280,13 +280,13 @@ TEST_F(CBaseMdbTest,ClassTest_zadd_double)
 TEST_F(CBaseMdbTest,ClassTest_zadd_string)
 {
     integer = r.zadd<string>("czmzadd_string",0,"111");
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.zadd<string>("czmzadd_string",1,"222");
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.zadd<string>("czmzadd_string",2,"333");
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.zadd<string>("czmzadd_string",3,"444");
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     vector<string> user_list_string;
     r.zrange<string>("czmzadd_string",0,10,user_list_string);
     EXPECT_EQ(4,user_list_string.size());
@@ -308,13 +308,13 @@ TEST_F(CBaseMdbTest,ClassTest_zadd_string)
 TEST_F(CBaseMdbTest,ClassTest_sadd_int)
 {
     integer = r.sadd<int>("czmsadd_int",111);   //这里的参数我也是一个整形传入进来的
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.sadd<int>("czmsadd_int",222);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.sadd<int>("czmsadd_int",333);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.sadd<int>("czmsadd_int",444);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     vector<int> user_list_s_int;
     r.smembers<int>("czmsadd_int",user_list_s_int);
     EXPECT_EQ(4,user_list_s_int.size());
@@ -336,13 +336,13 @@ TEST_F(CBaseMdbTest,ClassTest_sadd_int)
 TEST_F(CBaseMdbTest,ClassTest_sadd_float)
 {
     integer = r.sadd<float>("czmsadd_float",111.1);   //这里的参数我也是一个整形传入进来的
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.sadd<float>("czmsadd_float",222.2);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.sadd<float>("czmsadd_float",333.3);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.sadd<float>("czmsadd_float",444.4);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     vector<float> user_list_s_float;
     r.smembers<float>("czmsadd_float",user_list_s_float);
     EXPECT_EQ(4,user_list_s_float.size());
@@ -364,13 +364,13 @@ TEST_F(CBaseMdbTest,ClassTest_sadd_float)
 TEST_F(CBaseMdbTest,ClassTest_sadd_double)
 {
     integer = r.sadd<double>("czmsadd_double",111.111);   //这里的参数我也是一个整形传入进来的
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.sadd<double>("czmsadd_double",222.222);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.sadd<double>("czmsadd_double",333.333);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.sadd<double>("czmsadd_double",444.444);
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     vector<double> user_list_s_double;
     r.smembers<double>("czmsadd_double",user_list_s_double);
     EXPECT_EQ(4,user_list_s_double.size());
@@ -392,13 +392,13 @@ TEST_F(CBaseMdbTest,ClassTest_sadd_double)
 TEST_F(CBaseMdbTest,ClassTest_sadd_string)
 {
     integer = r.sadd<string>("czmsadd_string","111.1");   //这里的参数我也是一个整形传入进来的
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.sadd<string>("czmsadd_string","222.2");
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.sadd<string>("czmsadd_string","333.3");
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     integer = r.sadd<string>("czmsadd_string","444.4");
-    EXPECT_EQ(result_back[r.get_TypeDb()],integer);
+    EXPECT_EQ(1,integer);
     vector<string> user_list_s_string;
     r.smembers<string>("czmsadd_string",user_list_s_string);
     EXPECT_EQ(4,user_list_s_string.size());
