@@ -17,16 +17,16 @@ private:
 public:
     CBaseMdb()
     {
-        m_type = TAIR;
+        m_type = REDIS;
     }
 
-    bool connect(std::string host, int port);
+    inline bool connect(std::string host, int port);
 
-    void set_TypeDb(TypeDb value);
+    inline void set_TypeDb(TypeDb value);
 
-    void close();
+    inline void close();
 
-    int get_TypeDb();
+    inline int get_TypeDb();
 
     template<typename T>
     int hset(std::string key,std::string field,T value);
@@ -52,24 +52,24 @@ public:
     template <typename V_TYPE>
     std::vector<V_TYPE>* smembers(std::string key,std::vector<V_TYPE> &members_set);
 
-    int removeKey(int area,std::string key);
+    inline int removeKey(int area,std::string key);
 
-    bool initDb(std::string host, int port);
+    inline bool initDb(std::string host, int port);
 
-    int  incr(std::string key,int integer);
+    inline int  incr(std::string key,int integer);
 };
 
-void CBaseMdb::set_TypeDb(TypeDb value)
+inline void CBaseMdb::set_TypeDb(TypeDb value)
 {
     m_type = value;
 }
 
-int CBaseMdb::get_TypeDb()
+inline int CBaseMdb::get_TypeDb()
 {
     return (int)m_type;
 }
 
-bool CBaseMdb::connect(std::string host, int port)
+inline bool CBaseMdb::connect(std::string host, int port)
 {
     if(REDIS == m_type)
     {
@@ -85,7 +85,7 @@ bool CBaseMdb::connect(std::string host, int port)
     }
 }
 
-void CBaseMdb::close()
+inline void CBaseMdb::close()
 {
     if(REDIS == m_type)
     {
@@ -101,7 +101,7 @@ void CBaseMdb::close()
     }
 }
 
-int CBaseMdb::removeKey(int area,std::string key)
+inline int CBaseMdb::removeKey(int area,std::string key)
 {
     if(REDIS == m_type)
     {
@@ -263,7 +263,7 @@ std::vector<V_TYPE>* CBaseMdb::smembers(std::string key,std::vector<V_TYPE> &mem
     }
 }
 
-bool CBaseMdb::initDb(std::string host, int port)
+inline bool CBaseMdb::initDb(std::string host, int port)
 {
     TBSYS_LOG(DEBUG,"entry base_mdb_initDb");
     if(REDIS == m_type)
@@ -281,7 +281,7 @@ bool CBaseMdb::initDb(std::string host, int port)
 }
 
 /*0----fail   success value*/
-int  CBaseMdb::incr(std::string key,int integer)
+inline int  CBaseMdb::incr(std::string key,int integer)
 {
     TBSYS_LOG(DEBUG,"entry base_mdb_incr");
     if(REDIS == m_type)

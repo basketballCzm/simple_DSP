@@ -81,9 +81,8 @@ namespace user_map
             master_addr_ip  = config.getString("tair_rdb", "master_addr_ip", NULL);
             master_addr_op  = config.getString("tair_rdb", "master_addr_op", NULL);
             port = atoi(master_addr_op);
-            TBSYS_LOG(DEBUG,"%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-            TBSYS_LOG(DEBUG,"master_addr_op = %s",master_addr_op);
-            TBSYS_LOG(DEBUG,"***********8*master_addr_ip = %s*port = %d ",master_addr_ip,port);
+            /*TBSYS_LOG(DEBUG,"master_addr_op = %s",master_addr_op);
+            TBSYS_LOG(DEBUG,"***********8*master_addr_ip = %s*port = %d ",master_addr_ip,port);*/
             slave_addr      = config.getString("tair_rdb", "slave_addr", NULL);            
             group_name      = config.getString("tair_rdb", "group_name", NULL);            
             time_slice      = config.getInt("tair_rdb", "time_slice", 10);
@@ -116,8 +115,6 @@ namespace user_map
             g_tair.startup(master_addr,slave_addr,group_name);
 
             g_baseMdb.initDb(std::string(master_addr_ip),port);
-            TBSYS_LOG(DEBUG,"*****************************************rrrrrrrr******888");
-
             std::stringstream ss;
             ss << "dbname="     << pg_database
                << " user="      << pg_user
@@ -558,9 +555,11 @@ namespace user_map
             cout <<"user_id="<<user_id<<endl;
             if(user_id>0)
             {
+                s_key = get_value<std::string>(key.get_data(),key.get_size());
                 g_baseMdb.set<int>(s_key,user_id);
                 //tair_put<int >(g_tair,tair_namespace,key,user_id);
                 get_data_entry(key,"user:",user_id,":mac");
+                s_key = get_value<std::string>(key.get_data(),key.get_size());
                 //tair_put<unsigned long long >(g_tair,tair_namespace,key,mac);
                 g_baseMdb.set<unsigned long long>(s_key,mac);
             }

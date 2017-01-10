@@ -37,6 +37,7 @@ protected:
     virtual void SetUp()
     {
       openlog("ad_map_test", LOG_PID|LOG_PERROR, LOG_LOCAL0 );
+      db_map();
       ad_map_init();
     }
     virtual void TearDown()

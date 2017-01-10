@@ -20,15 +20,15 @@ struct redis_identity
 class RedisDb
 {
 public:
-    RedisDb() {}
-    ~RedisDb()
+    inline RedisDb() {}
+    inline ~RedisDb()
     {
         this->_connect = NULL;
         this->_reply = NULL;
     }
 
 
-    bool connect(std::string host, int port);
+    inline bool connect(std::string host, int port);
 
     template<typename T>
     int hset(std::string key,std::string field,T value);
@@ -54,7 +54,7 @@ public:
     template <typename V_TYPE>
     std::vector<V_TYPE>* smembers(std::string key,std::vector<V_TYPE> &members_set);
 
-    int removeKey(int area,std::string key)
+    inline int removeKey(int area,std::string key)
     {
         this->_reply = (redisReply*)redisCommand(this->_connect,"del %s",key.c_str());
         if(NULL == this->_reply || REDIS_REPLY_INTEGER != this->_reply->type)
@@ -66,14 +66,14 @@ public:
         return this->_reply->integer;
     }
 
-    void close()
+    inline void close()
     {
         TBSYS_LOG(DEBUG,"entry redis close!");
         redisCommand(this->_connect,"QUIT");
         TBSYS_LOG(DEBUG,"entry redis close success!");
     }
 
-    int incr(std::string key,int integer)
+    inline int incr(std::string key,int integer)
     {
         this->_reply = (redisReply*)redisCommand(this->_connect,"incrby %s %d",key.c_str(),integer);
         if(NULL == this->_reply || REDIS_REPLY_INTEGER != this->_reply->type)
@@ -228,8 +228,6 @@ int RedisDb::zadd(std::string key, double score, T value)
     if(NULL == this->_reply || REDIS_REPLY_INTEGER != this->_reply->type)
     {
         TBSYS_LOG(DEBUG,"this->_reply:%d",this->_reply);
-        TBSYS_LOG(DEBUG,"this->_reply->type:%d",this->_reply->type);
-        TBSYS_LOG(DEBUG,"this->_reply->str:%s",this->_reply->str);
         freeReplyObject(this->_reply);
         return 0;
     }
@@ -242,8 +240,8 @@ int RedisDb::zadd(std::string key, double score, T value)
 template <typename V_TYPE>
 std::vector<V_TYPE>* RedisDb::zrange(std::string key, double min, double max, std::vector<V_TYPE> &members_set)
 {
-    TBSYS_LOG(DEBUG,"redis: redis zrange string %s %d %d",key.c_str(),min,max);
-    this->_reply = (redisReply*)redisCommand(this->_connect,"ZRANGE %s %d %d",key.c_str(),min,max);
+    TBSYS_LOG(DEBUG,"redis: redis zrange string %s %d %d",key.c_str(),(int)min,(int)max);
+    this->_reply = (redisReply*)redisCommand(this->_connect,"ZRANGE %s %d %d",key.c_str(),(int)min,(int)max);
     if(NULL == this->_reply || REDIS_REPLY_ARRAY != this->_reply->type)
     {
         TBSYS_LOG(DEBUG,"redis: redis zrange error!");

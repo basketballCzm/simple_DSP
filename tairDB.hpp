@@ -13,10 +13,10 @@
 class TairDb
 {
 public:
-    TairDb();
-    ~TairDb();
+    inline TairDb();
+    inline ~TairDb();
 
-    bool connect(std::string host, int port);
+    inline bool connect(std::string host, int port);
     template<typename T>
     int set(std::string key, T value);
 
@@ -44,7 +44,7 @@ public:
     template<typename V_TYPE>
     inline tair::common::data_entry *get_data_entry_of_value (const V_TYPE & data);
 
-    int removeKey(int area,std::string key)
+    inline int removeKey(int area,std::string key)
     {
         TBSYS_LOG(DEBUG,"tair remove success!");
         tair::common::data_entry s_key(key.c_str(),key.size()+1,true);
@@ -52,14 +52,14 @@ public:
         return ptair_Client->remove(area,s_key);
     }
 
-    void close()
+    inline void close()
     {
         TBSYS_LOG(DEBUG,"entry tair close!");
         ptair_Client->close();
         TBSYS_LOG(DEBUG,"entry tair close success!");
     }
 
-    int incr(std::string key,int integer)
+    inline int incr(std::string key,int integer)
     {
         TBSYS_LOG(DEBUG,"tair entry incrby start!");
         int value = 0;

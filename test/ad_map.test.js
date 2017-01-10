@@ -1,45 +1,40 @@
-/*
- * tair - test/client.test.js
- * Copyright(c) 2012 Taobao.com
- * Author: kate.sf <kate.sf@taobao.com>
- */
-
-var cli = require('node-tair-rdb');
 var should = require('should');
+var wnc = require('wushuu_node_common')
 var sys = require('sys')
 var exec = require('child_process').exec
-var deepcopy = require('deepcopy');
+var deepcopy = require('deepcopy')
 
-var tair;
-var nm=2;
-var used_key={}
-var mall_id=3
-var mall_level=1
+var MDBTest = mdb => {
+  var db;
+  var nm=2;
+  var used_key={}
+  var mall_id=3
+  var mall_level=1
 
-var test_user_list=[
-      ["12345678",4.3,3.8,mall_level,['label1','label2','label3']],
-      ["23456789",204,100.8,mall_level,['label2','label4','label5']],
-      ["34567890",4.3,103.8,mall_level,[]],
-      ["45678901",198.3,2.6,mall_level,['label1','label2','label3','label4','label5','label6']],
-      ["56789012",100.15,50.3,mall_level,['label4','label5','label7']],
-    ]
+  var test_user_list=[
+        ["12345678",4.3,3.8,mall_level,['label1','label2','label3']],
+        ["23456789",204,100.8,mall_level,['label2','label4','label5']],
+        ["34567890",4.3,103.8,mall_level,[]],
+        ["45678901",198.3,2.6,mall_level,['label1','label2','label3','label4','label5','label6']],
+        ["56789012",100.15,50.3,mall_level,['label4','label5','label7']],
+      ]
 
-function save_used_key(keys)
-{
-    if(keys.constructor === Array)
-    {
-      keys.forEach(function(e){
-          used_key[e]=1
-        })  
-    }
-    else
-    {
-      used_key[keys]=1
-    }
-}
+  function save_used_key(keys)
+  {
+      if(keys.constructor === Array)
+      {
+        keys.forEach(function(e){
+            used_key[e]=1
+          })  
+      }
+      else
+      {
+        used_key[keys]=1
+      }
+  }
 
 describe('ad_map.test.js', function () {
-  before(function (done) {
+/*  before(function (done) {
     tair = new cli('group_1', [
       {host: 'WUSHUU-TAIR-CS', port: 5198}
     ], {heartBeatInterval: 3000},
@@ -50,8 +45,20 @@ describe('ad_map.test.js', function () {
         }
         done();
       });
-  });
- 
+  });*/
+
+  before(function(done) {
+      wnc.setMDB(mdb)
+      var DB = wnc.getMDB(mdb);
+      db = new DB();
+      console.log(db)
+      console.log('hahahhaahhaha3')
+      db.q_connect().then(function() {
+          console.log('memory db connected')
+          done();
+      }).catch(err => done(err))
+  })
+
   it("ad_map insert test data users' location & label should be ok!",function(done){
       this.timeout(50000)
       var prop_list=["x","y","z","label.set"]
@@ -89,7 +96,7 @@ describe('ad_map.test.js', function () {
                       save_used_key(key)
                       var zcount=0
                       value.forEach(function(e){
-                          tair.hset(key,nm,e,1,function(err, data){
+                          /*tair.hset(key,nm,e,1,function(err, data){
                               should.not.exist(err);
                               data.should.equal(true);
                               ++zcount
@@ -100,7 +107,31 @@ describe('ad_map.test.js', function () {
                                   done()
                                 }
                               }
-                            })
+                            })*/
+                            db.hset(key,e,1).then(function(err,data){
+                              should.not.exist(err);
+                              data.should.equal(true);
+                              ++zcount
+                              if(zcount==value.length)
+                              {
+                                count++
+                                if(count==prop_list.length*test_user_list.length){
+                                  done()
+                                }
+                              }
+                            }).catch(err => done(err))
+                          /*db.hset(key,e,1,function(err,data){
+                            should.not.exist(err);
+                              data.should.equal(true);
+                              ++zcount
+                              if(zcount==value.length)
+                              {
+                                count++ 
+                                if(count==prop_list.length*test_user_list.length){
+                                  done()
+                                }
+                              }
+                          })*/
                         })
                     }
                   })
@@ -108,14 +139,22 @@ describe('ad_map.test.js', function () {
               else
               {
                 save_used_key(key)
-                tair.set(key,value,0,nm,0,function(err,success){
+                /*tair.set(key,value,0,nm,0,function(err,success){
                     should.not.exist(err)
                     success.should.equal(true)
                     count++;
                     if(count==prop_list.length*test_user_list.length){
                       done()
                     }
-                  })
+                  })*/
+                  db.setKV(key,value).then(function(err,success){
+                    should.not.exist(err)
+                    success.should.equal(true)
+                    count++;
+                    if(count==prop_list.length*test_user_list.length){
+                      done()
+                    }
+                  }).catch(err => done(err))
               }
             })
         })
@@ -136,20 +175,28 @@ describe('ad_map.test.js', function () {
               save_used_key(key)
               if(d.indexOf("set",d.length-3)===-1)
               {
-                tair.set(key,value,0,nm,0,function(err,success){
+                /*tair.set(key,value,0,nm,0,function(err,success){
                     should.not.exist(err)
                     success.should.equal(true)
                     count++;
                     if(count==prop_list.length*test_entry_list.length){
                       done()
                     }
-                  })
+                  })*/
+                  db.setKV(key,value).then(function(err,success){
+                    should.not.exist(err)
+                    success.should.equal(true)
+                    count++;
+                    if(count==prop_list.length*test_user_list.length){
+                      done()
+                    }
+                  }).catch(err => done(err))
               }
               else
               {
                 var zcount=0
                 c[j+1].forEach(function(v){
-                    tair.zadd(key,nm,v,v,function(err, data){
+                    /*tair.zadd(key,nm,v,v,function(err, data){
                         should.not.exist(err);
                         data.should.equal(true);
                         ++zcount
@@ -160,7 +207,19 @@ describe('ad_map.test.js', function () {
                             done()
                           }
                         }
-                      })
+                      })*/
+                      db.setZV(key,v,v).then(function(err,data){
+                        should.not.exist(err);
+                        data.should.equal(true);
+                        ++zcount
+                        if(zcount==c[j+1].length)
+                        {
+                          count++
+                          if(count==prop_list.length*test_entry_list.length){
+                            done()
+                          }
+                        }
+                      }).catch(err => done(err))
                   })  
               }
             })
@@ -195,14 +254,30 @@ describe('ad_map.test.js', function () {
                   value= tmpBuffer
                 }
                 save_used_key(key)
-                tair.set(key,value,0,nm,0,function(err,success){
+                /*tair.set(key,value,0,nm,0,function(err,success){
                     should.not.exist(err)
                     success.should.equal(true)
                     count++;
                     if(count==prop_list.length*test_entry_list.length){
                       done()
                     }
-                  })
+                  })*/
+                  db.setKV(key,value).then(function(err,success){
+                    should.not.exit(err)
+                    success.should.equal(true)
+                    count++;
+                    if(count==prop_list.length*test_entry_list.length){
+                      done()
+                    }
+                  }).catch(err => done(err))
+                  /*db.setKV(key,value,function(err,success){
+                    should.not.exist(err)
+                    success.should.equal(true)
+                    count++;
+                    if(count==prop_list.length*test_entry_list.length){
+                      done()
+                    }
+                  })*/
               }
               else
               {
@@ -220,7 +295,7 @@ describe('ad_map.test.js', function () {
                 }
                 c[j+1].forEach(function(v){
                     console.log("sadd key="+key+",value="+v)
-                    tair.sadd(key,nm,v,function(err, data){
+                    /*tair.sadd(key,nm,v,function(err, data){
                         should.not.exist(err);
                         data.should.equal(true);
                         ++zcount
@@ -231,7 +306,19 @@ describe('ad_map.test.js', function () {
                             done()
                           }
                         }
-                      })
+                      })*/
+                      db.setSV(key,v).then(function(err,data){
+                        should.not.exist(err);
+                        data.should.equal(true);
+                        ++zcount
+                        if(zcount==c[j+1].length)
+                        {
+                          count++
+                          if(count==prop_list.length*test_entry_list.length){
+                            done()
+                          }
+                        }
+                      }).catch(err => done(err))
                   })  
               }
             })
@@ -257,14 +344,22 @@ describe('ad_map.test.js', function () {
               var key="ad:"+mall_id+":"+c[0]+":"+d
               var value=c[j+1]
               save_used_key(key)
-              tair.set(key,value,0,nm,0,function(err,success){
+              /*tair.set(key,value,0,nm,0,function(err,success){
                   should.not.exist(err)
                   success.should.equal(true)
                   count++;
                   if(count==prop_list.length*test_entry_list.length){
                     done()
                   }
-                })
+                })*/
+                db.setKV(key,value).then(function(err,success){
+                  should.not.exist(err)
+                  success.should.equal(true)
+                  count++;
+                  if(count==prop_list.length*test_entry_list.length){
+                    done()
+                  }
+                }).catch(err => done(err))
            })
       })
     })
@@ -332,7 +427,7 @@ describe('ad_map.test.js', function () {
             {
               var key="ad.location:"+mall_id+":"+i+":"+j+":"+mall_level+":ad.group.set"  
               save_used_key(key)
-              tair.zadd(key,nm,ad_group_index+1,ad_group_index+1,function(err, data){
+              /*tair.zadd(key,nm,ad_group_index+1,ad_group_index+1,function(err, data){
                   should.not.exist(err);
                   data.should.equal(true);
                   ++mcount
@@ -344,7 +439,20 @@ describe('ad_map.test.js', function () {
                   {
                     done()
                   }
-                })
+                })*/
+                db.setZV(key,ad_group_index+1,ad_group_index+1),then(function(err,data){
+                  should.not.exist(err);
+                  data.should.equal(true);
+                  ++mcount
+                  if(mcount==x_len*y_len)
+                  {
+                    ++count
+                  }
+                  if(count==test_ad_loc_data.length)
+                  {
+                    done()
+                  }
+                }).catch(err => done(err))
             }
             else
             {
@@ -379,16 +487,27 @@ describe('ad_map.test.js', function () {
       var count=0
       for(var key in used_key){
         console.log('remove '+key)
-        tair.remove(key,nm,function(err){
+        /*tair.remove(key,nm,function(err){
           should.not.exist(err)
           count++;
           if(count==Object.keys(used_key).length){
              done();
           }
-        })
+        })*/
+        db.rmK(key).then(function(err){
+          should.not.exist(err)
+          count++;
+          if(count==Object.keys(user_key).length){
+            done();
+          }
+        }).catch(err => done(err))
       }
     })
-});
+})
+}
+
+["tair","redis"].forEach(MDBTest)
+
 
 
 
