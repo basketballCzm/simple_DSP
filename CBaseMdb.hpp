@@ -17,7 +17,7 @@ private:
 public:
     CBaseMdb()
     {
-        m_type = REDIS;
+        m_type = TAIR;
     }
 
     inline bool connect(std::string host, int port);

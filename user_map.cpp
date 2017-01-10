@@ -81,8 +81,6 @@ namespace user_map
             master_addr_ip  = config.getString("tair_rdb", "master_addr_ip", NULL);
             master_addr_op  = config.getString("tair_rdb", "master_addr_op", NULL);
             port = atoi(master_addr_op);
-            /*TBSYS_LOG(DEBUG,"master_addr_op = %s",master_addr_op);
-            TBSYS_LOG(DEBUG,"***********8*master_addr_ip = %s*port = %d ",master_addr_ip,port);*/
             slave_addr      = config.getString("tair_rdb", "slave_addr", NULL);            
             group_name      = config.getString("tair_rdb", "group_name", NULL);            
             time_slice      = config.getInt("tair_rdb", "time_slice", 10);
@@ -490,7 +488,6 @@ namespace user_map
     {
         user_map_init();
         tair::common::data_entry key;
-        TBSYS_LOG(DEBUG,"******************************************************************");
         get_data_entry(key,"user:",user_id,":mac");
         std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
         unsigned long long mac = g_baseMdb.get<unsigned long long>(s_key,0);
