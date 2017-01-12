@@ -18,7 +18,6 @@ std::string reply;
 string str;
 bool result = false;
 std::string str_ip[2] = {"WUSHUU-REDIS","WUSHUU-TAIR-CS"};
-int removekey_namespace[2] = {0,2};
 int address_op[2] = {6379,5198};
 int result_back[2] = {1,0};//redis ---success 1     tair  ---success 0
 
@@ -50,7 +49,7 @@ TEST_F(CBaseMdbTest,ClassTest_set)
     TBSYS_LOGGER.setFileName("CbaseMdb.log",true);   //文件名加上线程的id，确定日志的名称
     TBSYS_LOGGER.setLogLevel("debug");
     TBSYS_LOG(DEBUG,"r.get_TypeDb() = %d",r.get_TypeDb());
-    TBSYS_LOG(DEBUG,"r.get_TypeDb() = %d",removekey_namespace[r.get_TypeDb()]);
+    TBSYS_LOG(DEBUG,"r.get_TypeDb() = %d",tair_namespace);
     TBSYS_LOG(DEBUG,"str_ip[r.get_TypeDb()].c_str() %s: ",str_ip[r.get_TypeDb()].c_str());
     TBSYS_LOG(DEBUG,"address_op[r.get_TypeDb()]:%d",address_op[r.get_TypeDb()]);
 
@@ -203,7 +202,7 @@ TEST_F(CBaseMdbTest,ClassTest_zadd_int)
     integer = r.zadd<int>("czmzadd_int",3,444);
     EXPECT_EQ(1,integer);
     vector<int> user_list_int;
-    r.zrange<int>("czmzadd_int",0,10,user_list_int);
+    r.zrange<int>("czmzadd_int",0,1213342323,user_list_int);
     EXPECT_EQ(4,user_list_int.size());
     vector<int>::iterator iter_int;
     iter_int = find(user_list_int.begin(),user_list_int.end(),111);
@@ -251,16 +250,16 @@ TEST_F(CBaseMdbTest,ClassTest_zadd_float)
 
 TEST_F(CBaseMdbTest,ClassTest_zadd_double)
 {
-    integer = r.zadd<double>("czmzadd_double",0,111.111);
+    integer = r.zadd<double>("czmzadd_double",1484130,111.111);
     EXPECT_EQ(1,integer);
-    integer = r.zadd<double>("czmzadd_double",1,222.222);
+    integer = r.zadd<double>("czmzadd_double",1484130000,222.222);
     EXPECT_EQ(1,integer);
-    integer = r.zadd<double>("czmzadd_double",2,333.333);
+    integer = r.zadd<double>("czmzadd_double",14,333.333);
     EXPECT_EQ(1,integer);
-    integer = r.zadd<double>("czmzadd_double",3,444.444);
+    integer = r.zadd<double>("czmzadd_double",144,444.444);
     EXPECT_EQ(1,integer);
     vector<double> user_list_double;
-    r.zrange<double>("czmzadd_double",0,10,user_list_double);
+    r.zrange<double>("czmzadd_double",0,1484130001,user_list_double);
     EXPECT_EQ(4,user_list_double.size());
     vector<double>::iterator iter_double;
     iter_double = find(user_list_double.begin(),user_list_double.end(),111.111);
@@ -419,20 +418,20 @@ TEST_F(CBaseMdbTest,ClassTest_sadd_string)
 
 TEST_F(CBaseMdbTest,ClassTest_removeKey)
 {
-    r.removeKey(removekey_namespace[r.get_TypeDb()],"czmset_int");
-    r.removeKey(removekey_namespace[r.get_TypeDb()],"czmset_float");
-    r.removeKey(removekey_namespace[r.get_TypeDb()],"czmset_double");
-    r.removeKey(removekey_namespace[r.get_TypeDb()],"czmset_string");
-    r.removeKey(removekey_namespace[r.get_TypeDb()],"czmhset_int");
-    r.removeKey(removekey_namespace[r.get_TypeDb()],"czmhset_float");
-    r.removeKey(removekey_namespace[r.get_TypeDb()],"czmhset_double");
-    r.removeKey(removekey_namespace[r.get_TypeDb()],"czmhset_string");
-    r.removeKey(removekey_namespace[r.get_TypeDb()],"czmzadd_int");
-    r.removeKey(removekey_namespace[r.get_TypeDb()],"czmzadd_float");
-    r.removeKey(removekey_namespace[r.get_TypeDb()],"czmzadd_double");
-    r.removeKey(removekey_namespace[r.get_TypeDb()],"czmzadd_string");
-    r.removeKey(removekey_namespace[r.get_TypeDb()],"czmsadd_int");
-    r.removeKey(removekey_namespace[r.get_TypeDb()],"czmsadd_float");
-    r.removeKey(removekey_namespace[r.get_TypeDb()],"czmsadd_double");
-    r.removeKey(removekey_namespace[r.get_TypeDb()],"czmsadd_string");
+    r.removeKey(tair_namespace,"czmset_int");
+    r.removeKey(tair_namespace,"czmset_float");
+    r.removeKey(tair_namespace,"czmset_double");
+    r.removeKey(tair_namespace,"czmset_string");
+    r.removeKey(tair_namespace,"czmhset_int");
+    r.removeKey(tair_namespace,"czmhset_float");
+    r.removeKey(tair_namespace,"czmhset_double");
+    r.removeKey(tair_namespace,"czmhset_string");
+    r.removeKey(tair_namespace,"czmzadd_int");
+    r.removeKey(tair_namespace,"czmzadd_float");
+    r.removeKey(tair_namespace,"czmzadd_double");
+    r.removeKey(tair_namespace,"czmzadd_string");
+    r.removeKey(tair_namespace,"czmsadd_int");
+    r.removeKey(tair_namespace,"czmsadd_float");
+    r.removeKey(tair_namespace,"czmsadd_double");
+    r.removeKey(tair_namespace,"czmsadd_string");
 }

@@ -13,11 +13,11 @@ build:
     - TBLIB_ROOT=/usr/local make
     - TBLIB_ROOT=/usr/local make install
     #test
-    - MDB=REDIS test/CbaseMdb_test
-    - MDB=TAIR  test/CbaseMdb_test
-    - test/user_map_test
+    - MDB=TAIR test/CbaseMdb_test
+    - MDB=REDIS  test/CbaseMdb_test
+    - MDB=REDIS  test/user_map_test
     - git config --global http.sslVerify false
     - cnpm install
-    - mocha
+    - MDB=REDIS mocha
     #deploy
     - echo "TODO"

@@ -17,7 +17,7 @@ private:
 public:
     CBaseMdb()
     {
-        m_type = TAIR;
+        m_type = REDIS;
     }
 
     inline bool connect(std::string host, int port);
@@ -45,6 +45,9 @@ public:
 
     template <typename V_TYPE>
     std::vector<V_TYPE>* zrange(std::string key, double min, double max, std::vector<V_TYPE> &members_set);
+
+    template <typename V_TYPE>
+    std::vector<V_TYPE>* zrangeByIndex(std::string key, std::vector<V_TYPE> &members_set);
 
     template<typename T>
     int sadd(std::string key, T value);
@@ -220,6 +223,24 @@ std::vector<V_TYPE>* CBaseMdb::zrange(std::string key, double min, double max, s
     else if(TAIR == m_type)
     {
         return m_tair_db.zrange<V_TYPE>(key,min,max,members_set);
+    }
+    else
+    {
+        return &members_set;
+    }
+}
+
+template <typename V_TYPE>
+std::vector<V_TYPE>* CBaseMdb::zrangeByIndex(std::string key, std::vector<V_TYPE> &members_set)
+{
+    TBSYS_LOG(DEBUG,"entry base_mdb_zrangeByIndex");
+    if(REDIS == m_type)
+    {
+        return m_redis_db.zrangeByIndex<V_TYPE>(key,members_set);
+    }
+    else if(TAIR == m_type)
+    {
+        return m_tair_db.zrangeByIndex<V_TYPE>(key,members_set);
     }
     else
     {

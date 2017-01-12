@@ -4,6 +4,10 @@ var sys = require('sys')
 var exec = require('child_process').exec
 var deepcopy = require('deepcopy')
 
+function sleep(d){
+  for(var t = Date.now();Date.now() - t <= d;);
+}
+
 var MDBTest = mdb => {
   var db;
   var nm=2;
@@ -66,12 +70,12 @@ describe('ad_map.test.js', function () {
           prop_list.forEach(function(d,j){
               var key="location:"+mall_id+":"+c[0]+":"+d
               var value=c[j+1]
-              if(d==="x" || d=== "y")
+              /*if(d==="x" || d=== "y")
               {
                 var tmpBuffer = new Buffer(4)
                 tmpBuffer.writeFloatLE(value,0)
                 value= tmpBuffer
-              }
+              }*/
 
               if(d==="label.set")
               {
@@ -144,12 +148,46 @@ describe('ad_map.test.js', function () {
                       done()
                     }
                   })*/
-                  db.setKV(key,value).then(()=>{
+                  /*db.setKV(key,value).then(()=>{
                     count++;
                     if(count==prop_list.length*test_user_list.length){
                       done()
                     }
-                  }).catch(err => done(err))
+                  }).catch(err => done(err))*/
+
+                  if(typeof value ==="number")
+                  {
+                    if(value%1 === 0)
+                    {
+                      //console.log("int"+key);
+                      db.setKV(key,value,"int").then(()=>{
+                      count++;
+                      if(count==prop_list.length*test_user_list.length){
+                      done()
+                      }
+                      }).catch(err => done(err))
+                    }
+                    else
+                    {
+                      //console.log("double"+key);
+                      db.setKV(key,value,"double").then(()=>{
+                      count++;
+                      if(count==prop_list.length*test_user_list.length){
+                      done()
+                      }
+                      }).catch(err => done(err))
+                    }
+                  }
+                  else
+                  {
+                    //console.log("string"+key);
+                    db.setKV(key,value,"string").then(()=>{
+                    count++;
+                    if(count==prop_list.length*test_user_list.length){
+                      done()
+                    }
+                    }).catch(err => done(err))
+                  }
               }
             })
         })
@@ -238,12 +276,12 @@ describe('ad_map.test.js', function () {
               var value=c[j+1]
               if(d.indexOf("set",d.length-3)===-1)
               {
-                if(d.indexOf("price",d.length-5)!==-1)
+                /*if(d.indexOf("price",d.length-5)!==-1)
                 {
                   var tmpBuffer = new Buffer(8)
                   tmpBuffer.writeDoubleLE(value,0)
                   value= tmpBuffer
-                }
+                }*/
                 save_used_key(key)
                 /*tair.set(key,value,0,nm,0,function(err,success){
                     should.not.exist(err)
@@ -253,13 +291,39 @@ describe('ad_map.test.js', function () {
                       done()
                     }
                   })*/
-                  //if(typeof value ==="")
-                  db.setKV(key,value).then(()=>{
+                  if(typeof value ==="number")
+                  {
+                    if(value%1 === 0)
+                    {
+                      //console.log("int"+key);
+                      db.setKV(key,value,"int").then(()=>{
+                      count++;
+                      if(count==prop_list.length*test_entry_list.length){
+                      done()
+                      }
+                      }).catch(err => done(err))
+                    }
+                    else
+                    {
+                      //console.log("double"+key);
+                      db.setKV(key,value,"double").then(()=>{
+                      count++;
+                      if(count==prop_list.length*test_entry_list.length){
+                      done()
+                      }
+                      }).catch(err => done(err))
+                    }
+                  }
+                  else
+                  {
+                    //console.log("string"+key);
+                    db.setKV(key,value,"string").then(()=>{
                     count++;
                     if(count==prop_list.length*test_entry_list.length){
                       done()
                     }
-                  }).catch(err => done(err))
+                    }).catch(err => done(err))
+                  }
                   /*db.setKV(key,value,function(err,success){
                     should.not.exist(err)
                     success.should.equal(true)
@@ -297,7 +361,39 @@ describe('ad_map.test.js', function () {
                           }
                         }
                       })*/
-                      db.setSV(key,v).then(()=>{
+                      if(typeof v === "number")
+                      {
+                        if(v%1 === 0)
+                        {
+                          console.log(key);
+                          db.setSV(key,v,"int").then(()=>{
+                          ++zcount
+                          if(zcount==c[j+1].length)
+                          {
+                            count++
+                            if(count==prop_list.length*test_entry_list.length){
+                            done()
+                            }
+                          }
+                          }).catch(err => done(err))
+                        }
+                        else
+                        {
+                          db.setSV(key,v,"double").then(()=>{
+                          ++zcount
+                          if(zcount==c[j+1].length)
+                          {
+                            count++
+                            if(count==prop_list.length*test_entry_list.length){
+                            done()
+                            }
+                          }
+                          }).catch(err => done(err))
+                        }
+                      }
+                      else
+                      {
+                        db.setSV(key,v,"string").then(()=>{
                         ++zcount
                         if(zcount==c[j+1].length)
                         {
@@ -306,7 +402,8 @@ describe('ad_map.test.js', function () {
                             done()
                           }
                         }
-                      }).catch(err => done(err))
+                        }).catch(err => done(err))
+                      }
                   })  
               }
             })
@@ -316,15 +413,15 @@ describe('ad_map.test.js', function () {
   it("ad_map insert test data ad should be ok!",function(done){
       this.timeout(10000)
       var test_entry_list=[
-        [1,1],
-        [2,1],
-        [3,2],
-        [4,3],
-        [5,4],
-        [6,6],
-        [7,1],
+        [1,1,10],
+        [2,1,11],
+        [3,2,15],
+        [4,3,17],
+        [5,4,20],
+        [6,6,22],
+        [7,1,24],
       ]
-      var prop_list=["group"]
+      var prop_list=["group","weight"]
       var count=0
 
       test_entry_list.forEach(function(c){
@@ -453,8 +550,7 @@ describe('ad_map.test.js', function () {
           })
       })
     })
-
-
+ 
 
   })
   it("c++ test ,ad_request should be ok!",function(done){
@@ -469,6 +565,7 @@ describe('ad_map.test.js', function () {
 
   it("clear up test data should work",function(done){
       var count=0
+      //sleep(1000)
       for(var key in used_key){
         console.log('remove '+key)
         /*tair.remove(key,nm,function(err){
@@ -489,7 +586,7 @@ describe('ad_map.test.js', function () {
 })
 }
 
-["tair"].forEach(MDBTest)
+["redis"].forEach(MDBTest)
 
 
 

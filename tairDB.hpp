@@ -35,6 +35,9 @@ public:
     template <typename V_TYPE>
     std::vector<V_TYPE>* zrange(std::string key, double min, double max, std::vector<V_TYPE> &members_set);
 
+    template <typename V_TYPE>
+    std::vector<V_TYPE>* zrangeByIndex(std::string key, std::vector<V_TYPE> &members_set);
+
     template<typename T>
     int sadd(std::string key, T value);
 
@@ -194,6 +197,17 @@ std::vector<V_TYPE>* TairDb::zrange(std::string key, double min, double max, std
     std::vector<tair::common::data_entry*> values;
     tair_zrangebyscore<V_TYPE>(*ptair_Client,tair_namespace,s_key,(double)min,(double)max,members_set);  
     TBSYS_LOG(DEBUG,"tair entry zrange end !");
+    return & members_set;
+}
+
+template <typename V_TYPE>
+std::vector<V_TYPE>* TairDb::zrangeByIndex(std::string key, std::vector<V_TYPE> &members_set)
+{
+    TBSYS_LOG(DEBUG,"tair entry zrangeByIndex start !");
+    tair::common::data_entry s_key(key.c_str(),key.size()+1,true);
+    std::vector<tair::common::data_entry*> values;
+    tair_zmembers<V_TYPE>(*ptair_Client,tair_namespace,s_key,members_set);  
+    TBSYS_LOG(DEBUG,"tair entry zrangeByIndex end !");
     return & members_set;
 }
 

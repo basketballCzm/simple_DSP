@@ -48,6 +48,9 @@ public:
     template <typename V_TYPE>
     std::vector<V_TYPE>* zrange(std::string key, double min, double max, std::vector<V_TYPE> &members_set);
 
+    template <typename V_TYPE>
+    std::vector<V_TYPE>* zrangeByIndex(std::string key, std::vector<V_TYPE> &members_set);
+
     template<typename T>
     int sadd(std::string key, T value);
 
@@ -98,6 +101,7 @@ bool RedisDb::connect(std::string host, int port)
         TBSYS_LOG(DEBUG,"connect error: %s\n",this->_connect->errstr);
         return false;
     }
+    redisCommand(this->_connect,"select 2");
     return true;
 }
 
@@ -240,8 +244,15 @@ int RedisDb::zadd(std::string key, double score, T value)
 template <typename V_TYPE>
 std::vector<V_TYPE>* RedisDb::zrange(std::string key, double min, double max, std::vector<V_TYPE> &members_set)
 {
-    TBSYS_LOG(DEBUG,"redis: redis zrange string %s %d %d",key.c_str(),(int)min,(int)max);
-    this->_reply = (redisReply*)redisCommand(this->_connect,"ZRANGE %s %d %d",key.c_str(),(int)min,(int)max);
+    TBSYS_LOG(DEBUG,"redis: redis zrange string %s %lld %lld",key.c_str(),(int)min,(int)max);
+
+    /*std::ostringstream strLog_ss;
+    strLog_ss << "ZRANGEBYSCORE " << key << " " <<min << " " << max << std::endl;
+    std::string strLog = strLog_ss.str();
+    TBSYS_LOG(DEBUG,"std::string strLog:%s",strLog.c_str());
+    this->_reply = (redisReply*)redisCommand(this->_connect,strLog.c_str());*/
+    TBSYS_LOG(DEBUG,"ZRANGEBYSCORE %s %lld %lld",key.c_str(),(int)min,(int)max);
+    this->_reply = (redisReply*)redisCommand(this->_connect,"ZRANGEBYSCORE %s %lld %lld",key.c_str(),(int)min,(int)max);
     if(NULL == this->_reply || REDIS_REPLY_ARRAY != this->_reply->type)
     {
         TBSYS_LOG(DEBUG,"redis: redis zrange error!");
@@ -249,6 +260,9 @@ std::vector<V_TYPE>* RedisDb::zrange(std::string key, double min, double max, st
         return NULL;
     }
 
+    TBSYS_LOG(DEBUG,"this->_reply : %d",this->_reply);
+    TBSYS_LOG(DEBUG,"this->_reply->type : %d",this->_reply->type);
+    TBSYS_LOG(DEBUG,"this->_reply->elements: %d",this->_reply->elements);
     for(unsigned int i = 0; i < this->_reply->elements; i++)
     {
         std::istringstream stream1;
@@ -260,6 +274,41 @@ std::vector<V_TYPE>* RedisDb::zrange(std::string key, double min, double max, st
     }
     freeReplyObject(this->_reply);
     TBSYS_LOG(DEBUG,"zrange success");
+    return & members_set;
+}
+
+template <typename V_TYPE>
+std::vector<V_TYPE>* RedisDb::zrangeByIndex(std::string key, std::vector<V_TYPE> &members_set)
+{
+    TBSYS_LOG(DEBUG,"redis: redis zrangeByIndex string %s",key.c_str());
+    /*std::ostringstream strLog_ss;
+    strLog_ss << "ZRANGEBYSCORE " << key << " " <<min << " " << max << std::endl;
+    std::string strLog = strLog_ss.str();
+    TBSYS_LOG(DEBUG,"std::string strLog:%s",strLog.c_str());
+    this->_reply = (redisReply*)redisCommand(this->_connect,strLog.c_str());*/
+    TBSYS_LOG(DEBUG,"ZRANGE %s 0 %lld",key.c_str(),(int)std::numeric_limits<double>::max());
+    this->_reply = (redisReply*)redisCommand(this->_connect,"ZRANGE %s 0 %lld",key.c_str(),(int)std::numeric_limits<double>::max());
+    if(NULL == this->_reply || REDIS_REPLY_ARRAY != this->_reply->type)
+    {
+        TBSYS_LOG(DEBUG,"redis: redis zrangeByIndex error!");
+        freeReplyObject(this->_reply);
+        return NULL;
+    }
+
+    TBSYS_LOG(DEBUG,"this->_reply : %d",this->_reply);
+    TBSYS_LOG(DEBUG,"this->_reply->type : %d",this->_reply->type);
+    TBSYS_LOG(DEBUG,"this->_reply->elements: %d",this->_reply->elements);
+    for(unsigned int i = 0; i < this->_reply->elements; i++)
+    {
+        std::istringstream stream1;
+        stream1.str(this->_reply->element[i]->str);
+        V_TYPE value;
+        stream1 >> value;
+
+        members_set.push_back(value);
+    }
+    freeReplyObject(this->_reply);
+    TBSYS_LOG(DEBUG,"zrangeByIndex success");
     return & members_set;
 }
 

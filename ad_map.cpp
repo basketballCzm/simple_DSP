@@ -22,11 +22,11 @@
 
 
 using namespace std;
-CBaseMdb g_baseMdb_ad;
 
 namespace ad_map
 {
-tair::tair_client_api g_tair;
+//tair::tair_client_api g_tair;
+CBaseMdb g_baseMdb_ad;
 const char * config_file="etc/config.ini";
 tbsys::CConfig config;
 const char * master_addr;
@@ -82,7 +82,7 @@ void ad_map_init()
         TBSYS_LOGGER.setLogLevel(tb_log_level);
 
         //g_tair.set_timeout(5000);
-        g_tair.startup(master_addr,slave_addr,group_name);
+        //g_tair.startup(master_addr,slave_addr,group_name);
 
         g_baseMdb_ad.initDb(std::string(master_addr_ip),port);
         TBSYS_LOG(DEBUG,"ad_map_init() after g_tair.startup; log file is %s",tb_log_file);
@@ -109,8 +109,10 @@ void get_ad_group_set_of_space(const int mall_id, const int space_id, std::vecto
 
     get_data_entry( ad_group_set_key,"ad.space:",mall_id,":",space_id,":ad.group.set");
     std::string s_ad_group_set_key = get_value<std::string>(ad_group_set_key.get_data(),ad_group_set_key.get_size());
+    TBSYS_LOG(DEBUG,"&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+    TBSYS_LOG(DEBUG,"%s",s_ad_group_set_key.c_str());
     //tair_zmembers<int>(g_tair,tair_namespace,ad_group_set_key,ad_group_set);
-    g_baseMdb_ad.zrange<int>(s_ad_group_set_key,std::numeric_limits<double>::lowest(),std::numeric_limits<double>::max(),ad_group_set);
+    g_baseMdb_ad.zrangeByIndex<int>(s_ad_group_set_key,ad_group_set);
     return;
 }
 
@@ -124,7 +126,7 @@ void get_ad_group_set_of_location(const int mall_id, const UserPosition &pos, st
     TBSYS_LOG(DEBUG, "ad_map::get_ad_group_set_of_location() slice_x=%d,pos.x=%f slice_y=%d pos.y=%f key=%s"
               ,slice_x ,pos.position.x, slice_y, pos.position.y, ad_group_set_key.get_data());
     std::string s_ad_group_set_key = get_value<std::string>(ad_group_set_key.get_data(),ad_group_set_key.get_size());
-    g_baseMdb_ad.zrange<int>(s_ad_group_set_key,std::numeric_limits<double>::lowest(),std::numeric_limits<double>::max(),ad_group_set);
+    g_baseMdb_ad.zrangeByIndex<int>(s_ad_group_set_key,ad_group_set);
     //tair_zmembers<int>(g_tair,tair_namespace,ad_group_set_key,ad_group_set);
     return;
 }
@@ -145,12 +147,14 @@ double get_eCPM(const int mall_id,const int ad_group_id, int &next_ad_id)
 {
     tair::common::data_entry key;
     //vector<tair::common::data_entry*> ad_id_set;
-    std::vector<std::string> ad_id_set;
-
+    //std::vector<std::string> ad_id_set;
+    std::vector<int> ad_id_set;
     get_data_entry( key,"ad.group:",mall_id,":",ad_group_id,":ad.set");
     std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+    TBSYS_LOG(DEBUG,"get_eCPMget_eCPMget_eCPM");
+    TBSYS_LOG(DEBUG,"%s",s_key.c_str());
     //g_tair.smembers(tair_namespace,key,ad_id_set);
-    g_baseMdb_ad.smembers<std::string>(s_key,ad_id_set);
+    g_baseMdb_ad.smembers<int>(s_key,ad_id_set);
 
     int sum_weight=0;
     double sum_eCPM=0;
@@ -164,9 +168,12 @@ double get_eCPM(const int mall_id,const int ad_group_id, int &next_ad_id)
     const double & click_price=g_baseMdb_ad.get<double>(s_key,0);
     //min show weight win this show time.
     double min_show_weight=std::numeric_limits<double>::max();;
-    for(vector<std::string>::iterator it=ad_id_set.begin(); it!=ad_id_set.end(); it++)
+    for(vector<int>::iterator it=ad_id_set.begin(); it!=ad_id_set.end(); it++)
     {
-        int ad_id=*( int*)((*it).c_str());
+        TBSYS_LOG(DEBUG,"rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr");
+        //int ad_id=*( int*)((*it).c_str());
+        int ad_id = *it;
+        TBSYS_LOG(DEBUG,"ad_id = %d",ad_id);
 
         if(!check_ad_valid(mall_id,ad_id))
             continue;
@@ -204,6 +211,7 @@ double get_eCPM(const int mall_id,const int ad_group_id, int &next_ad_id)
         double show_weight=(show_counter+1.0)/weight;
         if(show_weight<min_show_weight)
         {
+            TBSYS_LOG(DEBUG,"rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrreeeeeerrrrr");
             min_show_weight=show_weight;
             next_ad_id=ad_id;
         }
