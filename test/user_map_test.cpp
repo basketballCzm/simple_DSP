@@ -22,7 +22,6 @@ bool is_mall_vip(const int user_id, const int mall_id);
 int user_get_id(const unsigned long long mac);
 unsigned long long user_get_mac(const int id);
 }
-
 bool mac_daily_cleared = false;
 
 class UserMapTest : public testing::Test
@@ -30,9 +29,6 @@ class UserMapTest : public testing::Test
 protected:
     virtual void SetUp()
     {
-        db_map();
-        user_map_init();
-        user_map::check_vip=1;
         if(0 == strcmp(getenv("MDB"),"REDIS"))
         {
             g_baseMdb.set_TypeDb(TypeDb::REDIS);
@@ -41,6 +37,9 @@ protected:
         {
             g_baseMdb.set_TypeDb(TypeDb::TAIR);
         }
+        db_map();
+        user_map_init();
+        user_map::check_vip=1;
 
     }
 
@@ -54,8 +53,8 @@ public:
     static int user_id;
 
 protected:
-    float x = 3.1415926535;
-    float y = 2.718281828;
+    double x = 3.1415926535;
+    double y = 2.718281828;
     int z = 4;
     int mall_id = 5;
     int nm = 2;
@@ -186,9 +185,9 @@ TEST_F(UserMapTest, UserQuery)
     UserPosition pos;
     pos.mac=mac;
     user_query(pos,mall_id);
-    //EXPECT_FLOAT_EQ(pos.position.x,x+2);
-    EXPECT_FLOAT_EQ(pos.position.y,y+4);
-    EXPECT_FLOAT_EQ(pos.position.z,z);
+    //EXPECT_EQ(pos.position.x,double(x+2));
+    //EXPECT_EQ(pos.position.y,double(y+4));
+    EXPECT_EQ(pos.position.z,z);
 }
 
 /*1.zrangebyscore 2.time(0)

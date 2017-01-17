@@ -62,9 +62,18 @@ void ad_map_init()
         }
         TBSYS_LOG(DEBUG,"ad_map_init() load config ok!");
         master_addr=config.getString("tair_rdb","master_addr",NULL);
-        master_addr_ip  = config.getString("tair_rdb", "master_addr_ip", NULL);
-        master_addr_op  = config.getString("tair_rdb", "master_addr_op", NULL);
-        port = atoi(master_addr_op);
+        if(TypeDb::TAIR == g_baseMdb_ad.get_TypeDb())
+        {
+            master_addr_ip  = config.getString("tair_rdb", "master_addr_ip", NULL);
+            master_addr_op  = config.getString("tair_rdb", "master_addr_op", NULL);
+            port = atoi(master_addr_op);
+        }
+        else if(TypeDb::REDIS == g_baseMdb_ad.get_TypeDb())
+        {
+            master_addr_ip  = config.getString("redis_rdb", "master_addr_ip", NULL);
+            master_addr_op  = config.getString("redis_rdb", "master_addr_op", NULL);
+            port = atoi(master_addr_op);
+        }
         slave_addr=config.getString("tair_rdb","slave_addr",NULL);
         group_name=config.getString("tair_rdb","group_name",NULL);
         time_slice=config.getInt("tair_rdb","time_slice",10);
@@ -83,6 +92,14 @@ void ad_map_init()
 
         //g_tair.set_timeout(5000);
         //g_tair.startup(master_addr,slave_addr,group_name);
+        if(0 == strcmp(getenv("MDB"),"REDIS"))
+        {
+            g_baseMdb_ad.set_TypeDb(TypeDb::REDIS);
+        }
+        else if(0 == strcmp(getenv("MDB"),"TAIR"))
+        {
+            g_baseMdb_ad.set_TypeDb(TypeDb::TAIR);
+        }
 
         g_baseMdb_ad.initDb(std::string(master_addr_ip),port);
         TBSYS_LOG(DEBUG,"ad_map_init() after g_tair.startup; log file is %s",tb_log_file);
@@ -101,15 +118,12 @@ void ad_map_init()
     }
 }
 
-
-
 void get_ad_group_set_of_space(const int mall_id, const int space_id, std::vector< int> &ad_group_set)
 {
     tair::common::data_entry ad_group_set_key;
 
     get_data_entry( ad_group_set_key,"ad.space:",mall_id,":",space_id,":ad.group.set");
     std::string s_ad_group_set_key = get_value<std::string>(ad_group_set_key.get_data(),ad_group_set_key.get_size());
-    TBSYS_LOG(DEBUG,"&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
     TBSYS_LOG(DEBUG,"%s",s_ad_group_set_key.c_str());
     //tair_zmembers<int>(g_tair,tair_namespace,ad_group_set_key,ad_group_set);
     g_baseMdb_ad.zrangeByIndex<int>(s_ad_group_set_key,ad_group_set);
@@ -170,7 +184,6 @@ double get_eCPM(const int mall_id,const int ad_group_id, int &next_ad_id)
     double min_show_weight=std::numeric_limits<double>::max();;
     for(vector<int>::iterator it=ad_id_set.begin(); it!=ad_id_set.end(); it++)
     {
-        TBSYS_LOG(DEBUG,"rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr");
         //int ad_id=*( int*)((*it).c_str());
         int ad_id = *it;
         TBSYS_LOG(DEBUG,"ad_id = %d",ad_id);
@@ -211,7 +224,6 @@ double get_eCPM(const int mall_id,const int ad_group_id, int &next_ad_id)
         double show_weight=(show_counter+1.0)/weight;
         if(show_weight<min_show_weight)
         {
-            TBSYS_LOG(DEBUG,"rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrreeeeeerrrrr");
             min_show_weight=show_weight;
             next_ad_id=ad_id;
         }

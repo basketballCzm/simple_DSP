@@ -73,7 +73,7 @@ describe('ad_map.test.js', function () {
               /*if(d==="x" || d=== "y")
               {
                 var tmpBuffer = new Buffer(4)
-                tmpBuffer.writeFloatLE(value,0)
+                tmpBuffer.writedoubleLE(value,0)
                 value= tmpBuffer
               }*/
 
@@ -279,7 +279,7 @@ describe('ad_map.test.js', function () {
                 /*if(d.indexOf("price",d.length-5)!==-1)
                 {
                   var tmpBuffer = new Buffer(8)
-                  tmpBuffer.writeDoubleLE(value,0)
+                  tmpBuffer.writedoubleLE(value,0)
                   value= tmpBuffer
                 }*/
                 save_used_key(key)

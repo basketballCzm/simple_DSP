@@ -14,7 +14,7 @@ namespace user_map
     void user_map_init();
     int user_add(UserPosition pos,int mall_id=0);
     //kafka_offset default -1 meanes none
-    int user_add(const unsigned long long mac,const float x,const float y,const int z, const int kafka_offset=-1,int mall_id=0);
+    int user_add(const unsigned long long mac,const double x,const double y,const int z, const int kafka_offset=-1,int mall_id=0);
     int user_remove(int mac,int mall_id=0);
     int user_update(UserPosition pos,int mall_id=0);
     int user_update(const unsigned long long mac,const string phone);
@@ -24,7 +24,7 @@ namespace user_map
 
     //user tag
 
-    int user_tag_update(const unsigned long mac, const char* user_tag, const float user_value);
+    int user_tag_update(const unsigned long mac, const char* user_tag, const double user_value);
 
     //get user id from mac, zero means not exist
 

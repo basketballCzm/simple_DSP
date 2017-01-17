@@ -36,9 +36,6 @@ class AdMapTest : public testing::Test
 protected:
     virtual void SetUp()
     {
-        openlog("ad_map_test", LOG_PID|LOG_PERROR, LOG_LOCAL0 );
-        db_map();
-        ad_map_init();
         if(0 == strcmp(getenv("MDB"),"REDIS"))
         {
             g_baseMdb_ad.set_TypeDb(TypeDb::REDIS);
@@ -47,6 +44,9 @@ protected:
         {
             g_baseMdb_ad.set_TypeDb(TypeDb::TAIR);
         }
+        openlog("ad_map_test", LOG_PID|LOG_PERROR, LOG_LOCAL0 );
+        db_map();
+        ad_map_init();
     }
     virtual void TearDown()
     {
