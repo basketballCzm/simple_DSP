@@ -17,7 +17,7 @@ double d_num = 0;
 std::string reply;
 string str;
 bool result = false;
-std::string str_ip[2] = {"WUSHUU-REDIS","WUSHUU-TAIR-CS"};
+std::string str_ip[2] = {"redis","tair"};
 int removekey_namespace[2] = {0,2};
 int address_op[2] = {6379,5198};
 int result_back[2] = {1,0};//redis ---success 1     tair  ---success 0
