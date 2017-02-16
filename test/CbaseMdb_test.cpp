@@ -11,6 +11,7 @@
 #include "loadConf.h"
 using namespace std;
 
+unsigned long long mac = 1234567890;
 int integer = 0;
 float f_num = 0;
 double d_num = 0;
@@ -58,6 +59,8 @@ TEST_F(CBaseMdbTest,ClassTest_set)
     //float的精度会存在问题
     integer = r.set<float>("czmset_float",99034.3);
     EXPECT_EQ(1,integer);
+    integer = r.set<unsigned long long>("czm_unsigned",mac);
+    EXPECT_EQ(1,integer);
     integer = r.set<double>("czmset_double",21.334);
     EXPECT_EQ(1,integer);
     integer = r.set<string>("czmset_string","123456");
@@ -68,6 +71,8 @@ TEST_F(CBaseMdbTest,ClassTest_set)
     EXPECT_FLOAT_EQ(99034.3,f_num);
     d_num = r.get<double>("czmset_double",-1);
     EXPECT_EQ(21.334,d_num);
+    mac = r.get<unsigned long long>("czm_unsigned",-1);
+    EXPECT_EQ(1234567890,mac);
     str = r.get<string>("czmset_string","error");
     EXPECT_STREQ("123456",str.c_str());
     //empty
@@ -434,4 +439,5 @@ TEST_F(CBaseMdbTest,ClassTest_removeKey)
     r.removeKey(tair_namespace,"czmsadd_float");
     r.removeKey(tair_namespace,"czmsadd_double");
     r.removeKey(tair_namespace,"czmsadd_string");
+    r.removeKey(tair_namespace,"czm_unsigned");
 }

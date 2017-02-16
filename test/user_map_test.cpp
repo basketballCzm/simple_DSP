@@ -94,7 +94,7 @@ TEST_F(UserMapTest,UserGetIdGetMac)
     for(int i = 0; i < 5; ++i)
     {
         ::pthread_create(mThreadIDs+i, nullptr, user_get_id_func, user_id_list+i);
-        sleep(2);
+        //sleep(2);
     }
 
     for(int i = 0; i < 5; ++i)

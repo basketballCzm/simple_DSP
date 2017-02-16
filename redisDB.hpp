@@ -20,7 +20,10 @@ struct redis_identity
 class RedisDb
 {
 public:
-    inline RedisDb() {}
+    inline RedisDb() {
+        lock = 1;
+        lock_get = 1;
+    }
     inline ~RedisDb()
     {
         this->_connect = NULL;
@@ -91,6 +94,8 @@ public:
 private:
     redisContext* _connect;
     redisReply* _reply;
+    int lock;
+    int lock_get;
 };
 
 bool RedisDb::connect(std::string host, int port)
@@ -166,27 +171,39 @@ int RedisDb::set(std::string key, T value)
     strset_ss << "SET " << key << " " << value << std::endl;
     std::string strset = strset_ss.str();
     TBSYS_LOG(DEBUG,strLog.c_str(),key.c_str());
-    this->_reply = (redisReply*)redisCommand(this->_connect, strset.c_str());
 
+    //while(0 == lock);
+    //lock--;
+    this->_reply = (redisReply*)redisCommand(this->_connect, strset.c_str());
+    TBSYS_LOG(DEBUG,"SET : this->_connect:0x%x", this->_connect);
     if(NULL == this->_reply)
     {
         freeReplyObject(this->_reply);
+        //lock++;
         return 0;
     }
 
-    if(!(this->_reply->type == REDIS_REPLY_STATUS && strcasecmp(this->_reply->str,"OK")==0))
+// && strcasecmp(this->_reply->str,"OK")==0) REDIS_REPLY_STATUS
+    if(!(this->_reply->type == REDIS_REPLY_STATUS) && strcasecmp(this->_reply->str,"OK")==0)
     {
+        TBSYS_LOG(DEBUG,"this->_reply->type : %d",this->_reply->type);
+        TBSYS_LOG(DEBUG,"this->_reply->str : %s",this->_reply->str);
         freeReplyObject(this->_reply);
+        //lock++;
         return 0;
     }
     std::string str  = this->_reply->str;
     TBSYS_LOG(DEBUG,"set success %s",this->_reply->str);
     if(NULL != this->_reply->str && 0 == strcmp("OK",this->_reply->str))
     {
+        TBSYS_LOG(DEBUG,"SSSS:%s",this->_reply->str);
         freeReplyObject(this->_reply);
+        //lock++;
         return 1;
     }
+    TBSYS_LOG(DEBUG,"sssssss");
     freeReplyObject(this->_reply);
+    //lock++;
     return 0;
 }
 
@@ -195,12 +212,15 @@ T RedisDb::get(std::string key,T default_v)
 {
     tair::common::data_entry *p_value;
     TBSYS_LOG(DEBUG,"redis: redis get %s",key.c_str());
-    TBSYS_LOG(DEBUG,"this->_connect:0x%x", this->_connect);
+    //while(0 == lock_get);
+    //lock_get--;
     this->_reply = (redisReply*)redisCommand(this->_connect, "GET %s", key.c_str());
+    TBSYS_LOG(DEBUG,"GET : this->_connect:0x%x", this->_connect);
     if(NULL == this->_reply || this->_reply->type != REDIS_REPLY_STRING)
     {
         TBSYS_LOG(DEBUG,"redis: redis get error!");
         freeReplyObject(this->_reply);
+        //lock_get++;
         return default_v;
     }
 
@@ -208,8 +228,9 @@ T RedisDb::get(std::string key,T default_v)
     stream1.str(this->_reply->str);
     T value;
     stream1 >> value;
-    freeReplyObject(this->_reply);
     TBSYS_LOG(DEBUG,"get success");
+    freeReplyObject(this->_reply);
+    //lock_get++;
     return value;
 }
 

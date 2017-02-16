@@ -21,6 +21,7 @@
 
 #include <unistd.h>
 #include <stdlib.h>
+#include <pthread.h>
 #include "CBaseMdb.hpp"
 
 using namespace std;
@@ -59,6 +60,7 @@ const char * tb_log_level;
 
 std::shared_ptr<pqxx::connection> conn;
 
+pthread_mutex_t mutex;
 int check_vip;
 bool user_tag_save_on_tair;
 
@@ -130,6 +132,7 @@ void user_map_init()
         }
 
         g_baseMdb.initDb(std::string(master_addr_ip),port);
+        pthread_mutex_init(&mutex, NULL); 
         std::stringstream ss;
         ss << "dbname="     << pg_database
            << " user="      << pg_user
@@ -546,8 +549,9 @@ unsigned long long user_get_mac(const int user_id)
 }
 
 int user_get_id(const unsigned long long mac)
-{
+{ 
     user_map_init();
+    pthread_mutex_lock(&mutex);
     tair::common::data_entry key;
     get_data_entry(key,"mac:",mac,":user.id");
     std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
@@ -585,6 +589,7 @@ int user_get_id(const unsigned long long mac)
             g_baseMdb.set<unsigned long long>(s_key,mac);
         }
     }
+    pthread_mutex_unlock(&mutex);
     return user_id;
 
 }
