@@ -31,7 +31,7 @@ const char * config_file="etc/config.ini";
 tbsys::CConfig config;
 const char * master_addr;
 const char * master_addr_ip;
-const char * master_addr_op;
+const char * master_addr_port;
 int port;
 
 const char * slave_addr;
@@ -65,14 +65,14 @@ void ad_map_init()
         if(TypeDb::TAIR == g_baseMdb_ad.get_TypeDb())
         {
             master_addr_ip  = config.getString("tair_rdb", "master_addr_ip", NULL);
-            master_addr_op  = config.getString("tair_rdb", "master_addr_op", NULL);
-            port = atoi(master_addr_op);
+            master_addr_port  = config.getString("tair_rdb", "master_addr_port", NULL);
+            port = atoi(master_addr_port);
         }
         else if(TypeDb::REDIS == g_baseMdb_ad.get_TypeDb())
         {
             master_addr_ip  = config.getString("redis_rdb", "master_addr_ip", NULL);
-            master_addr_op  = config.getString("redis_rdb", "master_addr_op", NULL);
-            port = atoi(master_addr_op);
+            master_addr_port  = config.getString("redis_rdb", "master_addr_port", NULL);
+            port = atoi(master_addr_port);
         }
         slave_addr=config.getString("tair_rdb","slave_addr",NULL);
         group_name=config.getString("tair_rdb","group_name",NULL);
