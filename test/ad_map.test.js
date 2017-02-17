@@ -586,4 +586,13 @@ describe('ad_map.test.js', function () {
 })
 }
 
-["redis","tair"].forEach(MDBTest)
+if("TAIR" == process.env["MDB"])
+{
+  ["tair"].forEach(MDBTest);
+}
+else if("REDIS" == process.env["MDB"])
+{
+  ["redis"].forEach(MDBTest);
+}
+
+//["redis","tair"].forEach(MDBTest)

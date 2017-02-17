@@ -443,7 +443,7 @@ void user_list_all(Json::Value & user_list,double start,double end, int mall_id)
 
     std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
     std::vector <std::string> values;
-    g_baseMdb.zrange<std::string>(s_key,start,end,values);
+    g_baseMdb.zrangebyscore<std::string>(s_key,start,end,values);
 
     //g_tair.zrangebyscore(tair_namespace, key, start, end, vals,scores,0,0);
 
@@ -807,7 +807,7 @@ void user_list(Json::Value& list, double start, double end, int mall_id, int sho
     std::vector<std::string> users;
     TBSYS_LOG(DEBUG, "user_list() zrangebyscore key=%s",key.get_data());
     std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
-    g_baseMdb.zrange<std::string>(s_key,start,end,users);
+    g_baseMdb.zrangebyscore<std::string>(s_key,start,end,users);
     //tair_zrangebyscore(g_tair, tair_namespace, key, start, end, users);
     TBSYS_LOG(DEBUG, "user_list() zrangebyscore return, users.size=%d",(unsigned int)users.size());
     int i = 0;

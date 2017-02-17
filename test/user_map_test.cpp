@@ -204,7 +204,7 @@ TEST_F(UserMapTest,keytest)
     g_baseMdb.zadd<std::string>(key,score,s_value);
 
     vector<string> user_list;
-    g_baseMdb.zrange<std::string>(key,(double)t_now-20000,(double)t_now,user_list);
+    g_baseMdb.zrangebyscore<std::string>(key,(double)t_now-20000,(double)t_now,user_list);
     ASSERT_GE(user_list.size(),1);
     g_baseMdb.removeKey(0,key);
     //sleep(1000);
@@ -225,7 +225,7 @@ TEST_F(UserMapTest, VipArriveTime)
 
     vector<string> user_list;
     std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
-    g_baseMdb.zrange<std::string>(s_key,double(t_now-20),double(t_now+20),user_list);
+    g_baseMdb.zrangebyscore<std::string>(s_key,double(t_now-20),double(t_now+20),user_list);
     //tair_zrangebyscore<string>(g_tair,nm,key,double(t_now-20),double(t_now),user_list);
     ASSERT_EQ(user_list.size(),0);
 
@@ -244,7 +244,7 @@ TEST_F(UserMapTest, VipArriveTime)
     EXPECT_EQ(true,is_mall_vip(user_id,mall_id));
 
     t_now=time(0);
-    g_baseMdb.zrange<std::string>(s_key,double(t_now-200000),double(t_now+200000),user_list);
+    g_baseMdb.zrangebyscore<std::string>(s_key,double(t_now-200000),double(t_now+200000),user_list);
     //tair_zrangebyscore<string>(g_tair,nm,key,double(t_now-20),double(t_now),user_list);
     ASSERT_GE(user_list.size(),1);
     EXPECT_STREQ(user_list[0].c_str(),to_string(user_id).c_str());

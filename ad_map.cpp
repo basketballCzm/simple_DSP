@@ -126,7 +126,7 @@ void get_ad_group_set_of_space(const int mall_id, const int space_id, std::vecto
     std::string s_ad_group_set_key = get_value<std::string>(ad_group_set_key.get_data(),ad_group_set_key.get_size());
     TBSYS_LOG(DEBUG,"%s",s_ad_group_set_key.c_str());
     //tair_zmembers<int>(g_tair,tair_namespace,ad_group_set_key,ad_group_set);
-    g_baseMdb_ad.zrangeByIndex<int>(s_ad_group_set_key,ad_group_set);
+    g_baseMdb_ad.zmembers<int>(s_ad_group_set_key,ad_group_set);
     return;
 }
 
@@ -140,7 +140,7 @@ void get_ad_group_set_of_location(const int mall_id, const UserPosition &pos, st
     TBSYS_LOG(DEBUG, "ad_map::get_ad_group_set_of_location() slice_x=%d,pos.x=%f slice_y=%d pos.y=%f key=%s"
               ,slice_x ,pos.position.x, slice_y, pos.position.y, ad_group_set_key.get_data());
     std::string s_ad_group_set_key = get_value<std::string>(ad_group_set_key.get_data(),ad_group_set_key.get_size());
-    g_baseMdb_ad.zrangeByIndex<int>(s_ad_group_set_key,ad_group_set);
+    g_baseMdb_ad.zmembers<int>(s_ad_group_set_key,ad_group_set);
     //tair_zmembers<int>(g_tair,tair_namespace,ad_group_set_key,ad_group_set);
     return;
 }

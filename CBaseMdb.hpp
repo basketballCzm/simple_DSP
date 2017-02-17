@@ -44,10 +44,10 @@ public:
     int zadd(std::string key, double score, T value);
 
     template <typename V_TYPE>
-    std::vector<V_TYPE>* zrange(std::string key, double min, double max, std::vector<V_TYPE> &members_set);
+    std::vector<V_TYPE>* zrangebyscore(std::string key, double min, double max, std::vector<V_TYPE> &members_set);
 
     template <typename V_TYPE>
-    std::vector<V_TYPE>* zrangeByIndex(std::string key, std::vector<V_TYPE> &members_set);
+    std::vector<V_TYPE>* zmembers(std::string key, std::vector<V_TYPE> &members_set);
 
     template<typename T>
     int sadd(std::string key, T value);
@@ -213,16 +213,16 @@ int CBaseMdb::zadd(std::string key, double score, T value)
 }
 
 template <typename V_TYPE>
-std::vector<V_TYPE>* CBaseMdb::zrange(std::string key, double min, double max, std::vector<V_TYPE> &members_set)
+std::vector<V_TYPE>* CBaseMdb::zrangebyscore(std::string key, double min, double max, std::vector<V_TYPE> &members_set)
 {
-    TBSYS_LOG(DEBUG,"entry base_mdb_zrange");
+    TBSYS_LOG(DEBUG,"entry base_mdb_zrangebyscore");
     if(REDIS == m_type)
     {
-        return m_redis_db.zrange<V_TYPE>(key,min,max,members_set);
+        return m_redis_db.zrangebyscore<V_TYPE>(key,min,max,members_set);
     }
     else if(TAIR == m_type)
     {
-        return m_tair_db.zrange<V_TYPE>(key,min,max,members_set);
+        return m_tair_db.zrangebyscore<V_TYPE>(key,min,max,members_set);
     }
     else
     {
@@ -231,16 +231,16 @@ std::vector<V_TYPE>* CBaseMdb::zrange(std::string key, double min, double max, s
 }
 
 template <typename V_TYPE>
-std::vector<V_TYPE>* CBaseMdb::zrangeByIndex(std::string key, std::vector<V_TYPE> &members_set)
+std::vector<V_TYPE>* CBaseMdb::zmembers(std::string key, std::vector<V_TYPE> &members_set)
 {
-    TBSYS_LOG(DEBUG,"entry base_mdb_zrangeByIndex");
+    TBSYS_LOG(DEBUG,"entry base_mdb_zmembers");
     if(REDIS == m_type)
     {
-        return m_redis_db.zrangeByIndex<V_TYPE>(key,members_set);
+        return m_redis_db.zmembers<V_TYPE>(key,members_set);
     }
     else if(TAIR == m_type)
     {
-        return m_tair_db.zrangeByIndex<V_TYPE>(key,members_set);
+        return m_tair_db.zmembers<V_TYPE>(key,members_set);
     }
     else
     {

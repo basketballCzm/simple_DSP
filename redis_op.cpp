@@ -146,15 +146,15 @@ void Redis_op(UriQueryListA * queryList, Json::Value & ret, RedisDb *r)
 		}
 	}
 	
-	else if(strcmp("zrange",action.c_str()) == 0)
+	else if(strcmp("zrangebyscore",action.c_str()) == 0)
 	{
 		TBSYS_LOG(DEBUG,"*******************************************");
-		TBSYS_LOG(DEBUG,"Redis_op: redis zrange string");
+		TBSYS_LOG(DEBUG,"Redis_op: redis zrangebyscore string");
 		vector<int> user_list;
 		r->zrange<int>(phone,0,10,user_list);
 		if(0 == user_list.size())
 		{
-			TBSYS_LOG(DEBUG,"zrange is error!");
+			TBSYS_LOG(DEBUG,"zrangebyscore is error!");
 		}
 		else
 		{
@@ -164,7 +164,7 @@ void Redis_op(UriQueryListA * queryList, Json::Value & ret, RedisDb *r)
 				get_data_entry(value_str,user_list[i]," ");
 			}
 			ret["result"] = Json::Value((char*)&value_str);
-			TBSYS_LOG(DEBUG, "[zrange output.result : %s\n  ]",(char*)&value_str);
+			TBSYS_LOG(DEBUG, "[zrangebyscore output.result : %s\n  ]",(char*)&value_str);
 		} 
 	}
 	

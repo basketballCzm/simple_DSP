@@ -221,7 +221,7 @@ TEST_F(CBaseMdbTest,ClassTest_zadd_int)
     integer = r.zadd<int>("czmzadd_int",3,444);
     EXPECT_EQ(1,integer);
     vector<int> user_list_int;
-    r.zrange<int>("czmzadd_int",0,1213342323,user_list_int);
+    r.zrangebyscore<int>("czmzadd_int",0,1213342323,user_list_int);
     EXPECT_EQ(4,user_list_int.size());
     vector<int>::iterator iter_int;
     iter_int = find(user_list_int.begin(),user_list_int.end(),111);
@@ -251,7 +251,7 @@ TEST_F(CBaseMdbTest,ClassTest_zadd_float)
     integer = r.zadd<float>("czmzadd_float",3,444.4);
     EXPECT_EQ(1,integer);
     vector<float> user_list_float;
-    r.zrange<float>("czmzadd_float",0,10,user_list_float);
+    r.zrangebyscore<float>("czmzadd_float",0,10,user_list_float);
     EXPECT_EQ(4,user_list_float.size());
     /*vector<float>::iterator iter_float;
     iter_float = find(user_list_float.begin(),user_list_float.end(),111.1);
@@ -280,7 +280,7 @@ TEST_F(CBaseMdbTest,ClassTest_zadd_double)
     integer = r.zadd<double>("czmzadd_double",144,444.444);
     EXPECT_EQ(1,integer);
     vector<double> user_list_double;
-    r.zrange<double>("czmzadd_double",0,1484130001,user_list_double);
+    r.zrangebyscore<double>("czmzadd_double",0,1484130001,user_list_double);
     EXPECT_EQ(4,user_list_double.size());
     vector<double>::iterator iter_double;
     iter_double = find(user_list_double.begin(),user_list_double.end(),111.111);
@@ -309,7 +309,7 @@ TEST_F(CBaseMdbTest,ClassTest_zadd_string)
     integer = r.zadd<string>("czmzadd_string",3,"444");
     EXPECT_EQ(1,integer);
     vector<string> user_list_string;
-    r.zrange<string>("czmzadd_string",0,10,user_list_string);
+    r.zrangebyscore<string>("czmzadd_string",0,10,user_list_string);
     EXPECT_EQ(4,user_list_string.size());
     vector<string>::iterator iter_string;
     iter_string = find(user_list_string.begin(),user_list_string.end(),"111");

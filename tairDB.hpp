@@ -33,10 +33,10 @@ public:
     int zadd(std::string key, double score, T value);
 
     template <typename V_TYPE>
-    std::vector<V_TYPE>* zrange(std::string key, double min, double max, std::vector<V_TYPE> &members_set);
+    std::vector<V_TYPE>* zrangebyscore(std::string key, double min, double max, std::vector<V_TYPE> &members_set);
 
     template <typename V_TYPE>
-    std::vector<V_TYPE>* zrangeByIndex(std::string key, std::vector<V_TYPE> &members_set);
+    std::vector<V_TYPE>* zmembers(std::string key, std::vector<V_TYPE> &members_set);
 
     template<typename T>
     int sadd(std::string key, T value);
@@ -190,24 +190,24 @@ int TairDb::zadd(std::string key, double score, T value)
 
 
 template <typename V_TYPE>
-std::vector<V_TYPE>* TairDb::zrange(std::string key, double min, double max, std::vector<V_TYPE> &members_set)
+std::vector<V_TYPE>* TairDb::zrangebyscore(std::string key, double min, double max, std::vector<V_TYPE> &members_set)
 {
-    TBSYS_LOG(DEBUG,"tair entry zrange start !");
+    TBSYS_LOG(DEBUG,"tair entry zrangebyscore start !");
     tair::common::data_entry s_key(key.c_str(),key.size()+1,true);
     std::vector<tair::common::data_entry*> values;
     tair_zrangebyscore<V_TYPE>(*ptair_Client,tair_namespace,s_key,(double)min,(double)max,members_set);  
-    TBSYS_LOG(DEBUG,"tair entry zrange end !");
+    TBSYS_LOG(DEBUG,"tair entry zrangebyscore end !");
     return & members_set;
 }
 
 template <typename V_TYPE>
-std::vector<V_TYPE>* TairDb::zrangeByIndex(std::string key, std::vector<V_TYPE> &members_set)
+std::vector<V_TYPE>* TairDb::zmembers(std::string key, std::vector<V_TYPE> &members_set)
 {
-    TBSYS_LOG(DEBUG,"tair entry zrangeByIndex start !");
+    TBSYS_LOG(DEBUG,"tair entry zmembers start !");
     tair::common::data_entry s_key(key.c_str(),key.size()+1,true);
     std::vector<tair::common::data_entry*> values;
     tair_zmembers<V_TYPE>(*ptair_Client,tair_namespace,s_key,members_set);  
-    TBSYS_LOG(DEBUG,"tair entry zrangeByIndex end !");
+    TBSYS_LOG(DEBUG,"tair entry zmembers end !");
     return & members_set;
 }
 
