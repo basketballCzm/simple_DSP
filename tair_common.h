@@ -180,7 +180,7 @@ inline int tair_put(tair::tair_client_api & tair_instance,int area,const tair::c
 }
 
 template <typename V_TYPE>
-inline int tair_zadd(tair::tair_client_api & tair_instance,int area,const tair::common::data_entry & key,int score,const V_TYPE & data)
+inline int tair_zadd(tair::tair_client_api & tair_instance,int area,const tair::common::data_entry & key,double score,const V_TYPE & data)
 {
     tair::common::data_entry *p_value=get_data_entry_of_value(data);
     int ret=tair_instance.zadd(area,key,(double)score,*p_value,0,0);

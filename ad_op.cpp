@@ -132,6 +132,9 @@ int main()
     openlog("ad_op", LOG_PID|LOG_PERROR, LOG_LOCAL0 );
 
     FCGX_Init();
+    //loadConfig
+    //connectDb
+    //mdb
     user_map::user_map_init();
     ad_map::ad_map_init();
     FCGX_Request request;

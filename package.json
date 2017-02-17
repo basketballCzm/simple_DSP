@@ -9,7 +9,8 @@
   "dependencies": {
     "deepcopy": "^0.6.3",
     "node-tair-rdb": "git+https://code.wushuu.com/wushuu-ads/node-tair-rdb.git",
-    "should": "^11.1.0"
+    "should": "^11.1.0",
+    "wushuu_node_common": "git+https://code.wushuu.com/wushuu-ads/wushuu_node_common.git"
   },
   "devDependencies": {},
   "scripts": {

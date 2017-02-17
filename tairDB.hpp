@@ -1,5 +1,5 @@
-#ifndef __TAIRDB_HPP__
-#define __TAIRDB_HPP__
+#ifndef TAIRDB_HPP_INCLUDED
+#define TAIRDB_HPP_INCLUDED
 #include <string>
 #include <hiredis/hiredis.h>
 #include <vector>
@@ -13,10 +13,10 @@
 class TairDb
 {
 public:
-    TairDb();
-    ~TairDb();
+    inline TairDb();
+    inline ~TairDb();
 
-    bool connect(std::string host, int port);
+    inline bool connect(std::string host, int port);
     template<typename T>
     int set(std::string key, T value);
 
@@ -30,10 +30,13 @@ public:
     T get(std::string key,T default_v);
 
     template<typename T>
-    int zadd(std::string key, int score, T value);
+    int zadd(std::string key, double score, T value);
 
     template <typename V_TYPE>
-    std::vector<V_TYPE>* zrange(std::string key, int min, int max, std::vector<V_TYPE> &members_set);
+    std::vector<V_TYPE>* zrangebyscore(std::string key, double min, double max, std::vector<V_TYPE> &members_set);
+
+    template <typename V_TYPE>
+    std::vector<V_TYPE>* zmembers(std::string key, std::vector<V_TYPE> &members_set);
 
     template<typename T>
     int sadd(std::string key, T value);
@@ -44,7 +47,7 @@ public:
     template<typename V_TYPE>
     inline tair::common::data_entry *get_data_entry_of_value (const V_TYPE & data);
 
-    int removeKey(int area,std::string key)
+    inline int removeKey(int area,std::string key)
     {
         TBSYS_LOG(DEBUG,"tair remove success!");
         tair::common::data_entry s_key(key.c_str(),key.size()+1,true);
@@ -52,11 +55,26 @@ public:
         return ptair_Client->remove(area,s_key);
     }
 
-    void close()
+    inline void close()
     {
         TBSYS_LOG(DEBUG,"entry tair close!");
         ptair_Client->close();
         TBSYS_LOG(DEBUG,"entry tair close success!");
+    }
+
+    inline int incr(std::string key,int integer)
+    {
+        TBSYS_LOG(DEBUG,"tair entry incrby start!");
+        int value = 0;
+        int ret = 0;
+        tair::common::data_entry s_key(key.c_str(),key.size()+1,true);
+        ret = ptair_Client->incr(tair_namespace,s_key,integer,&value);
+        TBSYS_LOG(DEBUG,"tair incrby end!");
+        if(0 != ret)
+        {
+            return 0;
+        }
+        return 1;
     }
 
 private:
@@ -85,6 +103,10 @@ bool TairDb::connect(std::string host, int port)
     {
        TBSYS_LOG(DEBUG,"tair connect success!");
     }
+    else
+    {
+        TBSYS_LOG(DEBUG,"tair connect fail!");
+    }
     return bFlag;
 }
 
@@ -96,7 +118,11 @@ int TairDb::hset(std::string key,std::string field,T value)
     tair::common::data_entry s_field(field.c_str(),field.size()+1,true);
     int ret=tair_hset<T>(*ptair_Client,tair_namespace,s_key,s_field,value);
     TBSYS_LOG(DEBUG,"tair entry hset end!");
-    return ret;
+    if(0 != ret)
+    {
+        return 0;
+    }
+    return 1;
 }
 
 
@@ -130,7 +156,11 @@ int TairDb::set(std::string key, T value)
     TBSYS_LOG(DEBUG,"set success %s",strLog_ss_1.str().c_str());*/
     int ret=tair_put<T>(*ptair_Client,tair_namespace,s_key,value);
     TBSYS_LOG(DEBUG,"tair entry set end!");
-    return ret;
+    if(0 != ret)
+    {
+        return 0;
+    }
+    return 1;
 }
 
 template<typename T>
@@ -145,24 +175,39 @@ T TairDb::get(std::string key,T default_v)
 }
 
 template<typename T>
-int TairDb::zadd(std::string key, int score, T value)
+int TairDb::zadd(std::string key, double score, T value)
 {
     TBSYS_LOG(DEBUG,"tair entry zadd start !");
     tair::common::data_entry s_key(key.c_str(),key.size()+1,true);
     int ret = tair_zadd<T>(*ptair_Client,tair_namespace,s_key,score,value);
     TBSYS_LOG(DEBUG,"tair entry zadd end !");
-    return ret;
+    if(0 != ret)
+    {
+        return 0;
+    }
+    return 1;
 }
 
 
 template <typename V_TYPE>
-std::vector<V_TYPE>* TairDb::zrange(std::string key, int min, int max, std::vector<V_TYPE> &members_set)
+std::vector<V_TYPE>* TairDb::zrangebyscore(std::string key, double min, double max, std::vector<V_TYPE> &members_set)
 {
-    TBSYS_LOG(DEBUG,"tair entry zrange start !");
+    TBSYS_LOG(DEBUG,"tair entry zrangebyscore start !");
     tair::common::data_entry s_key(key.c_str(),key.size()+1,true);
     std::vector<tair::common::data_entry*> values;
     tair_zrangebyscore<V_TYPE>(*ptair_Client,tair_namespace,s_key,(double)min,(double)max,members_set);  
-    TBSYS_LOG(DEBUG,"tair entry zrange end !");
+    TBSYS_LOG(DEBUG,"tair entry zrangebyscore end !");
+    return & members_set;
+}
+
+template <typename V_TYPE>
+std::vector<V_TYPE>* TairDb::zmembers(std::string key, std::vector<V_TYPE> &members_set)
+{
+    TBSYS_LOG(DEBUG,"tair entry zmembers start !");
+    tair::common::data_entry s_key(key.c_str(),key.size()+1,true);
+    std::vector<tair::common::data_entry*> values;
+    tair_zmembers<V_TYPE>(*ptair_Client,tair_namespace,s_key,members_set);  
+    TBSYS_LOG(DEBUG,"tair entry zmembers end !");
     return & members_set;
 }
 
@@ -174,7 +219,11 @@ int TairDb::sadd(std::string key, T value)
     tair::common::data_entry s_key(key.c_str(),key.size()+1,true);
     int ret = tair_sadd<T>(*ptair_Client,tair_namespace,s_key,value);
     TBSYS_LOG(DEBUG,"tair entry sadd end !");
-    return ret;
+    if(0 != ret)
+    {
+        return 0;
+    }
+    return 1;
 }
 
 

@@ -7,11 +7,11 @@
 #include <vector>
 #include <unordered_map>
 #include <sstream>
-#include "tair_common.h"
 #include "user_map.h"
 #include "cron_timing.h"
 #include <string>
 #include "boost/format.hpp"
+#include "CBaseMdb.hpp"
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -25,10 +25,15 @@ using namespace std;
 
 namespace ad_map
 {
-tair::tair_client_api g_tair;
+//tair::tair_client_api g_tair;
+CBaseMdb g_baseMdb_ad;
 const char * config_file="etc/config.ini";
 tbsys::CConfig config;
 const char * master_addr;
+const char * master_addr_ip;
+const char * master_addr_port;
+int port;
+
 const char * slave_addr;
 const char * group_name;
 int time_slice; // minutes
@@ -57,6 +62,18 @@ void ad_map_init()
         }
         TBSYS_LOG(DEBUG,"ad_map_init() load config ok!");
         master_addr=config.getString("tair_rdb","master_addr",NULL);
+        if(TypeDb::TAIR == g_baseMdb_ad.get_TypeDb())
+        {
+            master_addr_ip  = config.getString("tair_rdb", "master_addr_ip", NULL);
+            master_addr_port  = config.getString("tair_rdb", "master_addr_port", NULL);
+            port = atoi(master_addr_port);
+        }
+        else if(TypeDb::REDIS == g_baseMdb_ad.get_TypeDb())
+        {
+            master_addr_ip  = config.getString("redis_rdb", "master_addr_ip", NULL);
+            master_addr_port  = config.getString("redis_rdb", "master_addr_port", NULL);
+            port = atoi(master_addr_port);
+        }
         slave_addr=config.getString("tair_rdb","slave_addr",NULL);
         group_name=config.getString("tair_rdb","group_name",NULL);
         time_slice=config.getInt("tair_rdb","time_slice",10);
@@ -74,27 +91,42 @@ void ad_map_init()
         TBSYS_LOGGER.setLogLevel(tb_log_level);
 
         //g_tair.set_timeout(5000);
-        g_tair.startup(master_addr,slave_addr,group_name);
+        //g_tair.startup(master_addr,slave_addr,group_name);
+        if(0 == strcmp(getenv("MDB"),"REDIS"))
+        {
+            g_baseMdb_ad.set_TypeDb(TypeDb::REDIS);
+        }
+        else if(0 == strcmp(getenv("MDB"),"TAIR"))
+        {
+            g_baseMdb_ad.set_TypeDb(TypeDb::TAIR);
+        }
+
+        g_baseMdb_ad.initDb(std::string(master_addr_ip),port);
         TBSYS_LOG(DEBUG,"ad_map_init() after g_tair.startup; log file is %s",tb_log_file);
         b_started=true;
 
         tair::common::data_entry key;
 
         get_data_entry(key,"config:slice.x");
-        slice_x=tair_get<int>(g_tair,tair_namespace,key,10);
+        std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+        //slice_x=tair_get<int>(g_tair,tair_namespace,key,10);
+        slice_x=g_baseMdb_ad.get<int>(s_key,10);
         get_data_entry(key,"config:slice.y");
-        slice_y=tair_get<int>(g_tair,tair_namespace,key,10);
+        s_key = get_value<std::string>(key.get_data(),key.get_size());
+        slice_y=g_baseMdb_ad.get<int>(s_key,10);
+        //slice_y=tair_get<int>(g_tair,tair_namespace,key,10);
     }
 }
-
-
 
 void get_ad_group_set_of_space(const int mall_id, const int space_id, std::vector< int> &ad_group_set)
 {
     tair::common::data_entry ad_group_set_key;
 
     get_data_entry( ad_group_set_key,"ad.space:",mall_id,":",space_id,":ad.group.set");
-    tair_zmembers<int>(g_tair,tair_namespace,ad_group_set_key,ad_group_set);
+    std::string s_ad_group_set_key = get_value<std::string>(ad_group_set_key.get_data(),ad_group_set_key.get_size());
+    TBSYS_LOG(DEBUG,"%s",s_ad_group_set_key.c_str());
+    //tair_zmembers<int>(g_tair,tair_namespace,ad_group_set_key,ad_group_set);
+    g_baseMdb_ad.zmembers<int>(s_ad_group_set_key,ad_group_set);
     return;
 }
 
@@ -107,14 +139,18 @@ void get_ad_group_set_of_location(const int mall_id, const UserPosition &pos, st
 
     TBSYS_LOG(DEBUG, "ad_map::get_ad_group_set_of_location() slice_x=%d,pos.x=%f slice_y=%d pos.y=%f key=%s"
               ,slice_x ,pos.position.x, slice_y, pos.position.y, ad_group_set_key.get_data());
-    tair_zmembers<int>(g_tair,tair_namespace,ad_group_set_key,ad_group_set);
+    std::string s_ad_group_set_key = get_value<std::string>(ad_group_set_key.get_data(),ad_group_set_key.get_size());
+    g_baseMdb_ad.zmembers<int>(s_ad_group_set_key,ad_group_set);
+    //tair_zmembers<int>(g_tair,tair_namespace,ad_group_set_key,ad_group_set);
     return;
 }
 
 inline bool check_ad_valid(const int mall_id, int ad_id) {
     tair::common::data_entry key;
     get_data_entry(key,"ad:",mall_id,":",ad_id,":valid");
-    const int valid = tair_get<int>(g_tair,tair_namespace,key,1);
+    std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+    const int valid = g_baseMdb_ad.get<int>(s_key,1);
+    //const int valid = tair_get<int>(g_tair,tair_namespace,key,1);
     if(valid<=0) {
         return false;
     } else {
@@ -124,36 +160,53 @@ inline bool check_ad_valid(const int mall_id, int ad_id) {
 double get_eCPM(const int mall_id,const int ad_group_id, int &next_ad_id)
 {
     tair::common::data_entry key;
-    vector<tair::common::data_entry*> ad_id_set;
-
+    //vector<tair::common::data_entry*> ad_id_set;
+    //std::vector<std::string> ad_id_set;
+    std::vector<int> ad_id_set;
     get_data_entry( key,"ad.group:",mall_id,":",ad_group_id,":ad.set");
-    g_tair.smembers(tair_namespace,key,ad_id_set);
+    std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+    TBSYS_LOG(DEBUG,"get_eCPMget_eCPMget_eCPM");
+    TBSYS_LOG(DEBUG,"%s",s_key.c_str());
+    //g_tair.smembers(tair_namespace,key,ad_id_set);
+    g_baseMdb_ad.smembers<int>(s_key,ad_id_set);
 
     int sum_weight=0;
     double sum_eCPM=0;
     get_data_entry( key,"ad.group:",mall_id,":",ad_group_id,":show.price");
-    const double & show_price=tair_get<double>(g_tair,tair_namespace,key,0);
+    s_key = get_value<std::string>(key.get_data(),key.get_size());
+    //const double & show_price=tair_get<double>(g_tair,tair_namespace,key,0);
+    const double & show_price=g_baseMdb_ad.get<double>(s_key,0);
     get_data_entry( key,"ad.group:",mall_id,":",ad_group_id,":click.price");
-    const double & click_price=tair_get<double>(g_tair,tair_namespace,key,0);
+    s_key = get_value<std::string>(key.get_data(),key.get_size());
+    //const double & click_price=tair_get<double>(g_tair,tair_namespace,key,0);
+    const double & click_price=g_baseMdb_ad.get<double>(s_key,0);
     //min show weight win this show time.
     double min_show_weight=std::numeric_limits<double>::max();;
-    for(vector<tair::common::data_entry *>::iterator it=ad_id_set.begin(); it!=ad_id_set.end(); it++)
+    for(vector<int>::iterator it=ad_id_set.begin(); it!=ad_id_set.end(); it++)
     {
-        int ad_id=*( int*)((*it)->get_data());
+        //int ad_id=*( int*)((*it).c_str());
+        int ad_id = *it;
+        TBSYS_LOG(DEBUG,"ad_id = %d",ad_id);
 
         if(!check_ad_valid(mall_id,ad_id))
             continue;
 
         get_data_entry(key,"ad:",mall_id,":",ad_id,":show.counter");
-        const string & s_show_counter=tair_get<string>(g_tair,tair_namespace,key,"0");
+        s_key = get_value<std::string>(key.get_data(),key.get_size());
+        //const string & s_show_counter=tair_get<string>(g_tair,tair_namespace,key,"0");
+        const string & s_show_counter = g_baseMdb_ad.get<std::string>(s_key,"0");
         const int show_counter=std::atoi(s_show_counter.c_str());
         TBSYS_LOG(DEBUG,"get_eCPM() show_counter=%d",show_counter);
         get_data_entry(key,"ad:",mall_id,":",ad_id,":click.counter");
-        const string & s_click_counter=tair_get<string>(g_tair,tair_namespace,key,"0");
+        s_key = get_value<std::string>(key.get_data(),key.get_size());
+        //const string & s_click_counter=tair_get<string>(g_tair,tair_namespace,key,"0");
+        const std::string & s_click_counter=g_baseMdb_ad.get<std::string>(s_key,"0");
         const int click_counter=atoi(s_click_counter.c_str());
         TBSYS_LOG(DEBUG,"get_eCPM() click_counter=%d",click_counter);
         get_data_entry(key,"ad:",mall_id,":",ad_id,":weight");
-        int weight=tair_get<int>(g_tair,tair_namespace,key,0);
+        s_key = get_value<std::string>(key.get_data(),key.get_size());
+        //int weight=tair_get<int>(g_tair,tair_namespace,key,0);
+        int weight=g_baseMdb_ad.get<int>(s_key,0);
         if(weight==0)
         {
             TBSYS_LOG(WARN,"ad_map::get_eCPM() weight of group (id:%d) ad (id:%d) not set",ad_group_id,ad_id);
@@ -174,7 +227,7 @@ double get_eCPM(const int mall_id,const int ad_group_id, int &next_ad_id)
             min_show_weight=show_weight;
             next_ad_id=ad_id;
         }
-        delete (*it);
+        //delete (*it);
     }
     ad_id_set.clear();
 
@@ -188,8 +241,11 @@ bool check_cron_time_set(const int mall_id,const time_t time,const int ad_group_
 {
     tair::common::data_entry key;
     get_data_entry(key,"ad.group:",mall_id,":",ad_group_id,":cron.time.set");
-    vector<tair::common::data_entry *> time_range_set;
-    g_tair.smembers(tair_namespace,key,time_range_set);
+    //vector<tair::common::data_entry *> time_range_set;
+    std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+    std::vector<std::string> time_range_set;
+    g_baseMdb_ad.smembers<std::string>(s_key,time_range_set);
+    //g_tair.smembers(tair_namespace,key,time_range_set);
 
     if(time_range_set.size()==0)
     {
@@ -197,18 +253,18 @@ bool check_cron_time_set(const int mall_id,const time_t time,const int ad_group_
     }
 
     bool b_fit_time_range=false;
-    for(vector<tair::common::data_entry *>::iterator it=time_range_set.begin(); it!=time_range_set.end(); it++)
+    for(vector<std::string>::iterator it=time_range_set.begin(); it!=time_range_set.end(); it++)
     {
         if(!b_fit_time_range)
         {
-            cron_timing *time_range=(cron_timing*)((*it)->get_data());
+            cron_timing *time_range=(cron_timing*)((*it).c_str());
             if(check_cron_timing(time,time_range))
             {
                 b_fit_time_range=true;
                 continue;
             }
         }
-        delete (*it);
+        //delete (*it);
     }
     time_range_set.clear();
 
@@ -218,9 +274,13 @@ bool check_cron_time_set(const int mall_id,const time_t time,const int ad_group_
 bool check_time_range(const int mall_id, const time_t time, const int ad_group_id) {
     tair::common::data_entry key;
     get_data_entry(key,"ad.group:",mall_id,":",ad_group_id,":market.start");
-    string s_start (tair_get<string>(g_tair, tair_namespace, key,"").c_str());
+    std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+    std::string s_start = g_baseMdb_ad.get<std::string>(s_key,"");
+    //string s_start (tair_get<string>(g_tair, tair_namespace, key,"").c_str());
     get_data_entry(key,"ad.group:",mall_id,":",ad_group_id,":market.end");
-    string s_end   (tair_get<string>(g_tair, tair_namespace, key,"").c_str());
+    s_key = get_value<std::string>(key.get_data(),key.get_size());
+    std::string s_end = g_baseMdb_ad.get<std::string>(s_key,"");
+    //string s_end   (tair_get<string>(g_tair, tair_namespace, key,"").c_str());
 
     if(s_start.empty() || s_end.empty()) {
         return true;
@@ -245,7 +305,9 @@ bool check_market_shop(const int user_id, const int group_id, const int mall_id)
     vector<int> shop_id_list;
     tair::common::data_entry key;
     get_data_entry(key,"ad.group:",mall_id,":",group_id,":market.shop.set");
-    tair_smembers<int>(g_tair,tair_namespace,key,shop_id_list);
+    std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+    //tair_smembers<int>(g_tair,tair_namespace,key,shop_id_list);
+    g_baseMdb_ad.smembers<int>(s_key,shop_id_list);
     if(shop_id_list.size()>0) {
         if(shop_id_list[0]>=0) {
             if(user_id>0) {
@@ -283,16 +345,22 @@ inline void increase_ad_time (int mall_id, int show_ad_id,string type) {
     tair::common::data_entry key;
     get_data_entry(key,"ad:",mall_id,":",show_ad_id,":",type,".counter");
     int show_counter;
-    g_tair.incr(tair_namespace,key,1,&show_counter);
+    std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+    //g_tair.incr(tair_namespace,key,1,&show_counter);
+    show_counter = g_baseMdb_ad.incr(s_key,1);
 }
 
 inline Json::Value get_ad(int mall_id,int show_ad_group_id ,int show_ad_id) {
     tair::common::data_entry key;
     Json::Value ad_node;
     get_data_entry(key,"ad:",mall_id,":",show_ad_id,":content");
-    ad_node["content"]=tair_get<string>(g_tair,tair_namespace,key,"");
+    std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+    ad_node["content"] = g_baseMdb_ad.get<std::string>(s_key,"");
+    //ad_node["content"]=tair_get<string>(g_tair,tair_namespace,key,"");
     get_data_entry(key,"ad:",mall_id,":",show_ad_id,":jump.url");
-    ad_node["jump_url"]=tair_get<string>(g_tair,tair_namespace,key,"");
+    s_key = get_value<std::string>(key.get_data(),key.get_size());
+    //ad_node["jump_url"]=tair_get<string>(g_tair,tair_namespace,key,"");
+    ad_node["jump_url"] = g_baseMdb_ad.get<std::string>(s_key,"");
     ad_node["id"]=show_ad_id;
     ad_node["group_id"]=show_ad_group_id;
     return ad_node;
@@ -313,11 +381,15 @@ inline string get_charge_cmd(int mall_id, int ad_id, int ad_group_id, string typ
     tair::common::data_entry key;
 
     get_data_entry( key,"ad.group:",mall_id,":",ad_group_id,":",type,".price");
-    double change=tair_get<double>(g_tair,tair_namespace,key,0);
+    std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+    double change = g_baseMdb_ad.get<double>(s_key,0);
+    //double change=tair_get<double>(g_tair,tair_namespace,key,0);
     if(change>=0)
         change=-change;
     get_data_entry( key,"ad.group:",mall_id,":",ad_group_id,":owner");
-    const int owner_id=tair_get<int>(g_tair,tair_namespace,key,0);
+    s_key = get_value<std::string>(key.get_data(),key.get_size());
+    //const int owner_id=tair_get<int>(g_tair,tair_namespace,key,0);
+    const int owner_id=g_baseMdb_ad.get<int>(s_key,0);
     return boost::str(boost::format(charge_ad_sql)%owner_id%"adv_consume"%change%s_remark.substr(0,s_remark.size()-1)%mall_id%pg_password%pg_server%pg_user%pg_database);
 }
 
@@ -357,8 +429,10 @@ void bidding(Json::Value &ret, const UserPosition &pos, const int user_id, const
     map<string,double> user_label_set_map;
     if(user_id>0) {
         get_data_entry(key,"user:",user_id,":label.set");
+        std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+        g_baseMdb_ad.hget<double>(s_key,user_label_set_map);
 
-        tair_hgetall<double>(g_tair,tair_namespace,key,user_label_set_map);
+        //tair_hgetall<double>(g_tair,tair_namespace,key,user_label_set_map);
         for(std::map<string, double>::iterator it=user_label_set_map.begin(); it!=user_label_set_map.end(); it++)
         {
             user_label_set.push_back(it->first);
@@ -380,7 +454,9 @@ void bidding(Json::Value &ret, const UserPosition &pos, const int user_id, const
         //filter by valid flag
         TBSYS_LOG(DEBUG,"ad_map::bidding() loop, filter by valid flag, group %d\n",*it);
         get_data_entry(key,"ad.group:",mall_id,":",*it,":valid");
-        if(tair_get<int>(g_tair,tair_namespace,key,1)==0)
+        //if(tair_get<int>(g_tair,tair_namespace,key,1)==0)
+        std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+        if(0 == g_baseMdb_ad.get<int>(s_key,1))
             continue;
 
         //filter by timerange
@@ -390,7 +466,9 @@ void bidding(Json::Value &ret, const UserPosition &pos, const int user_id, const
         //filter by users' tag
         get_data_entry(key,"ad.group:",mall_id,":",*it,":target.label.set");
         vector<string> ad_group_label_set;
-        tair_smembers<string>(g_tair,tair_namespace,key,ad_group_label_set);
+        s_key = get_value<std::string>(key.get_data(),key.get_size());
+        g_baseMdb_ad.smembers<std::string>(s_key,ad_group_label_set);
+        //tair_smembers<string>(g_tair,tair_namespace,key,ad_group_label_set);
         TBSYS_LOG(DEBUG,"ad_map::bidding() ad_group_label_set.size()=%d\n",ad_group_label_set.size());
 
         if( user_id >0 && (ad_group_label_set.size()!=0) &&
@@ -496,7 +574,9 @@ int ad_click(Json::Value &ret, const int ad_id, const int user_id, const int mal
 {
     tair::common::data_entry key;
     get_data_entry(key,"ad:",mall_id,":",ad_id,":group");
-    int group_id=tair_get<int>(g_tair,tair_namespace,key,-1);
+    std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
+    //int group_id=tair_get<int>(g_tair,tair_namespace,key,-1);
+    int group_id=g_baseMdb_ad.get<int>(s_key,-1);
     if (group_id== -1)
     {
         ret["result"]="no such ad";

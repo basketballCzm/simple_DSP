@@ -1,5 +1,5 @@
-#ifndef __CBASEMDB_HPP__
-#define __CBASEMDB_HPP__
+#ifndef CBASEMDB_HPP_INCLUDED
+#define CBASEMDB_HPP_INCLUDED
 #include <string>
 #include "redisDB.hpp"
 #include "tairDB.hpp"
@@ -20,13 +20,13 @@ public:
         m_type = REDIS;
     }
 
-    bool connect(std::string host, int port);
+    inline bool connect(std::string host, int port);
 
-    void set_TypeDb(TypeDb value);
+    inline void set_TypeDb(TypeDb value);
 
-    void close();
+    inline void close();
 
-    int get_TypeDb();
+    inline int get_TypeDb();
 
     template<typename T>
     int hset(std::string key,std::string field,T value);
@@ -41,10 +41,13 @@ public:
     T get(std::string key,T default_v);
 
     template<typename T>
-    int zadd(std::string key, int score, T value);
+    int zadd(std::string key, double score, T value);
 
     template <typename V_TYPE>
-    std::vector<V_TYPE>* zrange(std::string key, int min, int max, std::vector<V_TYPE> &members_set);
+    std::vector<V_TYPE>* zrangebyscore(std::string key, double min, double max, std::vector<V_TYPE> &members_set);
+
+    template <typename V_TYPE>
+    std::vector<V_TYPE>* zmembers(std::string key, std::vector<V_TYPE> &members_set);
 
     template<typename T>
     int sadd(std::string key, T value);
@@ -52,22 +55,24 @@ public:
     template <typename V_TYPE>
     std::vector<V_TYPE>* smembers(std::string key,std::vector<V_TYPE> &members_set);
 
-    int removeKey(int area,std::string key);
+    inline int removeKey(int area,std::string key);
 
-    bool initDb(std::string host, int port);
+    inline bool initDb(std::string host, int port);
+
+    inline int  incr(std::string key,int integer);
 };
 
-void CBaseMdb::set_TypeDb(TypeDb value)
+inline void CBaseMdb::set_TypeDb(TypeDb value)
 {
     m_type = value;
 }
 
-int CBaseMdb::get_TypeDb()
+inline int CBaseMdb::get_TypeDb()
 {
     return (int)m_type;
 }
 
-bool CBaseMdb::connect(std::string host, int port)
+inline bool CBaseMdb::connect(std::string host, int port)
 {
     if(REDIS == m_type)
     {
@@ -83,7 +88,7 @@ bool CBaseMdb::connect(std::string host, int port)
     }
 }
 
-void CBaseMdb::close()
+inline void CBaseMdb::close()
 {
     if(REDIS == m_type)
     {
@@ -99,7 +104,7 @@ void CBaseMdb::close()
     }
 }
 
-int CBaseMdb::removeKey(int area,std::string key)
+inline int CBaseMdb::removeKey(int area,std::string key)
 {
     if(REDIS == m_type)
     {
@@ -190,7 +195,7 @@ T CBaseMdb::get(std::string key,T default_v)
 }
 
 template<typename T>
-int CBaseMdb::zadd(std::string key, int score, T value)
+int CBaseMdb::zadd(std::string key, double score, T value)
 {
     TBSYS_LOG(DEBUG,"entry base_mdb_zadd");
     if(REDIS == m_type)
@@ -208,16 +213,34 @@ int CBaseMdb::zadd(std::string key, int score, T value)
 }
 
 template <typename V_TYPE>
-std::vector<V_TYPE>* CBaseMdb::zrange(std::string key, int min, int max, std::vector<V_TYPE> &members_set)
+std::vector<V_TYPE>* CBaseMdb::zrangebyscore(std::string key, double min, double max, std::vector<V_TYPE> &members_set)
 {
-    TBSYS_LOG(DEBUG,"entry base_mdb_zrange");
+    TBSYS_LOG(DEBUG,"entry base_mdb_zrangebyscore");
     if(REDIS == m_type)
     {
-        return m_redis_db.zrange<V_TYPE>(key,min,max,members_set);
+        return m_redis_db.zrangebyscore<V_TYPE>(key,min,max,members_set);
     }
     else if(TAIR == m_type)
     {
-        return m_tair_db.zrange<V_TYPE>(key,min,max,members_set);
+        return m_tair_db.zrangebyscore<V_TYPE>(key,min,max,members_set);
+    }
+    else
+    {
+        return &members_set;
+    }
+}
+
+template <typename V_TYPE>
+std::vector<V_TYPE>* CBaseMdb::zmembers(std::string key, std::vector<V_TYPE> &members_set)
+{
+    TBSYS_LOG(DEBUG,"entry base_mdb_zmembers");
+    if(REDIS == m_type)
+    {
+        return m_redis_db.zmembers<V_TYPE>(key,members_set);
+    }
+    else if(TAIR == m_type)
+    {
+        return m_tair_db.zmembers<V_TYPE>(key,members_set);
     }
     else
     {
@@ -261,7 +284,7 @@ std::vector<V_TYPE>* CBaseMdb::smembers(std::string key,std::vector<V_TYPE> &mem
     }
 }
 
-bool CBaseMdb::initDb(std::string host, int port)
+inline bool CBaseMdb::initDb(std::string host, int port)
 {
     TBSYS_LOG(DEBUG,"entry base_mdb_initDb");
     if(REDIS == m_type)
@@ -277,5 +300,24 @@ bool CBaseMdb::initDb(std::string host, int port)
         return false;
     }
 }
+
+/*0----fail   success value*/
+inline int  CBaseMdb::incr(std::string key,int integer)
+{
+    TBSYS_LOG(DEBUG,"entry base_mdb_incr");
+    if(REDIS == m_type)
+    {
+        return m_redis_db.incr(key,integer);
+    }
+    else if(TAIR == m_type)
+    {
+        return m_tair_db.incr(key,integer);
+    }
+    else
+    {
+        return 0;
+    }
+}
+
 #endif
 

@@ -1,5 +1,5 @@
-#ifndef __REDISDB_HPP__
-#define __REDISDB_HPP__
+#ifndef REDISDB_HPP_INCLUDED
+#define REDISDB_HPP_INCLUDED
 #include <string>
 #include <hiredis/hiredis.h>
 #include <vector>
@@ -20,15 +20,15 @@ struct redis_identity
 class RedisDb
 {
 public:
-    RedisDb() {}
-    ~RedisDb()
+    inline RedisDb() {}
+    inline ~RedisDb()
     {
         this->_connect = NULL;
         this->_reply = NULL;
     }
 
 
-    bool connect(std::string host, int port);
+    inline bool connect(std::string host, int port);
 
     template<typename T>
     int hset(std::string key,std::string field,T value);
@@ -43,10 +43,13 @@ public:
     T get(std::string key,T default_v);
 
     template<typename T>
-    int zadd(std::string key, int score, T value);
+    int zadd(std::string key, double score, T value);
 
     template <typename V_TYPE>
-    std::vector<V_TYPE>* zrange(std::string key, int min, int max, std::vector<V_TYPE> &members_set);
+    std::vector<V_TYPE>* zrangebyscore(std::string key, double min, double max, std::vector<V_TYPE> &members_set);
+
+    template <typename V_TYPE>
+    std::vector<V_TYPE>* zmembers(std::string key, std::vector<V_TYPE> &members_set);
 
     template<typename T>
     int sadd(std::string key, T value);
@@ -54,7 +57,7 @@ public:
     template <typename V_TYPE>
     std::vector<V_TYPE>* smembers(std::string key,std::vector<V_TYPE> &members_set);
 
-    int removeKey(int area,std::string key)
+    inline int removeKey(int area,std::string key)
     {
         this->_reply = (redisReply*)redisCommand(this->_connect,"del %s",key.c_str());
         if(NULL == this->_reply || REDIS_REPLY_INTEGER != this->_reply->type)
@@ -66,11 +69,23 @@ public:
         return this->_reply->integer;
     }
 
-    void close()
+    inline void close()
     {
         TBSYS_LOG(DEBUG,"entry redis close!");
         redisCommand(this->_connect,"QUIT");
         TBSYS_LOG(DEBUG,"entry redis close success!");
+    }
+
+    inline int incr(std::string key,int integer)
+    {
+        this->_reply = (redisReply*)redisCommand(this->_connect,"incrby %s %d",key.c_str(),integer);
+        if(NULL == this->_reply || REDIS_REPLY_INTEGER != this->_reply->type)
+        {
+            freeReplyObject(this->_reply);
+            return 0;
+        }
+        freeReplyObject(this->_reply);
+        return this->_reply->integer;
     }
 
 private:
@@ -86,6 +101,7 @@ bool RedisDb::connect(std::string host, int port)
         TBSYS_LOG(DEBUG,"connect error: %s\n",this->_connect->errstr);
         return false;
     }
+    redisCommand(this->_connect,"select 2");
     return true;
 }
 
@@ -150,19 +166,26 @@ int RedisDb::set(std::string key, T value)
     strset_ss << "SET " << key << " " << value << std::endl;
     std::string strset = strset_ss.str();
     TBSYS_LOG(DEBUG,strLog.c_str(),key.c_str());
-    this->_reply = (redisReply*)redisCommand(this->_connect, strset.c_str());
 
+    this->_reply = (redisReply*)redisCommand(this->_connect, strset.c_str());
+    TBSYS_LOG(DEBUG,"SET : this->_connect:0x%x", this->_connect);
     if(NULL == this->_reply)
     {
         freeReplyObject(this->_reply);
         return 0;
     }
 
+    if(NULL == this->_reply->str)
+    {
+        freeReplyObject(this->_reply);
+        return 0;
+    }
     if(!(this->_reply->type == REDIS_REPLY_STATUS && strcasecmp(this->_reply->str,"OK")==0))
     {
         freeReplyObject(this->_reply);
         return 0;
     }
+
     std::string str  = this->_reply->str;
     TBSYS_LOG(DEBUG,"set success %s",this->_reply->str);
     if(NULL != this->_reply->str && 0 == strcmp("OK",this->_reply->str))
@@ -179,8 +202,8 @@ T RedisDb::get(std::string key,T default_v)
 {
     tair::common::data_entry *p_value;
     TBSYS_LOG(DEBUG,"redis: redis get %s",key.c_str());
-    TBSYS_LOG(DEBUG,"this->_connect:0x%x", this->_connect);
     this->_reply = (redisReply*)redisCommand(this->_connect, "GET %s", key.c_str());
+    TBSYS_LOG(DEBUG,"GET : this->_connect:0x%x", this->_connect);
     if(NULL == this->_reply || this->_reply->type != REDIS_REPLY_STRING)
     {
         TBSYS_LOG(DEBUG,"redis: redis get error!");
@@ -192,13 +215,13 @@ T RedisDb::get(std::string key,T default_v)
     stream1.str(this->_reply->str);
     T value;
     stream1 >> value;
-    freeReplyObject(this->_reply);
     TBSYS_LOG(DEBUG,"get success");
+    freeReplyObject(this->_reply);
     return value;
 }
 
 template<typename T>
-int RedisDb::zadd(std::string key, int score, T value)
+int RedisDb::zadd(std::string key, double score, T value)
 {
 
     TBSYS_LOG(DEBUG,"enter redis_mdb_zadd");
@@ -216,8 +239,6 @@ int RedisDb::zadd(std::string key, int score, T value)
     if(NULL == this->_reply || REDIS_REPLY_INTEGER != this->_reply->type)
     {
         TBSYS_LOG(DEBUG,"this->_reply:%d",this->_reply);
-        TBSYS_LOG(DEBUG,"this->_reply->type:%d",this->_reply->type);
-        TBSYS_LOG(DEBUG,"this->_reply->str:%s",this->_reply->str);
         freeReplyObject(this->_reply);
         return 0;
     }
@@ -228,17 +249,27 @@ int RedisDb::zadd(std::string key, int score, T value)
 }
 
 template <typename V_TYPE>
-std::vector<V_TYPE>* RedisDb::zrange(std::string key, int min, int max, std::vector<V_TYPE> &members_set)
+std::vector<V_TYPE>* RedisDb::zrangebyscore(std::string key, double min, double max, std::vector<V_TYPE> &members_set)
 {
-    TBSYS_LOG(DEBUG,"redis: redis zrange string %s %d %d",key.c_str(),min,max);
-    this->_reply = (redisReply*)redisCommand(this->_connect,"ZRANGE %s %d %d",key.c_str(),min,max);
+    TBSYS_LOG(DEBUG,"redis: redis zrangebyscore string %s %lld %lld",key.c_str(),(int)min,(int)max);
+
+    /*std::ostringstream strLog_ss;
+    strLog_ss << "ZRANGEBYSCORE " << key << " " <<min << " " << max << std::endl;
+    std::string strLog = strLog_ss.str();
+    TBSYS_LOG(DEBUG,"std::string strLog:%s",strLog.c_str());
+    this->_reply = (redisReply*)redisCommand(this->_connect,strLog.c_str());*/
+    TBSYS_LOG(DEBUG,"ZRANGEBYSCORE %s %lld %lld",key.c_str(),(int)min,(int)max);
+    this->_reply = (redisReply*)redisCommand(this->_connect,"ZRANGEBYSCORE %s %lld %lld",key.c_str(),(int)min,(int)max);
     if(NULL == this->_reply || REDIS_REPLY_ARRAY != this->_reply->type)
     {
-        TBSYS_LOG(DEBUG,"redis: redis zrange error!");
+        TBSYS_LOG(DEBUG,"redis: redis zrangebyscore error!");
         freeReplyObject(this->_reply);
         return NULL;
     }
 
+    TBSYS_LOG(DEBUG,"this->_reply : %d",this->_reply);
+    TBSYS_LOG(DEBUG,"this->_reply->type : %d",this->_reply->type);
+    TBSYS_LOG(DEBUG,"this->_reply->elements: %d",this->_reply->elements);
     for(unsigned int i = 0; i < this->_reply->elements; i++)
     {
         std::istringstream stream1;
@@ -249,7 +280,42 @@ std::vector<V_TYPE>* RedisDb::zrange(std::string key, int min, int max, std::vec
         members_set.push_back(value);
     }
     freeReplyObject(this->_reply);
-    TBSYS_LOG(DEBUG,"zrange success");
+    TBSYS_LOG(DEBUG,"zrangebyscore success");
+    return & members_set;
+}
+
+template <typename V_TYPE>
+std::vector<V_TYPE>* RedisDb::zmembers(std::string key, std::vector<V_TYPE> &members_set)
+{
+    TBSYS_LOG(DEBUG,"redis: redis zmembers string %s",key.c_str());
+    /*std::ostringstream strLog_ss;
+    strLog_ss << "ZRANGEBYSCORE " << key << " " <<min << " " << max << std::endl;
+    std::string strLog = strLog_ss.str();
+    TBSYS_LOG(DEBUG,"std::string strLog:%s",strLog.c_str());
+    this->_reply = (redisReply*)redisCommand(this->_connect,strLog.c_str());*/
+    TBSYS_LOG(DEBUG,"ZRANGE %s 0 %lld",key.c_str(),(int)std::numeric_limits<double>::max());
+    this->_reply = (redisReply*)redisCommand(this->_connect,"ZRANGE %s 0 %lld",key.c_str(),(int)std::numeric_limits<double>::max());
+    if(NULL == this->_reply || REDIS_REPLY_ARRAY != this->_reply->type)
+    {
+        TBSYS_LOG(DEBUG,"redis: redis zmembers error!");
+        freeReplyObject(this->_reply);
+        return NULL;
+    }
+
+    TBSYS_LOG(DEBUG,"this->_reply : %d",this->_reply);
+    TBSYS_LOG(DEBUG,"this->_reply->type : %d",this->_reply->type);
+    TBSYS_LOG(DEBUG,"this->_reply->elements: %d",this->_reply->elements);
+    for(unsigned int i = 0; i < this->_reply->elements; i++)
+    {
+        std::istringstream stream1;
+        stream1.str(this->_reply->element[i]->str);
+        V_TYPE value;
+        stream1 >> value;
+
+        members_set.push_back(value);
+    }
+    freeReplyObject(this->_reply);
+    TBSYS_LOG(DEBUG,"zmembers success");
     return & members_set;
 }
 
