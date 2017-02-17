@@ -14,7 +14,7 @@
 		redisReply *reply;
 		redisContext *ctest;
 		long long num = 1;   //后面的参数进行校验
-		const char *hostname ="WUSHUU-REDIS";
+		const char *hostname ="redis";
 		int port = 6379;
 			
 		struct timeval timeout = { 1, 500000 }; // 1.5 seconds

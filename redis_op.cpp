@@ -226,7 +226,7 @@ int main()
     Json::StyledWriter writer;
 	
 	RedisDb *r = new RedisDb();
-	if(!r->connect("WUSHUU-REDIS",6379))
+	if(!r->connect("redis",6379))
 	{
 		TBSYS_LOG(DEBUG,"connect error!\n");
 		return 0;

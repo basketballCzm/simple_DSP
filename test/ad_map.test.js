@@ -586,9 +586,4 @@ describe('ad_map.test.js', function () {
 })
 }
 
-["redis"].forEach(MDBTest)
-
-
-
-
-
+["redis","tair"].forEach(MDBTest)

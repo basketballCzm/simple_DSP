@@ -9,7 +9,7 @@ using namespace std;
 using namespace user_map;
 
 static const string s_topic = "user-tag";
-static const string brokers = "WUSHUU-LOCAL-KAFKA";
+static const string brokers = "kafka";
 static bool exit_eof = false;
 static int64_t start_offset = RdKafka::Topic::OFFSET_BEGINNING; 
 //static int64_t start_offset = RdKafka::Topic::OFFSET_STORED; 

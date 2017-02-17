@@ -18,7 +18,7 @@ double d_num = 0;
 std::string reply;
 string str;
 bool result = false;
-std::string str_ip[2] = {"WUSHUU-REDIS","WUSHUU-TAIR-CS"};
+std::string str_ip[2] = {"redis","tair"};
 int address_op[2] = {6379,5198};
 int result_back[2] = {1,0};//redis ---success 1     tair  ---success 0
 
@@ -41,8 +41,12 @@ protected:
     virtual void TearDown() {
         r.close();
     }
+protected:
     CBaseMdb r;
+    static vector<std::string> saved_keys;
 };
+
+vector<std::string> CBaseMdbTest::saved_keys;
 
 
 TEST_F(CBaseMdbTest,ClassTest_set)
@@ -55,15 +59,20 @@ TEST_F(CBaseMdbTest,ClassTest_set)
     TBSYS_LOG(DEBUG,"address_op[r.get_TypeDb()]:%d",address_op[r.get_TypeDb()]);
 
     integer = r.set<int>("czmset_int",12345);
+    saved_keys.push_back("czmset_int");
     EXPECT_EQ(1,integer);
     //float的精度会存在问题
     integer = r.set<float>("czmset_float",99034.3);
+    saved_keys.push_back("czmset_float");
     EXPECT_EQ(1,integer);
     integer = r.set<unsigned long long>("czm_unsigned",mac);
+    saved_keys.push_back("czm_unsigned");
     EXPECT_EQ(1,integer);
     integer = r.set<double>("czmset_double",21.334);
+    saved_keys.push_back("czmset_double");
     EXPECT_EQ(1,integer);
     integer = r.set<string>("czmset_string","123456");
+    saved_keys.push_back("czmset_string");
     EXPECT_EQ(1,integer);
     integer = r.get<int>("czmset_int",-1);
     EXPECT_EQ(12345,integer);
@@ -85,6 +94,7 @@ TEST_F(CBaseMdbTest,ClassTest_hset_int)
     TBSYS_LOG(DEBUG,"ClassTest_hset_int  str_ip[r.get_TypeDb()].c_str() %s: ",str_ip[r.get_TypeDb()].c_str());
     TBSYS_LOG(DEBUG,"ClassTest_hset_int  address_op[r.get_TypeDb()]:%d",address_op[r.get_TypeDb()]);
     integer = r.hset<int>("czmhset_int","field1",111);
+    saved_keys.push_back("czmhset_int");
     EXPECT_EQ(1,integer);
     integer = r.hset<int>("czmhset_int","field2",222);
     EXPECT_EQ(1,integer);
@@ -115,6 +125,7 @@ TEST_F(CBaseMdbTest,ClassTest_hset_float)
 {
     //tair的底层有bug，float暂时不进行测试
     integer = r.hset<float>("czmhset_float","field1",111.1);
+    saved_keys.push_back("czmhset_float");
     EXPECT_EQ(1,integer);
     integer = r.hset<float>("czmhset_float","field2",222.2);
     EXPECT_EQ(1,integer);
@@ -143,6 +154,7 @@ TEST_F(CBaseMdbTest,ClassTest_hset_float)
 TEST_F(CBaseMdbTest,ClassTest_hset_double)
 {
     integer = r.hset<double>("czmhset_double","field1",111.111);
+    saved_keys.push_back("czmhset_double");
     EXPECT_EQ(1,integer);
     integer = r.hset<double>("czmhset_double","field2",222.222);
     EXPECT_EQ(1,integer);
@@ -171,6 +183,7 @@ TEST_F(CBaseMdbTest,ClassTest_hset_double)
 TEST_F(CBaseMdbTest,ClassTest_hset_string)
 {
     integer = r.hset<string>("czmhset_string","field1","111");
+    saved_keys.push_back("czmhset_string");
     EXPECT_EQ(1,integer);
     integer = r.hset<string>("czmhset_string","field2","222");
     EXPECT_EQ(1,integer);
@@ -199,6 +212,7 @@ TEST_F(CBaseMdbTest,ClassTest_hset_string)
 TEST_F(CBaseMdbTest,ClassTest_zadd_int)
 {
     integer = r.zadd<int>("czmzadd_int",0,111);
+    saved_keys.push_back("czmzadd_int");
     EXPECT_EQ(1,integer);
     integer = r.zadd<int>("czmzadd_int",1,222);
     EXPECT_EQ(1,integer);
@@ -228,6 +242,7 @@ TEST_F(CBaseMdbTest,ClassTest_zadd_float)
 {
     //tair的底层有bug，float暂时不进行测试
     integer = r.zadd<float>("czmzadd_float",0,111.1);
+    saved_keys.push_back("czmzadd_float");
     EXPECT_EQ(1,integer);
     integer = r.zadd<float>("czmzadd_float",1,222.2);
     EXPECT_EQ(1,integer);
@@ -256,6 +271,7 @@ TEST_F(CBaseMdbTest,ClassTest_zadd_float)
 TEST_F(CBaseMdbTest,ClassTest_zadd_double)
 {
     integer = r.zadd<double>("czmzadd_double",1484130,111.111);
+    saved_keys.push_back("czmzadd_double");
     EXPECT_EQ(1,integer);
     integer = r.zadd<double>("czmzadd_double",1484130000,222.222);
     EXPECT_EQ(1,integer);
@@ -284,6 +300,7 @@ TEST_F(CBaseMdbTest,ClassTest_zadd_double)
 TEST_F(CBaseMdbTest,ClassTest_zadd_string)
 {
     integer = r.zadd<string>("czmzadd_string",0,"111");
+    saved_keys.push_back("czmzadd_string");
     EXPECT_EQ(1,integer);
     integer = r.zadd<string>("czmzadd_string",1,"222");
     EXPECT_EQ(1,integer);
@@ -312,6 +329,7 @@ TEST_F(CBaseMdbTest,ClassTest_zadd_string)
 TEST_F(CBaseMdbTest,ClassTest_sadd_int)
 {
     integer = r.sadd<int>("czmsadd_int",111);   //这里的参数我也是一个整形传入进来的
+    saved_keys.push_back("czmsadd_int");
     EXPECT_EQ(1,integer);
     integer = r.sadd<int>("czmsadd_int",222);
     EXPECT_EQ(1,integer);
@@ -340,6 +358,7 @@ TEST_F(CBaseMdbTest,ClassTest_sadd_int)
 TEST_F(CBaseMdbTest,ClassTest_sadd_float)
 {
     integer = r.sadd<float>("czmsadd_float",111.1);   //这里的参数我也是一个整形传入进来的
+    saved_keys.push_back("czmsadd_float");
     EXPECT_EQ(1,integer);
     integer = r.sadd<float>("czmsadd_float",222.2);
     EXPECT_EQ(1,integer);
@@ -368,6 +387,7 @@ TEST_F(CBaseMdbTest,ClassTest_sadd_float)
 TEST_F(CBaseMdbTest,ClassTest_sadd_double)
 {
     integer = r.sadd<double>("czmsadd_double",111.111);   //这里的参数我也是一个整形传入进来的
+    saved_keys.push_back("czmsadd_double");
     EXPECT_EQ(1,integer);
     integer = r.sadd<double>("czmsadd_double",222.222);
     EXPECT_EQ(1,integer);
@@ -396,6 +416,7 @@ TEST_F(CBaseMdbTest,ClassTest_sadd_double)
 TEST_F(CBaseMdbTest,ClassTest_sadd_string)
 {
     integer = r.sadd<string>("czmsadd_string","111.1");   //这里的参数我也是一个整形传入进来的
+    saved_keys.push_back("czmsadd_string");
     EXPECT_EQ(1,integer);
     integer = r.sadd<string>("czmsadd_string","222.2");
     EXPECT_EQ(1,integer);
@@ -423,21 +444,8 @@ TEST_F(CBaseMdbTest,ClassTest_sadd_string)
 
 TEST_F(CBaseMdbTest,ClassTest_removeKey)
 {
-    r.removeKey(tair_namespace,"czmset_int");
-    r.removeKey(tair_namespace,"czmset_float");
-    r.removeKey(tair_namespace,"czmset_double");
-    r.removeKey(tair_namespace,"czmset_string");
-    r.removeKey(tair_namespace,"czmhset_int");
-    r.removeKey(tair_namespace,"czmhset_float");
-    r.removeKey(tair_namespace,"czmhset_double");
-    r.removeKey(tair_namespace,"czmhset_string");
-    r.removeKey(tair_namespace,"czmzadd_int");
-    r.removeKey(tair_namespace,"czmzadd_float");
-    r.removeKey(tair_namespace,"czmzadd_double");
-    r.removeKey(tair_namespace,"czmzadd_string");
-    r.removeKey(tair_namespace,"czmsadd_int");
-    r.removeKey(tair_namespace,"czmsadd_float");
-    r.removeKey(tair_namespace,"czmsadd_double");
-    r.removeKey(tair_namespace,"czmsadd_string");
-    r.removeKey(tair_namespace,"czm_unsigned");
+    for(vector<std::string>::iterator it= saved_keys.begin(); it != saved_keys.end(); ++it)
+    {
+        r.removeKey(tair_namespace,std::string(it->c_str()));
+    }
 }
