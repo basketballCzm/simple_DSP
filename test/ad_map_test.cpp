@@ -18,6 +18,13 @@ TEST(TairCommon,GetDataEntry)
     EXPECT_STREQ("ad.space:3:4.5:ad.group.set",key.get_data());
 }
 
+namespace user_map {
+    extern CBaseMdb g_baseMdb;
+    extern const char * master_addr_ip;
+    extern const char * master_addr_port;
+    extern int port;
+}
+
 
 using namespace ad_map;
 namespace ad_map {
@@ -36,17 +43,24 @@ class AdMapTest : public testing::Test
 protected:
     virtual void SetUp()
     {
+        openlog("ad_map_test", LOG_PID|LOG_PERROR, LOG_LOCAL0 );
+        db_map();
+        tbsys::CConfig &config = loadConf("etc/config.ini");
         if(0 == strcmp(getenv("MDB"),"REDIS"))
         {
             g_baseMdb_ad.set_TypeDb(TypeDb::REDIS);
+            config.setString("tair_rdb","mdb","redis");
         }
         else if(0 == strcmp(getenv("MDB"),"TAIR"))
         {
             g_baseMdb_ad.set_TypeDb(TypeDb::TAIR);
+            config.setString("tair_rdb","mdb","tair");
         }
-        openlog("ad_map_test", LOG_PID|LOG_PERROR, LOG_LOCAL0 );
-        db_map();
-        ad_map_init();
+        ad_map::ad_map_init(config);
+        user_map::user_map_init(config);
+        ad_map::g_baseMdb_ad.set_NumDb(13);
+        user_map::g_baseMdb.set_NumDb(13);
+
     }
     virtual void TearDown()
     {
@@ -77,7 +91,8 @@ TEST_F(AdMapTest,getAdGroupSetOfLocation)
     std::vector< int> ad_group_set;
     UserPosition pos;
     pos.mac=mac;
-    user_map::user_map_init();
+    tbsys::CConfig &config = loadConf("etc/config.ini");
+    user_map::user_map_init(config);
     EXPECT_NE(user_map::user_query( pos,mall_id),-1);
     EXPECT_EQ(pos.position.x,float(4.3));
     EXPECT_EQ(pos.position.y,float(3.8));

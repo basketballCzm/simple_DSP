@@ -24,6 +24,8 @@ public:
 
     inline void set_TypeDb(TypeDb value);
 
+    inline bool set_NumDb(int num);
+
     inline void close();
 
     inline int get_TypeDb();
@@ -81,6 +83,22 @@ inline bool CBaseMdb::connect(std::string host, int port)
     else if(TAIR == m_type)
     {
         return m_tair_db.connect(host,port);
+    }
+    else
+    {
+        return false;
+    }
+}
+
+inline bool CBaseMdb::set_NumDb(int num)
+{
+    if(REDIS == m_type)
+    {
+        return m_redis_db.set_NumDb(num);
+    }
+    else if(TAIR == m_type)
+    {
+        return m_tair_db.set_NumDb(num);
     }
     else
     {

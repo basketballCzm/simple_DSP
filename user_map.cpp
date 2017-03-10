@@ -9,7 +9,9 @@
 #include <unordered_map>
 #include <data_entry.hpp>
 #include "boost/format.hpp"
-#include "config.h"
+#include <config.h>
+#include <tblog.h>
+#include <tbsys.h>
 
 #include <pqxx/pqxx>        // pg c++ api
 #include <memory>
@@ -30,13 +32,11 @@ namespace user_map
 {
 //tair::tair_client_api g_tair;
 CBaseMdb g_baseMdb;
-const char * config_file="etc/config.ini";
-
-tbsys::CConfig config;
-
+static const char * config_file="etc/config.ini";
 const char * master_addr;
 const char * master_addr_ip;
 const char * master_addr_port;
+const char * mdb;
 int port;
 const char * slave_addr;
 const char * group_name;
@@ -64,34 +64,15 @@ pthread_mutex_t mutex;
 int check_vip;
 bool user_tag_save_on_tair;
 
-void user_map_init()
+void user_map_init(tbsys::CConfig &config)
 {
     static bool b_started = false;
 
     if(!b_started)
     {
-        if(config.load(config_file) == EXIT_FAILURE)
-        {
-            syslog(LOG_INFO,"load config file %s error", config_file);
-            TBSYS_LOG(DEBUG,"load config file %s error", config_file);
-            return;
-        }
-
         syslog(LOG_INFO,"user_map_init() load config ok!");
 
         master_addr     = config.getString("tair_rdb", "master_addr", NULL);
-        if(TypeDb::TAIR == g_baseMdb.get_TypeDb())
-        {
-            master_addr_ip  = config.getString("tair_rdb", "master_addr_ip", NULL);
-            master_addr_port  = config.getString("tair_rdb", "master_addr_port", NULL);
-            port = atoi(master_addr_port);
-        }
-        else if(TypeDb::REDIS == g_baseMdb.get_TypeDb())
-        {
-            master_addr_ip  = config.getString("redis_rdb", "master_addr_ip", NULL);
-            master_addr_port  = config.getString("redis_rdb", "master_addr_port", NULL);
-            port = atoi(master_addr_port);
-        }
         slave_addr      = config.getString("tair_rdb", "slave_addr", NULL);
         group_name      = config.getString("tair_rdb", "group_name", NULL);
         time_slice      = config.getInt("tair_rdb", "time_slice", 10);
@@ -101,6 +82,7 @@ void user_map_init()
         tb_log_level      = config.getString("tair_rdb", "log_level", "DEBUG");
         max_duration_gap = config.getInt("user_map", "max_duration_gap", 120);
         max_in_shop_gap = config.getInt("user_map", "max_in_shop_gap", 300);
+        mdb            = config.getString("tair_rdb","mdb","redis");
 
         pg_server   = config.getString("user_map", "pg_server", NULL);
 
@@ -119,16 +101,34 @@ void user_map_init()
 
         TBSYS_LOGGER.setFileName((string(tb_log_file)+string(".")+to_string(getpid())).c_str(),true);
         TBSYS_LOGGER.setLogLevel(tb_log_level);
+        TBSYS_LOG(DEBUG,"add_user_location_sql = %s",add_user_location_sql);
+        TBSYS_LOG(DEBUG,"pg_password = %s",pg_password);
+        TBSYS_LOG(DEBUG,"pg_server = %s",pg_server);
+        TBSYS_LOG(DEBUG,"pg_user = %s",pg_user);
+        TBSYS_LOG(DEBUG,"pg_database = %s",pg_database);
 
         //g_tair.set_timeout(5000);
         //g_tair.startup(master_addr,slave_addr,group_name);
-        if(0 == strcmp(getenv("MDB"),"REDIS"))
+        if(0 == strcmp(mdb,"redis"))
         {
             g_baseMdb.set_TypeDb(TypeDb::REDIS);
         }
-        else if(0 == strcmp(getenv("MDB"),"TAIR"))
+        else if(0 == strcmp(mdb,"tair"))
         {
             g_baseMdb.set_TypeDb(TypeDb::TAIR);
+        }
+
+        if(TypeDb::TAIR == g_baseMdb.get_TypeDb())
+        {
+            master_addr_ip  = config.getString("tair_rdb", "master_addr_ip", NULL);
+            master_addr_port  = config.getString("tair_rdb", "master_addr_port", NULL);
+            port = atoi(master_addr_port);
+        }
+        else if(TypeDb::REDIS == g_baseMdb.get_TypeDb())
+        {
+            master_addr_ip  = config.getString("redis_rdb", "master_addr_ip", NULL);
+            master_addr_port  = config.getString("redis_rdb", "master_addr_port", NULL);
+            port = atoi(master_addr_port);
         }
 
         g_baseMdb.initDb(std::string(master_addr_ip),port);
@@ -159,7 +159,8 @@ int user_remove(int mac, int mall_id)
 
 int user_query(UserPosition& pos, int mall_id)
 {
-    user_map_init();
+    tbsys::CConfig &config = loadConf(user_map::config_file);
+    user_map_init(config);
     tair::common::data_entry key;
     get_data_entry(key,"location:",mall_id,":",pos.mac,":x");
     std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
@@ -274,8 +275,11 @@ inline void user_location_log_add(const unsigned long long  mac,const double x,
     int zz = 0;
     if (z != INT_MIN)
         zz = z;
-
+    //add_user_location_sql=echo "begin transaction isolation level serializable;insert into user_location
+    //(tairid, mac, x, y, z, uptime) values(%ld, %ld, %f, %f, %d, %d);commit;" | PGPASSWORD=%s psql -h%s -U %s -d %s 
+    //2>/dev/null | grep -B 3 COMMIT | head -n 1
     string cmd=str(boost::format(add_user_location_sql)%log_id%mac%x%y%zz%t_time%pg_password%pg_server%pg_user%pg_database);
+    TBSYS_LOG(DEBUG,"cmd.str() = %s",cmd.c_str());
     cout << "PG_CMD:" << cmd << endl;
     string res = exec(cmd.c_str());
     cout << "PG_OUT:" << res << endl;
@@ -378,7 +382,8 @@ void mac_set_record(const unsigned long long mac, const int mall_id, time_t t_no
 
 int user_add(const unsigned long long  mac,const double x,const double y,const int z,const int kafka_offset, int mall_id )
 {
-    user_map_init();
+    tbsys::CConfig &config = loadConf(user_map::config_file);
+    user_map_init(config);
     syslog(LOG_INFO, "user_map::user_add() enter mac=%ld,x=%f,y=%f,z=%f",mac,x,y,z);
     TBSYS_LOG(DEBUG, "user_map::user_add() enter mac=%ld,x=%f,y=%f,z=%f",mac,x,y,z);
     //printf("user_map::user_add() enter mac=%d,x=%f,y=%f,z=%f",mac,x,y,z);
@@ -429,7 +434,8 @@ int user_update(const unsigned long long mac,const string phone )
 
 void user_list_all(Json::Value & user_list,double start,double end, int mall_id)
 {
-    user_map_init();
+    tbsys::CConfig &config = loadConf(user_map::config_file);
+    user_map_init(config);
 
     TBSYS_LOG(DEBUG, "user_list_all() enter");
 
@@ -472,8 +478,8 @@ void user_list_all(Json::Value & user_list,double start,double end, int mall_id)
 }
 
 int user_tag_update(const unsigned long mac, const char* user_tag, const double user_value) {
-
-    user_map_init();
+    tbsys::CConfig &config = loadConf(user_map::config_file);
+    user_map_init(config);
 
     syslog(LOG_INFO, "user_map::user_tag_update() enter");
 
@@ -513,7 +519,8 @@ int user_tag_update(const unsigned long mac, const char* user_tag, const double 
 
 unsigned long long user_get_mac(const int user_id)
 {
-    user_map_init();
+    tbsys::CConfig &config = loadConf(user_map::config_file);
+    user_map_init(config);
     tair::common::data_entry key;
     get_data_entry(key,"user:",user_id,":mac");
     std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
@@ -550,8 +557,10 @@ unsigned long long user_get_mac(const int user_id)
 
 int user_get_id(const unsigned long long mac)
 { 
-    user_map_init();
     pthread_mutex_lock(&mutex);
+    tbsys::CConfig &config = loadConf(user_map::config_file);
+    user_map_init(config);
+    TBSYS_LOG(DEBUG,"start pthread_mutex_lock");
     tair::common::data_entry key;
     get_data_entry(key,"mac:",mac,":user.id");
     std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
@@ -671,8 +680,8 @@ unsigned long str_to_uint64(const char* str) {
 }
 
 int apmac_get_shopid(unsigned long mac) {
-
-    user_map_init();
+    tbsys::CConfig &config = loadConf(user_map::config_file);
+    user_map_init(config);
 
     try
     {
@@ -695,7 +704,8 @@ int apmac_get_shopid(unsigned long mac) {
 
 bool mac_is_vip(const char* mac_str, int shop_id)
 {
-    user_map_init();
+    tbsys::CConfig &config = loadConf(user_map::config_file);
+    user_map_init(config);
 
     try
     {
@@ -723,7 +733,8 @@ bool mac_is_vip(const char* mac_str, int shop_id)
 
 void update_user_arrive_time(int mall_id, int shop_id, int user_id, unsigned long mac, std::time_t pre, std::time_t now, bool is_vip)
 {
-    user_map_init();
+    tbsys::CConfig &config = loadConf(user_map::config_file);
+    user_map_init(config);
     if(now -pre > max_in_shop_gap)
     {
         tair::common::data_entry key;
@@ -749,7 +760,8 @@ void update_user_arrive_time(int mall_id, int shop_id, int user_id, unsigned lon
 
 void update_user_location_time(int mall_id, int shop_id, int user_id, unsigned long mac, std::time_t now)
 {
-    user_map_init();
+    tbsys::CConfig &config = loadConf(user_map::config_file);
+    user_map_init(config);
 
     tair::common::data_entry key;
     get_data_entry(key, "location:", mall_id, ":", shop_id, ":", mac, ":time");
@@ -771,7 +783,8 @@ void update_user_location_time(int mall_id, int shop_id, int user_id, unsigned l
 
 /*    void update_user_arrive_time(int mall_id, int shop_id, int user_id, std::time_t now)
     {
-        user_map_init();
+        tbsys::CConfig &config = loadConf(user_map::config_file);
+        user_map_init(config);
 
         tair::common::data_entry key;
         get_data_entry(key, "user:", mall_id, ":", shop_id, ":arrive.time");
@@ -790,7 +803,8 @@ void update_user_location_time(int mall_id, int shop_id, int user_id, unsigned l
 void user_list(Json::Value& list, double start, double end, int mall_id, int shop_id)
 {
     TBSYS_LOG(DEBUG, "user_list() enter start=%lf,end=%lf,mall_id=%d,shop_id=%d",start,end,mall_id,shop_id);
-    user_map_init();
+    tbsys::CConfig &config = loadConf(user_map::config_file);
+    user_map_init(config);
     tair::common::data_entry key;
     time_t t_now=time(0);
     const string & s_date=get_date_str(t_now);
@@ -831,7 +845,8 @@ void user_list(Json::Value& list, double start, double end, int mall_id, int sho
 
 std::time_t get_user_location_time(int mall_id, int shop_id, unsigned long mac)
 {
-    user_map_init();
+    tbsys::CConfig &config = loadConf(user_map::config_file);
+    user_map_init(config);
 
     tair::common::data_entry time_key;
     get_data_entry(time_key, "location:", mall_id, ":", shop_id, ":", mac, ":time");

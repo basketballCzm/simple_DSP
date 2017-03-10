@@ -15,6 +15,7 @@
 #include <fcgiapp.h>
 #include <uriparser/Uri.h>
 #include "config.h"
+#include "tair_common.h"
 
 #include "user_map.h"
 #include "ad_map.h"
@@ -135,15 +136,17 @@ int main()
     //loadConfig
     //connectDb
     //mdb
-    user_map::user_map_init();
-    ad_map::ad_map_init();
+    //ad_map::config_file
+    tbsys::CConfig &config = loadConf("etc/config.ini");
+    user_map::user_map_init(config);
+    ad_map::ad_map_init(config);
     FCGX_Request request;
     FCGX_InitRequest(&request, 0, 0);
 
     UriParserStateA state;
     Json::StyledWriter writer;
     
-    ad_map::ad_map_init();
+    ad_map::ad_map_init(config);
     
     while(FCGX_Accept_r(&request) >= 0)
     {

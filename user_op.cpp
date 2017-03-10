@@ -18,6 +18,7 @@
 #include <uriparser/Uri.h>
 #include "config.h"
 #include <cfloat>
+#include "tair_common.h"
 
 #include "user_map.h"
 #include <json/json.h>
@@ -191,7 +192,9 @@ int main()
     openlog("adstat", LOG_PID|LOG_PERROR, LOG_LOCAL0 );
 
     FCGX_Init();
-    user_map_init();
+    //user_map::config_file
+    tbsys::CConfig &config = loadConf("etc/config.ini");    
+    user_map_init(config);
     FCGX_Request request;
     FCGX_InitRequest(&request, 0, 0);
 
