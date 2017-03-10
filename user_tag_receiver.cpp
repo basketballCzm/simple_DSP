@@ -13,7 +13,7 @@ static const string brokers = "kafka";
 static bool exit_eof = false;
 static int64_t start_offset = RdKafka::Topic::OFFSET_BEGINNING; 
 //static int64_t start_offset = RdKafka::Topic::OFFSET_STORED; 
-static int32_t partition = 0; 
+static int32_t user_partition = 0; 
 
 static bool run = true;
 
@@ -122,7 +122,7 @@ int main ()
     /*
      * Start consumer for topic+partition at start offset
      */
-    RdKafka::ErrorCode resp = consumer->start(topic, partition, start_offset);
+    RdKafka::ErrorCode resp = consumer->start(topic, user_partition, start_offset);
     if (resp != RdKafka::ERR_NO_ERROR) {
         std::cerr << "Failed to start consumer: " <<
             RdKafka::err2str(resp) << std::endl;
@@ -136,7 +136,7 @@ int main ()
      */
     run=true;
     while (run) {
-        RdKafka::Message *msg = consumer->consume(topic, partition, 1000);
+        RdKafka::Message *msg = consumer->consume(topic, user_partition, 1000);
         msg_consume(msg, NULL);
         if(msg)
         {
@@ -149,7 +149,7 @@ int main ()
     /*
      * Stop consumer
      */
-    consumer->stop(topic, partition);
+    consumer->stop(topic, user_partition);
 
     consumer->poll(1000);
 

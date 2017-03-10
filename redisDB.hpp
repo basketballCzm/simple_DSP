@@ -30,6 +30,8 @@ public:
 
     inline bool connect(std::string host, int port);
 
+    inline bool set_NumDb(int num);
+
     template<typename T>
     int hset(std::string key,std::string field,T value);
 
@@ -103,6 +105,23 @@ bool RedisDb::connect(std::string host, int port)
     }
     redisCommand(this->_connect,"select 2");
     return true;
+}
+
+inline bool RedisDb::set_NumDb(int num)
+{
+    this->_reply = (redisReply*)redisCommand(this->_connect, "select %d",num);
+    if(NULL == this->_reply->str)
+    {
+        freeReplyObject(this->_reply);
+        return false;
+    }
+    if(!(this->_reply->type == REDIS_REPLY_STATUS && strcasecmp(this->_reply->str,"OK")==0))
+    {
+        freeReplyObject(this->_reply);
+        return false;
+    }
+    return true;
+
 }
 
 template<typename T>
@@ -272,10 +291,10 @@ std::vector<V_TYPE>* RedisDb::zrangebyscore(std::string key, double min, double 
     TBSYS_LOG(DEBUG,"this->_reply->elements: %d",this->_reply->elements);
     for(unsigned int i = 0; i < this->_reply->elements; i++)
     {
-        std::istringstream stream1;
-        stream1.str(this->_reply->element[i]->str);
+        std::istringstream stream_tmp;
+        stream_tmp.str(this->_reply->element[i]->str);
         V_TYPE value;
-        stream1 >> value;
+        stream_tmp >> value;
 
         members_set.push_back(value);
     }
@@ -307,10 +326,10 @@ std::vector<V_TYPE>* RedisDb::zmembers(std::string key, std::vector<V_TYPE> &mem
     TBSYS_LOG(DEBUG,"this->_reply->elements: %d",this->_reply->elements);
     for(unsigned int i = 0; i < this->_reply->elements; i++)
     {
-        std::istringstream stream1;
-        stream1.str(this->_reply->element[i]->str);
+        std::istringstream stream_tmp;
+        stream_tmp.str(this->_reply->element[i]->str);
         V_TYPE value;
-        stream1 >> value;
+        stream_tmp >> value;
 
         members_set.push_back(value);
     }
@@ -360,10 +379,10 @@ std::vector<V_TYPE>* RedisDb::smembers(std::string key,std::vector<V_TYPE> &memb
 
     for(int i = 0; i < this->_reply->elements; i++)
     {
-        std::istringstream stream1;
-        stream1.str(this->_reply->element[i]->str);
+        std::istringstream stream_tmp;
+        stream_tmp.str(this->_reply->element[i]->str);
         V_TYPE value;
-        stream1 >> value;
+        stream_tmp >> value;
 
         members_set.push_back(value);
     }

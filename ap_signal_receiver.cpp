@@ -15,7 +15,7 @@ static bool exit_eof = false;
 //static int64_t start_offset = RdKafka::Topic::OFFSET_BEGINNING; 
 //static int64_t start_offset = RdKafka::Topic::OFFSET_STORED; 
 static int64_t start_offset = RdKafka::Topic::OFFSET_END; 
-static int32_t partition = 0; 
+static int32_t ad_partition = 0; 
 
 static bool run = true;
 
@@ -203,7 +203,7 @@ int main ()
     /*
      * Start consumer for topic+partition at start offset
      */
-    RdKafka::ErrorCode resp = consumer->start(topic, partition, start_offset);
+    RdKafka::ErrorCode resp = consumer->start(topic, ad_partition, start_offset);
 
     if (resp != RdKafka::ERR_NO_ERROR)
     {
@@ -220,7 +220,7 @@ int main ()
     run=true;
     while (run)
     {
-        RdKafka::Message *msg = consumer->consume(topic, partition, 1000);
+        RdKafka::Message *msg = consumer->consume(topic, ad_partition, 1000);
         msg_consume(msg, NULL);
         delete msg;
         consumer->poll(0);
@@ -229,7 +229,7 @@ int main ()
     /*
      * Stop consumer
      */
-    consumer->stop(topic, partition);
+    consumer->stop(topic, ad_partition);
 
     consumer->poll(1000);
 

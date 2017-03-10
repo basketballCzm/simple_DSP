@@ -1,3 +1,5 @@
+#ifndef __TAIR_COMMON_H__
+#define __TAIR_COMMON_H__
 #include <tair_client_api.hpp>
 #include <define.hpp>
 #include <data_entry.hpp>
@@ -9,6 +11,8 @@
 #include <map>
 #include <unordered_map>
 #include <stdio.h>
+#include "config.h"
+#include "tblog.h"
 
 
 using namespace std;
@@ -35,6 +39,21 @@ inline std::string exec(const char* cmd) {
     }
     pclose(pipe);
     return result;
+}
+
+inline tbsys::CConfig& loadConf(const char *config_file)
+{
+    static tbsys::CConfig config;
+    static bool b_stated = true;
+    if(b_stated)
+    {
+        if(config.load(config_file) == EXIT_FAILURE)
+        {
+            TBSYS_LOG(DEBUG,"load config file %s error", config_file);
+        }
+        b_stated = false;
+    }
+    return config;
 }
 
 
@@ -334,5 +353,7 @@ inline bool check_intersection(const vector<T> &set1, const vector<T> &set2)
     }
     return false;
 }
+
+#endif
 
 

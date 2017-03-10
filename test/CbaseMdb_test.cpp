@@ -37,6 +37,7 @@ protected:
         r.set_TypeDb(TypeDb::TAIR);
     }
     r.initDb(str_ip[r.get_TypeDb()].c_str(),address_op[r.get_TypeDb()]);//address_op[r.get_TypeDb()]
+    r.set_NumDb(13);
     }
     virtual void TearDown() {
         r.close();

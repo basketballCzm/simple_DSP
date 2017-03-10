@@ -17,6 +17,8 @@ public:
     inline ~TairDb();
 
     inline bool connect(std::string host, int port);
+    inline bool set_NumDb(int num);
+
     template<typename T>
     int set(std::string key, T value);
 
@@ -108,6 +110,12 @@ bool TairDb::connect(std::string host, int port)
         TBSYS_LOG(DEBUG,"tair connect fail!");
     }
     return bFlag;
+}
+
+inline bool TairDb::set_NumDb(int num)
+{
+    tair_namespace = num;
+    return true;
 }
 
 template<typename T>

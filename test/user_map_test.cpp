@@ -11,6 +11,7 @@ namespace user_map
 extern int check_vip;
 //extern tair::tair_client_api g_tair;
 extern CBaseMdb g_baseMdb;
+extern const char * add_user_location_sql;
 extern const char * pg_server;
 extern const char * common_sql;
 extern const char * pg_server;
@@ -29,17 +30,22 @@ class UserMapTest : public testing::Test
 protected:
     virtual void SetUp()
     {
+        db_map();
+        tbsys::CConfig &config = loadConf("etc/config.ini");
         if(0 == strcmp(getenv("MDB"),"REDIS"))
         {
             g_baseMdb.set_TypeDb(TypeDb::REDIS);
+            config.setString("tair_rdb","mdb","redis");
         }
         else if(0 == strcmp(getenv("MDB"),"TAIR"))
         {
             g_baseMdb.set_TypeDb(TypeDb::TAIR);
+            config.setString("tair_rdb","mdb","tair");
         }
-        db_map();
-        user_map_init();
+        user_map_init(config);
+        g_baseMdb.set_NumDb(13);
         user_map::check_vip=1;
+
 
     }
 
@@ -145,7 +151,6 @@ TEST_F(UserMapTest, UserAdd)
     std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
     //tair_smembers(user_map::g_tair, nm, key, values);
     g_baseMdb.smembers<string>(s_key,values);
-
     int ret = user_add(mac, x, y, z, -1, mall_id);
     EXPECT_EQ(0, ret);
     ret = user_add(mac + 1, x + 1, y + 1, z + 1, -1, mall_id);

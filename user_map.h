@@ -1,4 +1,7 @@
-#include "ad_model.h"  
+#include "ad_model.h"
+#include <config.h>
+#include <tblog.h>
+#include <tbsys.h>
 #include <json/json.h>
 #include <limits.h>
 #include <limits>
@@ -11,7 +14,7 @@ namespace user_map
 {
     extern int check_vip;
 
-    void user_map_init();
+    void user_map_init(tbsys::CConfig &config);
     int user_add(UserPosition pos,int mall_id=0);
     //kafka_offset default -1 meanes none
     int user_add(const unsigned long long mac,const double x,const double y,const int z, const int kafka_offset=-1,int mall_id=0);

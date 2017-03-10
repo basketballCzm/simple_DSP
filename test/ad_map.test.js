@@ -54,7 +54,7 @@ describe('ad_map.test.js', function () {
   before(function(done) {
       wnc.setMDB(mdb)
       var DB = wnc.getMDB(mdb);
-      db = new DB();
+      db = new DB(13);
       console.log(db)
       db.q_connect().then(function() {
           console.log('memory db connected')

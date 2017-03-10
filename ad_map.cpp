@@ -28,10 +28,10 @@ namespace ad_map
 //tair::tair_client_api g_tair;
 CBaseMdb g_baseMdb_ad;
 const char * config_file="etc/config.ini";
-tbsys::CConfig config;
 const char * master_addr;
 const char * master_addr_ip;
 const char * master_addr_port;
+const char * mdb;
 int port;
 
 const char * slave_addr;
@@ -50,34 +50,19 @@ const char * pg_database;
 
 
 
-void ad_map_init()
+void ad_map_init(tbsys::CConfig &config)
 {
     TBSYS_LOG(DEBUG,"enter ad_map_init()");
     static bool b_started=false;
     if(!b_started)
     {
-        if(config.load(config_file) == EXIT_FAILURE) {
-            TBSYS_LOG(DEBUG,"load config file %s error", config_file);
-            return;
-        }
         TBSYS_LOG(DEBUG,"ad_map_init() load config ok!");
         master_addr=config.getString("tair_rdb","master_addr",NULL);
-        if(TypeDb::TAIR == g_baseMdb_ad.get_TypeDb())
-        {
-            master_addr_ip  = config.getString("tair_rdb", "master_addr_ip", NULL);
-            master_addr_port  = config.getString("tair_rdb", "master_addr_port", NULL);
-            port = atoi(master_addr_port);
-        }
-        else if(TypeDb::REDIS == g_baseMdb_ad.get_TypeDb())
-        {
-            master_addr_ip  = config.getString("redis_rdb", "master_addr_ip", NULL);
-            master_addr_port  = config.getString("redis_rdb", "master_addr_port", NULL);
-            port = atoi(master_addr_port);
-        }
         slave_addr=config.getString("tair_rdb","slave_addr",NULL);
         group_name=config.getString("tair_rdb","group_name",NULL);
         time_slice=config.getInt("tair_rdb","time_slice",10);
         tair_namespace=config.getInt("tair_rdb","namespace",0);
+        mdb=config.getString("tair_rdb","mdb","redis");
 
         tb_log_file=config.getString("tair_rdb","log_file",NULL);
         tb_log_level = config.getString("tair_rdb", "log_level", "DEBUG");
@@ -89,16 +74,33 @@ void ad_map_init()
 
         TBSYS_LOGGER.setFileName((string(tb_log_file)+string(".")+to_string(getpid())).c_str(),true);
         TBSYS_LOGGER.setLogLevel(tb_log_level);
+        TBSYS_LOG(DEBUG,"pg_server = %s",pg_server);
+        TBSYS_LOG(DEBUG,"pg_user = %s",pg_user);
+        TBSYS_LOG(DEBUG,"pg_database = %s",pg_database);
+        TBSYS_LOG(DEBUG,"pg_password = %s",pg_password);
 
         //g_tair.set_timeout(5000);
         //g_tair.startup(master_addr,slave_addr,group_name);
-        if(0 == strcmp(getenv("MDB"),"REDIS"))
+        if(0 == strcmp(mdb,"redis"))
         {
             g_baseMdb_ad.set_TypeDb(TypeDb::REDIS);
         }
-        else if(0 == strcmp(getenv("MDB"),"TAIR"))
+        else if(0 == strcmp(mdb,"tair"))
         {
             g_baseMdb_ad.set_TypeDb(TypeDb::TAIR);
+        }
+
+        if(TypeDb::TAIR == g_baseMdb_ad.get_TypeDb())
+        {
+            master_addr_ip  = config.getString("tair_rdb", "master_addr_ip", NULL);
+            master_addr_port  = config.getString("tair_rdb", "master_addr_port", NULL);
+            port = atoi(master_addr_port);
+        }
+        else if(TypeDb::REDIS == g_baseMdb_ad.get_TypeDb())
+        {
+            master_addr_ip  = config.getString("redis_rdb", "master_addr_ip", NULL);
+            master_addr_port  = config.getString("redis_rdb", "master_addr_port", NULL);
+            port = atoi(master_addr_port);
         }
 
         g_baseMdb_ad.initDb(std::string(master_addr_ip),port);
@@ -383,13 +385,14 @@ inline string get_charge_cmd(int mall_id, int ad_id, int ad_group_id, string typ
     get_data_entry( key,"ad.group:",mall_id,":",ad_group_id,":",type,".price");
     std::string s_key = get_value<std::string>(key.get_data(),key.get_size());
     double change = g_baseMdb_ad.get<double>(s_key,0);
-    //double change=tair_get<double>(g_tair,tair_namespace,key,0);
+    //double change=tair_get<double>(g_tair,tair_namespace,key,0);find 
     if(change>=0)
         change=-change;
     get_data_entry( key,"ad.group:",mall_id,":",ad_group_id,":owner");
     s_key = get_value<std::string>(key.get_data(),key.get_size());
     //const int owner_id=tair_get<int>(g_tair,tair_namespace,key,0);
     const int owner_id=g_baseMdb_ad.get<int>(s_key,0);
+    TBSYS_LOG(DEBUG,"%s",boost::str(boost::format(charge_ad_sql)%owner_id%"adv_consume"%change%s_remark.substr(0,s_remark.size()-1)%mall_id%pg_password%pg_server%pg_user%pg_database).c_str());
     return boost::str(boost::format(charge_ad_sql)%owner_id%"adv_consume"%change%s_remark.substr(0,s_remark.size()-1)%mall_id%pg_password%pg_server%pg_user%pg_database);
 }
 
@@ -557,7 +560,8 @@ int ad_query()
 int ad_request(Json::Value &ret, const unsigned long long mac,const int user_id, const int space_id, const int mall_id, const int n)
 {
     TBSYS_LOG(DEBUG, "ad_map enter ad_request() , user id :%d, mac: %ld ",user_id,mac);
-    ad_map_init();
+    tbsys::CConfig &config = loadConf(ad_map::config_file);
+    ad_map_init(config);
 
     UserPosition pos;
     pos.mac=mac;
