@@ -146,7 +146,7 @@ std::map<std::string,V_TYPE>* TairDb::hget(std::string key, std::map<std::string
     {
         TBSYS_LOG(DEBUG,"tairDB(field): tair hgetall one valsue: %s",(it->first).c_str());
         std::ostringstream strLog_ss1;
-        strLog_ss1 << "tair_common.h: tair hgetall one value: " << it->second << std::endl;
+        strLog_ss1 << "tair_common.h: tair hgetall one value: " << it->second;
         TBSYS_LOG(DEBUG,"tairDB(value): tair hgetall one value %s",strLog_ss1.str().c_str());
 
     }*/
@@ -160,7 +160,7 @@ int TairDb::set(std::string key, T value)
     TBSYS_LOG(DEBUG,"tair entry set start !");
     tair::common::data_entry s_key(key.c_str(),key.size()+1,true);
  /*   std::ostringstream strLog_ss_1;
-    strLog_ss_1 << "tairDB.hpp: tair set value:" << value << std::endl;
+    strLog_ss_1 << "tairDB.hpp: tair set value:" << value;
     TBSYS_LOG(DEBUG,"set success %s",strLog_ss_1.str().c_str());*/
     int ret=tair_put<T>(*ptair_Client,tair_namespace,s_key,value);
     TBSYS_LOG(DEBUG,"tair entry set end!");

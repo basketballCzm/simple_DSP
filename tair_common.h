@@ -298,7 +298,7 @@ vector<V_TYPE>* tair_smembers(tair::tair_client_api & tair_instance,int area, co
     {
         members_set.push_back(get_value<V_TYPE>((*it)->get_data(),(*it)->get_size()));
         std::ostringstream strLog_ss;
-        strLog_ss << "tair_common.h: tair get value smember : " << get_value<V_TYPE>((*it)->get_data(),(*it)->get_size())<< std::endl;
+        strLog_ss << "tair_common.h: tair get value smember : " << get_value<V_TYPE>((*it)->get_data(),(*it)->get_size());
         TBSYS_LOG(DEBUG,"get success %s",strLog_ss.str().c_str());
 
         delete (*it);
@@ -322,10 +322,10 @@ std::map<std::string,V_TYPE>* tair_hgetall(tair::tair_client_api & tair_instance
         members_set.insert(std::pair<std::string,V_TYPE>(str_field,value));
         std::ostringstream strLog_ss;
         //TBSYS_LOG(DEBUG,"string hex:%s",hexStr((it->first).c_str(), (it->first).size()).c_str());
-        strLog_ss << "tair_common.h: tair hgetall one value: " << hexStr(str_field.c_str(),str_field.size())<<", size:"<<(it->first)->get_size()<< std::endl;
+        strLog_ss << "tair_common.h: tair hgetall one value: " << hexStr(str_field.c_str(),str_field.size())<<", size:"<<(it->first)->get_size();
         TBSYS_LOG(DEBUG,"get one success %s",strLog_ss.str().c_str());
         std::ostringstream strLog_ss1;
-        strLog_ss1 << "tair_common.h: tair hgetall one value: " << members_set[str_field] << std::endl;
+        strLog_ss1 << "tair_common.h: tair hgetall one value: " << members_set[str_field];
         TBSYS_LOG(DEBUG,"get one success %s",strLog_ss1.str().c_str());
 
         delete (it->first);
