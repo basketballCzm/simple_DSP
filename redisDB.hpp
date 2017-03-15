@@ -130,11 +130,11 @@ int RedisDb::hset(std::string key,std::string field,T value)
     TBSYS_LOG(DEBUG,"this->_connect:0x%x",this->_connect);
     TBSYS_LOG(DEBUG,"entry redis_mdb_hset");
     std::ostringstream strLog_ss;
-    strLog_ss << "redis_op: redis hset %s " << value << std::endl;
+    strLog_ss << "redis_op: redis hset %s " << value;
     std::string strLog = strLog_ss.str();
 
     std::ostringstream strset_ss;
-    strset_ss << "HSET " << key << " " << field << " " <<value << std::endl;
+    strset_ss << "HSET " << key << " " << field << " " <<value;
     std::string strset = strset_ss.str();
     TBSYS_LOG(DEBUG,strLog.c_str(),key.c_str());
     this->_reply = (redisReply*)redisCommand(this->_connect, strset.c_str());
@@ -178,11 +178,11 @@ int RedisDb::set(std::string key, T value)
 {
     TBSYS_LOG(DEBUG,"enter redis_mdb_set");
     std::ostringstream strLog_ss;
-    strLog_ss << "user_op: redis set %s " << value << std::endl;
+    strLog_ss << "user_op: redis set %s " << value;
     std::string strLog = strLog_ss.str();
 
     std::ostringstream strset_ss;
-    strset_ss << "SET " << key << " " << value << std::endl;
+    strset_ss << "SET " << key << " " << value;
     std::string strset = strset_ss.str();
     TBSYS_LOG(DEBUG,strLog.c_str(),key.c_str());
 
@@ -245,11 +245,11 @@ int RedisDb::zadd(std::string key, double score, T value)
 
     TBSYS_LOG(DEBUG,"enter redis_mdb_zadd");
     std::ostringstream strLog_ss;
-    strLog_ss << "redis_op: redis zadd %s " << value << std::endl;
+    strLog_ss << "redis_op: redis zadd %s " << value;
     std::string strLog = strLog_ss.str();
 
     std::ostringstream strset_ss;
-    strset_ss << "ZADD " << key << " " << score << " " << value << std::endl;
+    strset_ss << "ZADD " << key << " " << score << " " << value;
     std::string strset = strset_ss.str();
     TBSYS_LOG(DEBUG,strLog.c_str(),key.c_str());
     TBSYS_LOG(DEBUG,"%s", strset.c_str());
@@ -273,7 +273,7 @@ std::vector<V_TYPE>* RedisDb::zrangebyscore(std::string key, double min, double 
     TBSYS_LOG(DEBUG,"redis: redis zrangebyscore string %s %lld %lld",key.c_str(),(int)min,(int)max);
 
     /*std::ostringstream strLog_ss;
-    strLog_ss << "ZRANGEBYSCORE " << key << " " <<min << " " << max << std::endl;
+    strLog_ss << "ZRANGEBYSCORE " << key << " " <<min << " " << max;
     std::string strLog = strLog_ss.str();
     TBSYS_LOG(DEBUG,"std::string strLog:%s",strLog.c_str());
     this->_reply = (redisReply*)redisCommand(this->_connect,strLog.c_str());*/
@@ -308,7 +308,7 @@ std::vector<V_TYPE>* RedisDb::zmembers(std::string key, std::vector<V_TYPE> &mem
 {
     TBSYS_LOG(DEBUG,"redis: redis zmembers string %s",key.c_str());
     /*std::ostringstream strLog_ss;
-    strLog_ss << "ZRANGEBYSCORE " << key << " " <<min << " " << max << std::endl;
+    strLog_ss << "ZRANGEBYSCORE " << key << " " <<min << " " << max;
     std::string strLog = strLog_ss.str();
     TBSYS_LOG(DEBUG,"std::string strLog:%s",strLog.c_str());
     this->_reply = (redisReply*)redisCommand(this->_connect,strLog.c_str());*/
@@ -321,9 +321,6 @@ std::vector<V_TYPE>* RedisDb::zmembers(std::string key, std::vector<V_TYPE> &mem
         return NULL;
     }
 
-    TBSYS_LOG(DEBUG,"this->_reply : %d",this->_reply);
-    TBSYS_LOG(DEBUG,"this->_reply->type : %d",this->_reply->type);
-    TBSYS_LOG(DEBUG,"this->_reply->elements: %d",this->_reply->elements);
     for(unsigned int i = 0; i < this->_reply->elements; i++)
     {
         std::istringstream stream_tmp;
@@ -344,11 +341,11 @@ int RedisDb::sadd(std::string key, T value)
 
     TBSYS_LOG(DEBUG,"enter redis_mdb_sadd");
     std::ostringstream strLog_ss;
-    strLog_ss << "user_op: redis sadd %s " << value << std::endl;
+    strLog_ss << "user_op: redis sadd %s " << value;
     std::string strLog = strLog_ss.str();
 
     std::ostringstream strset_ss;
-    strset_ss << "SADD " << key << " " <<  value << std::endl;
+    strset_ss << "SADD " << key << " " <<  value;
     std::string strset = strset_ss.str();
     TBSYS_LOG(DEBUG,strLog.c_str(),key.c_str());
     this->_reply = (redisReply*)redisCommand(this->_connect, strset.c_str());
