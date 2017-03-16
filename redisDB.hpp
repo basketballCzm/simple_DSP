@@ -249,8 +249,8 @@ int RedisDb::zadd(std::string key, double score, T value)
     std::string strLog = strLog_ss.str();
 
     std::ostringstream strset_ss;
-    long long int tmp_score = (long long int)score;
-    strset_ss << "ZADD " << key << " " << tmp_score << " " << value;
+    long long int score_tmp = (long long int)score;
+    strset_ss << "ZADD " << key << " " << score_tmp << " " << value;
     std::string strset = strset_ss.str();
     TBSYS_LOG(DEBUG,strLog.c_str(),key.c_str());
     TBSYS_LOG(DEBUG,"%s", strset.c_str());
