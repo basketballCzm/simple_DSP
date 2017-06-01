@@ -249,7 +249,8 @@ int RedisDb::zadd(std::string key, double score, T value)
     std::string strLog = strLog_ss.str();
 
     std::ostringstream strset_ss;
-    strset_ss << "ZADD " << key << " " << score << " " << value;
+    long long int score_tmp = (long long int)score;
+    strset_ss << "ZADD " << key << " " << score_tmp << " " << value;
     std::string strset = strset_ss.str();
     TBSYS_LOG(DEBUG,strLog.c_str(),key.c_str());
     TBSYS_LOG(DEBUG,"%s", strset.c_str());
@@ -270,15 +271,15 @@ int RedisDb::zadd(std::string key, double score, T value)
 template <typename V_TYPE>
 std::vector<V_TYPE>* RedisDb::zrangebyscore(std::string key, double min, double max, std::vector<V_TYPE> &members_set)
 {
-    TBSYS_LOG(DEBUG,"redis: redis zrangebyscore string %s %lld %lld",key.c_str(),(int)min,(int)max);
+    TBSYS_LOG(DEBUG,"redis: redis zrangebyscore string %s %lld %lld",key.c_str(),(long long int)min,(long long int)max);
 
     /*std::ostringstream strLog_ss;
     strLog_ss << "ZRANGEBYSCORE " << key << " " <<min << " " << max;
     std::string strLog = strLog_ss.str();
     TBSYS_LOG(DEBUG,"std::string strLog:%s",strLog.c_str());
     this->_reply = (redisReply*)redisCommand(this->_connect,strLog.c_str());*/
-    TBSYS_LOG(DEBUG,"ZRANGEBYSCORE %s %lld %lld",key.c_str(),(int)min,(int)max);
-    this->_reply = (redisReply*)redisCommand(this->_connect,"ZRANGEBYSCORE %s %lld %lld",key.c_str(),(int)min,(int)max);
+    TBSYS_LOG(DEBUG,"ZRANGEBYSCORE %s %lld %lld",key.c_str(),(long long int)min,(long long int)max);
+    this->_reply = (redisReply*)redisCommand(this->_connect,"ZRANGEBYSCORE %s %lld %lld",key.c_str(),(long long int)min,(long long int)max);
     if(NULL == this->_reply || REDIS_REPLY_ARRAY != this->_reply->type)
     {
         TBSYS_LOG(DEBUG,"redis: redis zrangebyscore error!");
@@ -312,8 +313,8 @@ std::vector<V_TYPE>* RedisDb::zmembers(std::string key, std::vector<V_TYPE> &mem
     std::string strLog = strLog_ss.str();
     TBSYS_LOG(DEBUG,"std::string strLog:%s",strLog.c_str());
     this->_reply = (redisReply*)redisCommand(this->_connect,strLog.c_str());*/
-    TBSYS_LOG(DEBUG,"ZRANGE %s 0 %lld",key.c_str(),(int)std::numeric_limits<double>::max());
-    this->_reply = (redisReply*)redisCommand(this->_connect,"ZRANGE %s 0 %lld",key.c_str(),(int)std::numeric_limits<double>::max());
+    TBSYS_LOG(DEBUG,"ZRANGE %s 0 %lld",key.c_str(),(long long int)std::numeric_limits<double>::max());
+    this->_reply = (redisReply*)redisCommand(this->_connect,"ZRANGE %s 0 %lld",key.c_str(),(long long int)std::numeric_limits<double>::max());
     if(NULL == this->_reply || REDIS_REPLY_ARRAY != this->_reply->type)
     {
         TBSYS_LOG(DEBUG,"redis: redis zmembers error!");
